@@ -1,0 +1,19 @@
+# Unifi doesn't have a native mac app, and doesn't send notifications
+# If I have earbuds in, I might miss the chime and ignore my phone buzzing at me
+
+- id: "doorbell_notify_mac"
+  alias: Doorbell notify mac
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.g4_doorbell_pro_poe_doorbell
+      to: "on"
+  action:
+    - service: notify.mobile_app_jeffs_macbook_pro
+      metadata: {}
+      data:
+        message: Doorbell Rang!
+        data:
+          entity_id: camera.g4_doorbell_pro_poe_high
+          group: "doorbell"
+  mode: single

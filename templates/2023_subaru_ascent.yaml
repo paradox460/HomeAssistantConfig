@@ -1,0 +1,23 @@
+# Do some math to figure out how much gas the car needs and how much a refil is going to hurt
+
+- sensor:
+    - name: "2023 Subaru Ascent Gas Needed"
+      unit_of_measurement: "gal"
+      unique_id: 2023_subaru_ascent_gas_needed
+      icon: mdi:fuel
+      state_class: total_increasing
+      state: "{{19.3 - (states('sensor.2023_ascent_touring_fuel_level') | float / 100) * 19.3  }}"
+- sensor:
+    - name: "2023 Subaru Ascent Refuel Cost"
+      unique_id: 2023_subaru_ascent_refuel_cost
+      unit_of_measurement: "USD"
+      icon: mdi:gas-station-in-use
+      state_class: measurement
+      state: >-
+        {{
+          (
+            states('sensor.maverick_gas_price') | float *
+            states('sensor.2023_subaru_ascent_gas_needed') | float
+          ) |
+          round(2, 'ceil')
+        }}

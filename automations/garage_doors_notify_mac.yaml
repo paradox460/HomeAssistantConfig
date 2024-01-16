@@ -1,0 +1,19 @@
+# Notify when either garage door opens
+- id: "garage_doors_notify_mac"
+  alias: "Garage Doors Notify Mac"
+  trigger:
+    - platform: state
+      entity_id:
+        - cover.big_door
+      from: "closed"
+    - platform: state
+      entity_id:
+        - cover.small_door
+      from: "closed"
+  action:
+    - service: notify.mobile_app_jeffs_macbook_pro
+      data:
+        message: "{{ trigger.from_state.attributes.friendly_name }} Opening"
+        data:
+          group: "garage"
+  mode: single

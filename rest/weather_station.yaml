@@ -1,0 +1,78 @@
+# Pull data from my WeeWX instance, using a JSON file exposed by a WeeWX report template
+# https://github.com/teeks99/weewx-json
+# A nice simple alternative to having WeeWX push things via MQTT, albeit _much slower_
+
+- scan_interval: 360
+  resource: http://10.0.0.6/weewx/weewx.json
+  method: GET
+  sensor:
+    - name: Weather Station Temperature
+      unique_id: "weather_station_temperature"
+      icon: mdi:thermometer
+      state_class: measurement
+      value_template: "{{ value_json.current.temperature.value | float }}"
+      unit_of_measurement: "ºF"
+      force_update: true
+    - name: Weather Station Heat Index
+      unique_id: "weather_station_heat_index"
+      icon: mdi:sun-thermometer
+      state_class: measurement
+      value_template: "{{ value_json.current['heat index'].value | float }}"
+      unit_of_measurement: "ºF"
+      force_update: true
+    - name: Weather Station Humidity
+      unique_id: "weather_station_humidity"
+      icon: mdi:cloud-percent
+      state_class: measurement
+      value_template: "{{ value_json.current.humidity.value | int }}"
+      unit_of_measurement: "%"
+      force_update: true
+    - name: Weather Station Barometer
+      unique_id: "weather_station_barometer"
+      icon: mdi:gauge
+      state_class: measurement
+      value_template: "{{ value_json.current.barometer.value | float }}"
+      unit_of_measurement: "inHg"
+      force_update: true
+    - name: Weather Station Wind Gust
+      unique_id: "weather_station_wind_gust"
+      icon: mdi:windsock
+      state_class: measurement
+      value_template: "{{ value_json.current['wind gust'].value | int }}"
+      unit_of_measurement: "mph"
+      force_update: true
+    - name: Weather Station Wind Speed
+      unique_id: "weather_station_wind_speed"
+      icon: mdi:weather-dust
+      state_class: measurement
+      value_template: "{{ value_json.current['wind speed'].value | int }}"
+      unit_of_measurement: "mph"
+      force_update: true
+    - name: Weather Station Wind Chill
+      unique_id: "weather_station_wind_chill"
+      icon: mdi:weather-windy
+      state_class: measurement
+      value_template: "{{ value_json.current['wind chill'].value | float }}"
+      unit_of_measurement: "ºF"
+      force_update: true
+    - name: Weather Station Rain Rate
+      unique_id: "weather_station_rain_rate"
+      icon: mdi:weather-pouring
+      state_class: measurement
+      value_template: "{{ value_json.current['rain rate'].value | float }}"
+      unit_of_measurement: "in/h"
+      force_update: true
+    - name: Weather Station Dewpoint
+      unique_id: "weather_station_dewpoint"
+      icon: mdi:thermometer-water
+      state_class: measurement
+      value_template: "{{ value_json.current.dewpoint.value | float }}"
+      unit_of_measurement: "ºF"
+      force_update: true
+    - name: Weather Station Rain Total
+      unique_id: "weather_station_rain_total"
+      icon: mdi:water
+      state_class: total_increasing
+      value_template: "{{ value_json.day['rain total'].value | float }}"
+      unit_of_measurement: "in"
+      force_update: true
