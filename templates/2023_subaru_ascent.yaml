@@ -16,7 +16,7 @@
       state: >-
         {{
           (
-            states('sensor.maverick_gas_price') | float *
+            states('sensor.average_gas_price') | float *
             states('sensor.2023_subaru_ascent_gas_needed') | float
           ) |
           round(2, 'ceil')
