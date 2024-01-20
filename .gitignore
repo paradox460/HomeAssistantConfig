@@ -6,12 +6,13 @@
 !/rest/
 !/templates/
 !/automations/
+!/esphome/
 !.gitignore
 !LICENSE
 
 # And then selectively ignore others
 lutron.yaml
-secrets.yaml
+**/secrets.yaml
 ip_bans.yaml
 known_devices.yaml
 
