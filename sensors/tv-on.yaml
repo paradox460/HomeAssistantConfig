@@ -1,0 +1,8 @@
+- unique_id: tv_on_time
+  entity_id: media_player.sony_xbr_85x90ch
+  name: Sony TV On Time
+  type: time
+  start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+  end: "{{ now() }}"
+  state: "on"
+  platform: history_stats

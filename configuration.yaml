@@ -21,5 +21,6 @@ frontend:
 
 rest: !include_dir_merge_list rest/
 template: !include_dir_merge_list templates/
+sensor: !include_dir_merge_list sensors/
 mqtt:
   sensor: !include_dir_merge_list mqtt/sensor/

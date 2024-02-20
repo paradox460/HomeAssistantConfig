@@ -9,6 +9,7 @@
 !/esphome/
 !/mqtt/
 !/mqtt/**/*
+!/sensors/
 !.gitignore
 !LICENSE
 
