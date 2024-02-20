@@ -38,13 +38,13 @@ button:
     name: "Feed Cat"
     id: feed_cat
     output: motor_relay
-    duration: 1s
+    duration: 750ms
 
 time:
   - platform: homeassistant
     id: ha_time
     on_time:
-      - hours: 8,16
+      - hours: 7,15
         minutes: 0
         seconds: 0
         then:
