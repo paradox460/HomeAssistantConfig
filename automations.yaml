@@ -1,1 +1,21 @@
-[]
+- id: '1708395880307'
+  alias: Auto-off wax melters
+  description: Turn off wax melter after 6 hours
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.wax_melter_switch
+    - switch.upstairs_guest_bedroom_wax_melter_switch
+    to: 'on'
+    for:
+      hours: 6
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ trigger.entity_id }}'
+  mode: single

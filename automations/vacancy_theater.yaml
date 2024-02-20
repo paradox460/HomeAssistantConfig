@@ -1,0 +1,24 @@
+- id: 'theater_vacancy'
+  alias: Theater Vacancy
+  description: 'Turn off the theater lights 30 minutes after the TV turns off.'
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.sony_xbr_85x90ch
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  action:
+  - service: light.turn_off
+    data:
+      transition: 30
+    target:
+      entity_id: light.theater_floor_lamps
+  - service: select.select_option
+    target:
+      entity_id: select.harmony_hub_activities
+    data:
+     option: "power_off"
+  mode: single
