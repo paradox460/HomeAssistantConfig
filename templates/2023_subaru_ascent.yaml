@@ -21,3 +21,13 @@
           ) |
           round(2, 'ceil')
         }}
+- sensor:
+  - name: "2023 Subaru Ascent Max Range"
+    unique_id: 2023_subaru_ascent_max_range
+    unit_of_measurement: mi
+    icon: mdi:car-arrow-right
+    state_class: measurement
+    state: >-
+      {{
+        states('sensor.2023_ascent_touring_average_fuel_consumption') | float * 19.3
+      }}
