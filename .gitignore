@@ -10,6 +10,8 @@
 !/mqtt/
 !/mqtt/**/*
 !/sensors/
+!/custom_templates/
+!/custom_templates/**/*
 !.gitignore
 !LICENSE
 

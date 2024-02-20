@@ -1,0 +1,13 @@
+{% macro degreeToDirection(degree) %}
+  {%-
+    set directions = [ "N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
+    "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE", "S",
+    "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS", "W",
+    "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"]
+  -%}
+  {%-
+    set index = ((degree | float(0) / 11.25) | round) % 32
+  -%}
+
+  {{- directions[index] -}}
+{% endmacro %}
