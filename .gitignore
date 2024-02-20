@@ -11,7 +11,6 @@
 !LICENSE
 
 # And then selectively ignore others
-lutron.yaml
 **/secrets.yaml
 ip_bans.yaml
 known_devices.yaml
