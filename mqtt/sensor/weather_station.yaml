@@ -5,7 +5,7 @@
   icon: mdi:thermometer
   state_class: measurement
   value_template: "{{ value | round(1) }}"
-  unit_of_measurement: "ºF"
+  unit_of_measurement: "°F"
   state_topic: weather/outTemp_F
   device_class: temperature
   device:
@@ -18,7 +18,7 @@
   icon: mdi:sun-thermometer
   state_class: measurement
   value_template: "{{ value | round(1) }}"
-  unit_of_measurement: "ºF"
+  unit_of_measurement: "°F"
   state_topic: weather/heatindex_F
   device_class: temperature
   device:
@@ -31,7 +31,7 @@
   icon: mdi:weather-windy
   state_class: measurement
   value_template: "{{ value | round(1) }}"
-  unit_of_measurement: "ºF"
+  unit_of_measurement: "°F"
   state_topic: weather/windchill_F
   device_class: temperature
   device:
@@ -44,7 +44,7 @@
   icon: mdi:thermometer-water
   state_class: measurement
   value_template: "{{ value | round(1) }}"
-  unit_of_measurement: "ºF"
+  unit_of_measurement: "°F"
   state_topic: weather/dewpoint_F
   device_class: temperature
   device:
@@ -58,7 +58,7 @@
   state_class: measurement
   state_topic: weather/appTemp_F
   device_class: temperature
-  unit_of_measurement: "ºF"
+  unit_of_measurement: "°F"
   value_template: "{{ value | round(1) }}"
   device:
     manufacturer: Davis Instruments
@@ -71,7 +71,7 @@
   state_class: measurement
   state_topic: weather/THSW_F
   device_class: temperature
-  unit_of_measurement: "ºF"
+  unit_of_measurement: "°F"
   value_template: "{{ value | round(1) }}"
   device:
     manufacturer: Davis Instruments
