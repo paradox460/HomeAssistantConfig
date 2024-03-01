@@ -1,0 +1,153 @@
+type: custom:plotly-graph
+title: Wind Gust Speeds
+layout:
+  legend:
+    orientation: h
+  margin:
+    t: 25
+  polar:
+    bgcolor: hsl(0% 0% 20%)
+    barmode: stack
+    bargap: 1em
+    radialaxis:
+      type: linear
+      ticksuffix: '%'
+      angle: 45
+      dtick: 4
+      color: hsl(0% 0% 80%)
+    angularaxis:
+      direction: clockwise
+      color: hsl(0% 0% 50%)
+  colorway:
+    - '#1984c5'
+    - '#22a7f0'
+    - '#63bff0'
+    - '#a7d5ed'
+    - '#e1a692'
+    - '#de6e56'
+    - '#e14b31'
+    - '#c23728'
+config:
+  displaylogo: false
+hours_to_show: 24
+raw_plotly_config: true
+an: >-
+  $ex vars.theta = ( ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+  'S',
+
+  'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'] )
+fn: |-
+  $ex vars.windRose = (vars, minSpeed, maxSpeed) => {
+      // Define the headings and degree ranges for the 16 cardinal headings
+      const headings = [
+          { label: "N",   min: 350.5, max:  13.0 },
+          { label: "NNE", min:  13.0, max:  35.5 },
+          { label: "NE",  min:  35.5, max:  58.0 },
+          { label: "ENE", min:  58.0, max:  80.5 },
+          { label: "E",   min:  80.5, max: 103.0 },
+          { label: "ESE", min: 103.0, max: 125.5 },
+          { label: "SE",  min: 125.5, max: 148.0 },
+          { label: "SSE", min: 148.0, max: 170.5 },
+          { label: "S",   min: 170.5, max: 193.0 },
+          { label: "SSW", min: 193.0, max: 215.5 },
+          { label: "SW",  min: 215.5, max: 238.0 },
+          { label: "WSW", min: 238.0, max: 260.5 },
+          { label: "W",   min: 260.5, max: 283.0 },
+          { label: "WNW", min: 283.0, max: 305.5 },
+          { label: "NW",  min: 305.5, max: 328.0 },
+          { label: "NNW", min: 328.0, max: 350.5 }
+      ];
+
+      // Initialize headingsCount for each heading
+      let   headingsCount    = headings.map(heading => 0);
+      // console.log("headingsCount Initial", headingsCount );
+      const observationCount = vars.windDirections.length;
+      // Count wind readings for each heading
+      // console.log("directions", vars.windDirections);
+      for (let i = 0; i < observationCount; i++) {
+          const direction = vars.windDirections[i];
+          const speed     = vars.windSpeeds[i];
+          if ( (minSpeed != 0 || maxSpeed != 0) && (speed > minSpeed && speed <= maxSpeed) ) {
+          // Find the corresponding heading
+              const headingFound = headings.find(seg => {
+                if (seg.min < seg.max) {
+                      return direction >= seg.min && direction <= seg.max;
+                  } else if ( seg.min > seg.max ) {
+                      return direction >= seg.min || direction <= seg.max;
+                  } else {
+                    // console.log("heading not found", i);
+                    return false;
+                  }
+              });
+              // Increment counter for the heading
+              headingsCount[headings.indexOf(headingFound)]++;
+          } else if (minSpeed == 0 && maxSpeed == 0 && speed == 0) {
+              headingsCount.forEach((_, j) => headingsCount[j]++); // increment each heading element to create a zeros "circle" at the center of the windrose plot
+          }
+      }
+      // Calculate percentages for headings
+      const percentages = headingsCount.map(count => (count / observationCount) * 100);
+
+      // console.log( "windSpeeds", vars.windSpeeds );
+      // console.log( "HeadingsCount", headingsCount );
+      // console.log( "Percentages", percentages );
+      return ( percentages );
+  }
+defaults:
+  entity:
+    hovertemplate: '%{theta} %{r:.2f}%'
+entities:
+  - entity: sensor.weather_station_wind_gust_direction
+    internal: true
+    filters:
+      - resample: 5m
+      - map_y: parseFloat(y)
+    dn: $fn ({ ys, vars }) => { vars.windDirections = ys }
+  - entity: sensor.weather_station_wind_gust
+    internal: true
+    filters:
+      - resample: 5m
+      - map_y: parseFloat(y)
+    sn: $fn ({ ys, vars }) => { vars.windSpeeds = ys }
+  - entity: ''
+    type: barpolar
+    name: ≤5 MPH
+    r: $ex vars.windRose( vars, 0, 5 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 0, 5).some((x) => x > 0)
+  - entity: ''
+    type: barpolar
+    name: ≤10 MPH
+    r: $ex vars.windRose( vars, 5, 10 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 5, 10).some((x) => x > 0)
+  - entity: ''
+    type: barpolar
+    name: ≤20 MPH
+    r: $ex vars.windRose( vars, 10, 20 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 10, 20).some((x) => x > 0)
+  - entity: ''
+    type: barpolar
+    name: ≤30 MPH
+    r: $ex vars.windRose( vars, 20, 30 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 20, 30).some((x) => x > 0)
+  - entity: ''
+    type: barpolar
+    name: ≤40 MPH
+    r: $ex vars.windRose( vars, 30, 40 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 30, 40).some((x) => x > 0)
+  - entity: ''
+    type: barpolar
+    name: ≤50 MPH
+    r: $ex vars.windRose( vars, 40, 50 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 40, 50).some((x) => x > 0)
+  - entity: ''
+    type: barpolar
+    name: '>50 MPH'
+    r: $ex vars.windRose( vars, 50, 1000 )
+    theta: $ex vars.theta
+    showlegend: $ex vars.windRose(vars, 50, 1000).some((x) => x > 0)

@@ -1,0 +1,155 @@
+title: Home
+icon: mdi:home
+type: custom:vertical-layout
+badges: []
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: tile
+        entity: person.jeff
+        show_entity_picture: true
+        vertical: true
+        hide_state: false
+        state_content:
+          - state
+          - last-changed
+      - type: tile
+        entity: person.stephanie
+        show_entity_picture: true
+        vertical: true
+        hide_state: false
+        state_content:
+          - state
+          - last-changed
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    cards:
+      - type: custom:bubble-card
+        card_type: separator
+        name: Kids
+        icon: mdi:teddy-bear
+        view_layout:
+          grid-column-end: span 2
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Ede's Room
+          - entity: light.ede_s_room_zone_01
+      - type: custom:gap-card
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Nursery C
+          - entity: light.nursery_zone_01
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Nursery B
+          - entity: light.nursery_zone_02
+      - type: custom:bubble-card
+        card_type: separator
+        name: Bedrooms
+        icon: mdi:bed
+        view_layout:
+          grid-column-end: span 2
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: MB Spots
+          - entity: light.master_bedroom_spots
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: MB Bedside
+          - entity: light.master_bedroom_bedside
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: U Guest
+          - entity: light.upstairs_guest_room_zone_01
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: G Guest
+          - entity: light.ground_bedroom_zone_01
+      - type: custom:bubble-card
+        card_type: separator
+        name: Wax Melters
+        icon: mdi:scent
+        view_layout:
+          grid-column-end: span 2
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: U.G. Wax Melter
+          - entity: switch.upstairs_guest_bedroom_wax_melter_switch
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Wax Melter
+          - entity: switch.wax_melter_switch
+      - type: custom:bubble-card
+        card_type: separator
+        name: Misc
+        icon: mdi:asterisk
+        view_layout:
+          grid-column-end: span 2
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Theater
+          - entity: light.theater_floor_lamps
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Office
+          - entity: light.office_zone_01
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Holiday
+          - entity: switch.holiday_lights
+      - type: custom:mushroom-entity-card
+        entity: button.esphome_web_659621_feed_cat
+        icon_color: primary
+        secondary_info: none
+        tap_action:
+          action: toggle
+          confirmation:
+            text: Are you sure you want to feed Agron?
+        hold_action:
+          action: more-info
+    layout:
+      grid-template-columns: 1fr 1fr
+  - type: horizontal-stack
+    cards:
+      - features:
+          - type: cover-open-close
+        type: tile
+        entity: cover.big_door
+        state_content:
+          - state
+          - last-changed
+      - features:
+          - type: cover-open-close
+        type: tile
+        entity: cover.small_door
+        state_content:
+          - state
+          - last-changed
+  - type: custom:layout-break
+  - type: energy-distribution
+    link_dashboard: true
+  - type: energy-usage-graph
+  - !include ../weather_glance.yaml
+  - type: custom:layout-break
+  - type: custom:webrtc-camera
+    url: rtsps://10.0.0.1:7441/0Dw1XJxrDxEz0awB
+    ui: true
+    poster: camera.g4_doorbell_pro_poe_high
+    style: '.screenshot, .mode {display: none}'
+  - type: custom:webrtc-camera
+    url: rtsps://10.0.0.1:7441/tq3oFVRurMYMcI1c?enableSrtp
+    ui: true
+    poster: camera.g4_doorbell_pro_poe_package_camera
+    style: '.screenshot, .mode {display: none}'

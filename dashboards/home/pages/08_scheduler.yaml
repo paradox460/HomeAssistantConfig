@@ -1,0 +1,20 @@
+title: Schedule
+path: scheduler
+icon: mdi:home-clock-outline
+type: panel
+visible:
+  - user: e531502870dd40e49478f284ef84b1b0
+  - user: eb0e92478e0945b3ac5c801c402ec1c0
+badges: []
+cards:
+  - type: custom:scheduler-card
+    include:
+      - button
+      - climate
+      - cover
+      - light
+      - scene
+      - select
+      - switch
+    exclude: []
+    show_header_toggle: true

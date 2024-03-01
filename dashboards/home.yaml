@@ -1,0 +1,8 @@
+keep_texts_in_tabs:
+  enabled: true
+button_card_templates: !include shared/button_card_templates.yaml
+apexcharts_card_templates: !include shared/apexcharts_card_templates.yaml
+decluttering_templates: !include shared/decluttering_templates.yaml
+views:
+  !include_dir_list home/pages/
+title: Home

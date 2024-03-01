@@ -1,0 +1,248 @@
+
+title: Weather
+path: weather
+icon: mdi:weather-partly-cloudy
+layout:
+  grid-template-columns: repeat(4, 1fr)
+  grid-template-rows: min-content auto
+  grid-template-areas: |-
+    "t t t t"
+    "a b b b"
+    "c b b b"
+  place-content: stretch
+  mediaquery:
+    '(max-width: 1300px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |-
+        "t"
+        "a"
+        "c"
+        "b"
+type: custom:grid-layout
+badges:
+  - entity: sensor.weather_station_wind_direction
+  - entity: sensor.weather_station_temperature
+  - entity: sensor.weather_station_humidity
+cards:
+  - !include ../weather_glance.yaml
+  - show_current: true
+    show_forecast: true
+    type: weather-forecast
+    entity: weather.forecast_home
+    forecast_type: daily
+    name: Pro Forecast
+  - type: iframe
+    url: >-
+      https://embed.windy.com/embed2.html?lat=38.238&lon=-111.973&detailLat=41.263&detailLon=-111.984&zoom=5&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=%C2%B0F&radarRange=-1
+    view_layout:
+      place-self: stretch stretch
+      grid-area: b
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Temps
+      show_states: true
+      colorize_states: true
+    graph_span: 36h
+    all_series_config:
+      stroke_width: 1
+      group_by:
+        func: avg
+        duration: 10min
+    series:
+      - entity: sensor.weather_station_temperature
+        name: Temperature
+        show:
+          extremas: true
+      - entity: sensor.weather_station_thsw_index
+        name: THSW
+      - entity: sensor.weather_station_wind_chill
+        name: Wind Chill
+      - entity: sensor.weather_station_dewpoint
+        name: Dewpoint
+    view_layout:
+      place-self: end stretch
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Wind
+      show_states: true
+      colorize_states: true
+    graph_span: 36h
+    all_series_config:
+      stroke_width: 1
+      show:
+        extremas: max
+      group_by:
+        duration: 5min
+      yaxis_id: speed
+    yaxis:
+      - id: speed
+      - id: dir
+        show: false
+    series:
+      - entity: sensor.weather_station_wind_speed
+        name: Wind Speed (5m avg)
+        group_by:
+          func: avg
+      - entity: sensor.weather_station_wind_gust
+        name: Gust (5m avg)
+        opacity: 0.2
+        type: area
+        group_by:
+          func: max
+      - entity: sensor.weather_station_wind_speed
+        show:
+          in_chart: false
+        name: Current
+  - !include ../wind_rose.yaml
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Pressure
+      show_states: true
+      colorize_states: true
+    graph_span: 2d
+    series:
+      - entity: sensor.weather_station_barometer
+        name: Pressure
+        group_by:
+          func: avg
+        stroke_width: 1
+        float_precision: 2
+        show:
+          extremas: true
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Humidity
+      show_states: true
+      colorize_states: true
+    graph_span: 1d
+    all_series_config:
+      stroke_width: 1
+      show:
+        extremas: true
+    series:
+      - entity: sensor.weather_station_humidity
+        name: Humidity
+        group_by:
+          func: avg
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Rain
+      show_states: true
+      colorize_states: true
+    graph_span: 1d
+    all_series_config:
+      stroke_width: 1
+      float_precision: 2
+      show:
+        extremas: max
+    yaxis:
+      - id: rate
+        opposite: true
+      - id: stormtotal
+      - id: total
+    series:
+      - entity: sensor.weather_station_storm_rain
+        name: Storm Total
+        yaxis_id: total
+      - entity: sensor.weather_station_rain_hour
+        name: Hourly Rain
+        yaxis_id: total
+        group_by:
+          func: avg
+      - entity: sensor.weather_station_rain_rate
+        name: Rain Rate
+        type: column
+        stroke_width: 2
+        yaxis_id: rate
+        color: rebeccapurple
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Sun
+      show_states: true
+      colorize_states: true
+    graph_span: 1d
+    all_series_config:
+      stroke_width: 1
+      show:
+        extremas: max
+      group_by:
+        func: avg
+        duration: 15min
+    yaxis:
+      - id: rads
+      - id: uv
+        opposite: true
+    experimental:
+      color_threshold: true
+    series:
+      - entity: sensor.weather_station_solar_radiation
+        name: Solar Radiation
+        yaxis_id: rads
+        color: orangered
+      - entity: sensor.weather_station_uv_index
+        yaxis_id: uv
+        name: UV Index
+        type: area
+        opacity: 0.25
+        show:
+          header_color_threshold: true
+        color_threshold:
+          - value: 0
+            color: green
+          - value: 3
+            color: yellow
+          - value: 6
+            color: orange
+          - value: 8
+            color: red
+          - value: 11
+            color: rebeccapurple
+  - type: custom:apexcharts-card
+    config_templates:
+      - weather
+    header:
+      show: true
+      title: Evapotranspiration
+      show_states: true
+      colorize_states: true
+    graph_span: 1d
+    all_series_config:
+      stroke_width: 1
+      show:
+        extremas: max
+    yaxis:
+      - id: main
+      - id: stats
+        show: false
+    series:
+      - entity: sensor.weather_station_et
+        name: Evapotranspiration
+        float_precision: 2
+        yaxis_id: main
+        group_by:
+          func: avg
+      - entity: sensor.weather_station_daily_et
+        name: Daily ET
+        yaxis_id: stats
+        float_precision: 2
+        show:
+          in_chart: false
+  - type: custom:horizon-card

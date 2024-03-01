@@ -1,0 +1,108 @@
+title: Laundry
+path: laundry
+icon: mdi:washing-machine
+badges: []
+cards:
+  - type: vertical-stack
+    cards:
+      - show_name: true
+        show_icon: true
+        show_state: false
+        type: glance
+        entities:
+          - entity: switch.washing_machine_power_on
+            name: Power
+          - entity: button.washing_machine_start
+            name: Start
+            icon: mdi:washing-machine
+          - entity: button.washing_machine_stop
+            name: Stop
+            icon: mdi:washing-machine-off
+        title: Washing Machine
+        state_color: true
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.washing_machine_program_phase
+            state_not: unknown
+          - condition: state
+            entity: sensor.washing_machine_program_phase
+            state_not: unavailable
+        card:
+          type: tile
+          entity: sensor.washing_machine_program_phase
+          icon: mdi:tumble-dryer
+          vertical: false
+          state_content:
+            - state
+            - last-changed
+      - type: glance
+        entities:
+          - entity: sensor.washing_machine_started_at
+            icon: mdi:clock-start
+            name: Started At
+          - entity: sensor.washing_machine_elapsed_time
+            name: Elapsed
+          - entity: sensor.washing_machine_remaining_time
+            name: Remaining
+            icon: mdi:progress-clock
+          - entity: sensor.washing_machine_finish_at
+            name: Finished At
+      - type: history-graph
+        entities:
+          - entity: sensor.washing_machine_status
+            name: Status
+          - entity: sensor.washing_machine_program_phase
+            name: Phase
+  - type: vertical-stack
+    cards:
+      - show_name: true
+        show_icon: true
+        show_state: false
+        type: glance
+        entities:
+          - entity: switch.tumble_dryer_power_on
+            name: Power
+          - entity: button.tumble_dryer_start
+            name: Start
+            icon: mdi:tumble-dryer
+          - entity: button.tumble_dryer_stop
+            name: Stop
+            icon: mdi:tumble-dryer-off
+        title: Dryer
+        state_color: true
+        theme: Google Dark Theme
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.tumble_dryer_program_phase
+            state_not: unknown
+          - condition: state
+            entity: sensor.tumble_dryer_program_phase
+            state_not: unavailable
+        card:
+          type: tile
+          entity: sensor.tumble_dryer_program_phase
+          icon: mdi:tumble-dryer
+          vertical: false
+          state_content:
+            - state
+            - last-changed
+      - type: glance
+        entities:
+          - entity: sensor.tumble_dryer_started_at
+            icon: mdi:clock-start
+            name: Started At
+          - entity: sensor.tumble_dryer_elapsed_time
+            name: Elapsed
+          - entity: sensor.tumble_dryer_remaining_time
+            name: Remaining
+            icon: mdi:progress-clock
+          - entity: sensor.tumble_dryer_finish_at
+            name: Finished At
+      - type: history-graph
+        entities:
+          - entity: sensor.tumble_dryer_status
+            name: Status
+          - entity: sensor.tumble_dryer_program_phase
+            name: Phase

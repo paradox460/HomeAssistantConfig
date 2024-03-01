@@ -1,0 +1,107 @@
+title: Kids
+path: kids
+icon: mdi:teddy-bear
+type: custom:grid-layout
+layout:
+  margin: 0 auto
+  grid-template-columns: minmax(300px, 800px) 300px
+  place-content: center
+  mediaquery:
+    '(max-width: 900px)':
+      grid-template-columns: auto
+badges: []
+cards:
+  - type: custom:webrtc-camera
+    url: rtsps://10.0.0.1:7441/IJfM6OcaOqMGf7l5
+    ui: true
+    poster: camera.ede_s_bedroom_high
+  - type: custom:layout-card
+    layout_type: grid
+    layout:
+      mediaquery:
+        '(max-width: 900px)':
+          grid-template-columns: 2fr 1fr
+    cards:
+      - features:
+          - type: light-brightness
+        type: tile
+        entity: light.ede_s_room_zone_01
+        vertical: false
+        hide_state: false
+      - type: tile
+        entity: switch.equipment_room_virtual_ede_s_bedtime_led
+        name: Ede's bedtime
+        icon: mdi:bed-clock
+        hide_state: true
+        vertical: false
+        show_entity_picture: false
+        icon_tap_action:
+          action: call-service
+          service: scene.turn_on
+          data:
+            entity_id: scene.equipment_room_virtual_ede_s_bedtime
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          data:
+            entity_id: scene.equipment_room_virtual_ede_s_bedtime
+      - show_name: false
+        show_icon: true
+        show_state: true
+        type: glance
+        entities:
+          - entity: sensor.ede_s_room_t_h_temperature
+          - entity: sensor.ede_s_room_t_h_humidity
+  - type: custom:webrtc-camera
+    url: rtsps://10.0.0.1:7441/9cmsJgiusbQQqnD3
+    ui: true
+    poster: camera.g4_instant_high
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    cards:
+      - features:
+          - type: light-brightness
+        type: tile
+        entity: light.nursery_zone_01
+      - features:
+          - type: light-brightness
+        type: tile
+        entity: light.nursery_zone_02
+      - entity: switch.equipment_room_virtual_nursery_bedtime_led
+        type: tile
+        name: Nursery Bedtime
+        icon: mdi:bed-clock
+        hide_state: true
+        vertical: false
+        show_entity_picture: false
+        icon_tap_action:
+          action: call-service
+          service: scene.turn_on
+          data:
+            entity_id: scene.equipment_room_virtual_nursery_bedtime
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          data:
+            entity_id: scene.equipment_room_virtual_nursery_bedtime
+        view_layout:
+          grid-area: c
+      - show_name: false
+        show_icon: true
+        show_state: true
+        type: glance
+        entities:
+          - entity: sensor.nursery_t_h_temperature
+          - entity: sensor.nursery_t_h_humidity
+    layout:
+      grid-template-columns: auto
+      grid-template-areas: |-
+        "a"
+        "b"
+        "c"
+      mediaquery:
+        '(max-width: 900px)':
+          grid-template-columns: 1fr 1fr
+          grid-template-areas: |-
+            "a b"
+            "c c"

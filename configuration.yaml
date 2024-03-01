@@ -25,3 +25,15 @@ sensor: !include_dir_merge_list sensors/
 mqtt:
   sensor: !include_dir_merge_list mqtt/sensor/
 utility_meter: !include utility_meter.yaml
+
+lovelace_gen:
+
+lovelace:
+  mode: storage
+  dashboards:
+    home-yaml:
+      mode: yaml
+      filename: dashboards/home.yaml
+      title: Home
+      icon: mdi:home
+      show_in_sidebar: true

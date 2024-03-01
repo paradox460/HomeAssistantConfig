@@ -1,0 +1,30 @@
+tufte:
+  apex_config:
+    legend:
+      show: false
+    grid:
+      show: false
+    xaxis:
+      axisBorder:
+        show: false
+  all_series_config:
+    stroke_width: 1
+weather:
+  config_templates: tufte
+  update_interval: 1min
+  show:
+    last_updated: true
+temp_hum:
+  config_templates: tufte
+  header:
+    show: true
+    show_states: true
+    colorize_states: true
+  all_series_config:
+    group_by:
+      func: avg
+      duration: 15min
+  yaxis:
+    - id: temp
+    - id: hum
+      opposite: true

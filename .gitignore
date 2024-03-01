@@ -12,6 +12,8 @@
 !/sensors/
 !/custom_templates/
 !/custom_templates/**/*
+!/dashboards/
+!/dashboards/**/*
 !.gitignore
 !LICENSE
 

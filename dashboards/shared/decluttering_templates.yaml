@@ -1,0 +1,119 @@
+temp-hum-chart:
+  card:
+    type: custom:apexcharts-card
+    config_templates: temp_hum
+    header:
+      title: '[[name]]'
+    series:
+      - entity: '[[entity]]_temperature'
+        name: Temperature
+        yaxis_id: temp
+      - entity: '[[entity]]_humidity'
+        name: Humidity
+        yaxis_id: hum
+climate-chart:
+  card:
+    type: custom:apexcharts-card
+    config_templates: tufte
+    header:
+      title: '[[name]]'
+      show: true
+      show_states: true
+      colorize_states: true
+    yaxis:
+      - id: temp
+      - id: humidity
+        opposite: true
+      - id: state
+        show: false
+    all_series_config:
+      yaxis_id: temp
+      unit: ºF
+    series:
+      - entity: '[[entity]]'
+        attribute: current_temperature
+        name: Temperature
+        group_by:
+          func: avg
+        show:
+          in_header: true
+      - entity: '[[entity]]'
+        attribute: target_temp_high
+        name: Cool Set
+      - entity: '[[entity]]'
+        attribute: target_temp_low
+        name: Heat Set
+      - entity: '[[entity]]'
+        attribute: current_humidity
+        name: Humidity
+        yaxis_id: humidity
+        group_by:
+          func: avg
+        show:
+          in_header: true
+      - entity: '[[entity]]'
+        attribute: hvac_action
+        transform: 'return x == ''heating'' ? 1 : 0'
+        name: Heating
+        yaxis_id: state
+        type: area
+        curve: stepline
+        color: orange
+        fill_raw: last
+        opacity: 0.2
+        stroke_width: 0
+        unit: ''
+        show:
+          legend_value: false
+          in_header: false
+      - entity: '[[entity]]'
+        attribute: hvac_action
+        transform: 'return x == ''cooling'' ? 1 : 0'
+        name: Heating
+        yaxis_id: state
+        type: area
+        curve: stepline
+        color: '#add8e6'
+        fill_raw: last
+        opacity: 0.2
+        stroke_width: 0
+        unit: ''
+        show:
+          legend_value: false
+          in_header: false
+slider-button:
+  card:
+    entity: '[[entity]]'
+    type: custom:slider-button-card
+    slider:
+      direction: left-right
+      background: gradient
+      use_state_color: true
+      use_percentage_bg_opacity: true
+      show_track: false
+      toggle_on_click: false
+      force_square: false
+      show_attribute: false
+    show_name: true
+    show_state: true
+    compact: true
+    icon:
+      show: true
+      use_state_color: true
+      tap_action:
+        action: more-info
+    action_button:
+      mode: toggle
+      show: true
+      show_spinner: true
+      tap_action:
+        action: toggle
+    name: '[[name]]'
+    card_mod:
+      style: |
+        :host {
+          --slider-color: var(--state-light-active-color);
+          --paper-item-icon-active-color: var(--state-light-active-color);
+          --switch-checked-button-color: oklch(from var(--state-light-active-color) calc(l - 10) calc(c + .05) h);;
+          --switch-checked-track-color: oklch(from var(--state-light-active-color) calc(l - 20) calc(c + .05) h);;
+        }

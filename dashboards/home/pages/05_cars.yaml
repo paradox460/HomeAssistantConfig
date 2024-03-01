@@ -1,0 +1,97 @@
+title: Cars
+path: cars
+icon: mdi:car
+type: custom:vertical-layout
+badges: []
+cards:
+  - type: map
+    entities:
+      - entity: device_tracker.2023_ascent_touring
+        name: A
+    dark_mode: true
+    hours_to_show: 24
+  - type: custom:layout-break
+  - type: horizontal-stack
+    cards:
+      - type: gauge
+        entity: sensor.2023_ascent_touring_fuel_level
+        needle: true
+        severity:
+          green: 50
+          yellow: 25
+          red: 0
+        name: Fuel Level
+      - type: custom:config-template-card
+        entities:
+          - sensor.2023_ascent_touring_range
+        card:
+          type: gauge
+          entity: sensor.2023_ascent_touring_range
+          max: ${parseInt(states['sensor.2023_subaru_ascent_max_range'].state)}
+          name: Range
+          needle: false
+          min: 0
+          severity:
+            red: 0
+            yellow: 100
+            green: 150
+  - type: glance
+    entities:
+      - entity: sensor.average_gas_price
+      - entity: sensor.2023_subaru_ascent_gas_needed
+        name: Gas Needed
+      - entity: sensor.2023_subaru_ascent_refuel_cost
+        name: Refuel Cost
+  - type: custom:apexcharts-card
+    config_templates:
+      - tufte
+    header:
+      show: true
+      title: Gas Prices
+      show_states: true
+      colorize_states: true
+    graph_span: 1w
+    yaxis:
+      - decimals: 2
+        min: '|-0.01|'
+        max: '|0.01|'
+    series:
+      - entity: sensor.average_gas_price
+        stroke_width: 1
+        curve: stepline
+        show:
+          extremas: true
+        float_precision: 2
+  - type: custom:layout-break
+  - show_name: false
+    show_icon: true
+    show_state: true
+    type: glance
+    entities:
+      - entity: sensor.2023_ascent_touring_tire_pressure_front_left
+        name: Front Left
+      - entity: sensor.2023_ascent_touring_tire_pressure_front_right
+        name: Front Right
+      - entity: sensor.2023_ascent_touring_tire_pressure_rear_left
+        name: Rear Left
+      - entity: sensor.2023_ascent_touring_tire_pressure_rear_right
+        name: Rear Right
+    columns: 2
+    title: Tire Pressure
+    state_color: false
+  - type: horizontal-stack
+    cards:
+      - type: statistic
+        entity: sensor.2023_ascent_touring_odometer
+        period:
+          calendar:
+            period: day
+        stat_type: change
+        name: Today
+      - type: statistic
+        entity: sensor.2023_ascent_touring_odometer
+        period:
+          calendar:
+            period: week
+        stat_type: change
+        name: This Week

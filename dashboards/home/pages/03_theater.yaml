@@ -1,0 +1,108 @@
+title: Theater
+path: theater
+icon: mdi:theater
+type: custom:vertical-layout
+layout: {}
+badges: []
+cards:
+  - type: custom:stack-in-card
+    mode: horizontal
+    keep: null
+    cards:
+      - type: custom:button-card
+        template: theater_button
+        name: 'Off'
+        icon: mdi:remote-off
+        variables:
+          option: power_off
+      - type: custom:button-card
+        template: theater_button
+        icon: mdi:microsoft-xbox
+        name: Xbox
+        variables:
+          option: Play Xbox
+        tap_action:
+          action: call-service
+          service: script.play_xbox_script
+      - type: custom:button-card
+        template: theater_button
+        name: Plex
+        icon: mdi:plex
+        variables:
+          option: Plex
+      - type: custom:button-card
+        template: theater_button
+        name: Smart TV
+        icon: mdi:television
+        variables:
+          option: Watch Smart TV
+  - type: tile
+    entity: light.theater_floor_lamps
+    vertical: false
+    show_entity_picture: false
+    hide_state: true
+    features:
+      - type: light-brightness
+  - type: entity
+    entity: sensor.sony_tv_on_time
+    name: On Today
+  - type: custom:layout-break
+  - type: media-control
+    entity: media_player.sony_xbr_85x90ch
+  - type: media-control
+    entity: media_player.theater_screen
+  - type: media-control
+    entity: media_player.plex_plex_htpc_for_linux_michaelrosensfridge
+  - type: media-control
+    entity: media_player.xbox
+  - type: custom:layout-break
+  - type: custom:auto-entities
+    card:
+      type: entities
+      title: Online
+    filter:
+      include:
+        - integration: xbox
+          domain: binary_sensor
+          state: 'on'
+      exclude:
+        - entity_id: binary_sensor.paradox460
+    sort:
+      method: state
+      reverse: false
+    show_empty: false
+  - type: custom:auto-entities
+    card:
+      type: entities
+      title: Offline
+    filter:
+      include:
+        - integration: xbox
+          domain: binary_sensor
+          state: 'off'
+      exclude:
+        - entity_id: binary_sensor.paradox460
+    sort:
+      method: state
+      reverse: false
+    show_empty: false
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    cards:
+      - type: picture
+        image: /local/halo.jpg
+        tap_action:
+          action: call-service
+          service: script.play_xbox_script
+          data:
+            game: 9PP5G1F0C2B6
+      - type: picture
+        image: /local/gears.jpg
+        tap_action:
+          action: call-service
+          service: script.play_xbox_script
+          data:
+            game: C2KDNLT2H7DM
+          target: {}
+    layout:
+      grid-template-columns: 1fr 1fr
