@@ -1,0 +1,51 @@
+# Import rates are as follows
+# June-Sept inclusive (summerTime)
+# 9.0279¢ for first 400kWh
+# 11.721¢ for additional
+#
+# Oct-May Inclusive (winterTime)
+# 7.9893¢ for first 400kWh
+# 10.3725¢ for additional
+- trigger:
+    - platform: time_pattern
+      hours: 0
+      minutes: 0
+    - platform: state
+      entity_id:
+        - sensor.powerwall_import_month
+  sensor:
+    - name: Energy Price
+      unit_of_measurement: "$/kWh"
+      unique_id: energy_price_rate
+      state: >-
+        {% set useTariffLow = states('sensor.powerwall_import_month') | float(0) < 400 %}
+        {% set summerTime = (now().month >= 5 and now().month <= 9) %}
+        {% if summerTime %}
+          {{iif(useTariffLow, 0.090279, 0.11721) | float(0)}}
+        {% else %}
+          {{iif(useTariffLow, 0.079893, 0.103725 ) | float(0)}}
+        {% endif %}
+
+# Export rates are as follows
+# June-Sept inclusive
+# 5.636¢
+
+# Oct-May Inclusive
+# 4.745¢
+- trigger:
+    - platform: time_pattern
+      hours: 0
+      minutes: 0
+    - platform: homeassistant
+      event: start
+  sensor:
+    - name: Energy Payment
+      unit_of_measurement: "$/kWh"
+      unique_id: energy_payment_rate
+      state: >-
+        {% set summerTime = (now().month >= 5 and now().month <= 9) %}
+        {% if summerTime %}
+          {{ 0.05636 | float(0) }}
+        {% else %}
+          {{ 0.04745 | float(0) }}
+        {% endif %}

@@ -1,0 +1,8 @@
+energy_import_month:
+  source: sensor.powerwall_site_import
+  name: Powerwall import month
+  cron: "0 0 27 * *"
+energy_export_month:
+  source: sensor.powerwall_site_export
+  name: Powerwall export month
+  cron: "0 0 27 * *"

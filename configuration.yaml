@@ -24,3 +24,4 @@ template: !include_dir_merge_list templates/
 sensor: !include_dir_merge_list sensors/
 mqtt:
   sensor: !include_dir_merge_list mqtt/sensor/
+utility_meter: !include utility_meter.yaml
