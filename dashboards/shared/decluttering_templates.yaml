@@ -111,9 +111,9 @@ slider-button:
     name: '[[name]]'
     card_mod:
       style: |
-        :host {
+        ha-card {
           --slider-color: var(--state-light-active-color);
           --paper-item-icon-active-color: var(--state-light-active-color);
-          --switch-checked-button-color: oklch(from var(--state-light-active-color) calc(l - 10) calc(c + .05) h);;
-          --switch-checked-track-color: oklch(from var(--state-light-active-color) calc(l - 20) calc(c + .05) h);;
+          --switch-checked-button-color: oklch(from var(--state-light-active-color) calc(l - 0.2) c h);
+          --switch-checked-track-color: oklch(from var(--state-light-active-color) l calc(c + .05) h);
         }

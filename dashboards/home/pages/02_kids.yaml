@@ -22,12 +22,11 @@ cards:
         '(max-width: 900px)':
           grid-template-columns: 2fr 1fr
     cards:
-      - features:
-          - type: light-brightness
-        type: tile
-        entity: light.ede_s_room_zone_01
-        vertical: false
-        hide_state: false
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Ede's Room
+          - entity: light.ede_s_room_zone_01
       - type: tile
         entity: switch.equipment_room_virtual_ede_s_bedtime_led
         name: Ede's bedtime
@@ -59,14 +58,16 @@ cards:
   - type: custom:layout-card
     layout_type: custom:grid-layout
     cards:
-      - features:
-          - type: light-brightness
-        type: tile
-        entity: light.nursery_zone_01
-      - features:
-          - type: light-brightness
-        type: tile
-        entity: light.nursery_zone_02
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Ceiling
+          - entity: light.nursery_zone_01
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: Bedside
+          - entity: light.nursery_zone_02
       - entity: switch.equipment_room_virtual_nursery_bedtime_led
         type: tile
         name: Nursery Bedtime
