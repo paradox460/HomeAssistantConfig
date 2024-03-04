@@ -34,7 +34,7 @@ play_xbox_script:
           for:
             hours: 0
             minutes: 0
-            seconds: 5
+            seconds: 0
     - service: media_player.play_media
       target:
         entity_id: media_player.xbox
