@@ -47,15 +47,6 @@ cards:
     entity: sensor.sony_tv_on_time
     name: On Today
   - type: custom:layout-break
-  - type: media-control
-    entity: media_player.sony_xbr_85x90ch
-  - type: media-control
-    entity: media_player.theater_screen
-  - type: media-control
-    entity: media_player.plex_plex_htpc_for_linux_michaelrosensfridge
-  - type: media-control
-    entity: media_player.xbox
-  - type: custom:layout-break
   - type: custom:auto-entities
     card:
       type: entities
@@ -106,3 +97,12 @@ cards:
           target: {}
     layout:
       grid-template-columns: 1fr 1fr
+  - type: custom:layout-break
+  - type: media-control
+    entity: media_player.sony_xbr_85x90ch
+  - type: media-control
+    entity: media_player.theater_screen
+  - type: media-control
+    entity: media_player.plex_plex_htpc_for_linux_michaelrosensfridge
+  - type: media-control
+    entity: media_player.xbox
