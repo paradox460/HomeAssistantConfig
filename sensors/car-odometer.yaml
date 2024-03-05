@@ -1,0 +1,7 @@
+- unique_id: 2023_ascent_touring_odometer_today
+  entity_id: sensor.2023_ascent_touring_odometer
+  name: 2023 Ascent Touring Odometer Today
+  platform: statistics
+  state_characteristic: change
+  max_age:
+    hours: 24
