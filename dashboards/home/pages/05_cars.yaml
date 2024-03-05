@@ -95,47 +95,66 @@ cards:
             period: week
         stat_type: change
         name: This Week
-  - type: custom:mushroom-template-card
-    primary: >-
-      Today's cost ${{ (states('sensor.2023_ascent_touring_odometer_today') | float(0) /
-      states('sensor.2023_ascent_touring_average_fuel_consumption') | float(0) *
-      states('sensor.average_gas_price') | float(0)) | round(2) }}
-    secondary: >-
-      ≈ {{ "{:.03f} gal".format(states('sensor.2023_ascent_touring_odometer_today') |
-      float(0) / states('sensor.2023_ascent_touring_average_fuel_consumption') |
-      float(0)) }} @ {{ "${:.2f}".format(states('sensor.average_gas_price') |
-      float(0)) }}
-    icon: mdi:cash-fast
-  - type: custom:apexcharts-card
-    config_templates:
-      - tufte
-    header:
-      show: true
-      title: Driving amounts
-    graph_span: 7d
-    yaxis:
-      - id: mi
-      - id: cost
-        opposite: true
-    series:
+  - type: custom:plotly-graph
+    hours_to_show: 10d
+    title: Daily driving costs
+    config:
+      scrollZoom: false
+    layout:
+      xaxis:
+        fixedrange: true
+        showgrid: false
+        showline: false
+      yaxis:
+        fixedrange: true
+        showgrid: false
+        showline: false
+    entities:
+      - entity: sensor.2023_ascent_touring_average_fuel_consumption
+        internal: true
+        type: bar
+        statistic: mean
+        period: day
+        filters:
+          - resample: 1d
+          - map_x: new Date(+x - 3600000 * 17)
+          - store_var: mpg
+      - entity: sensor.average_gas_price
+        internal: true
+        statistic: mean
+        period: day
+        filters:
+          - resample: 1d
+          - map_x: new Date(+x - 3600000 * 17)
+          - store_var: price
       - entity: sensor.2023_ascent_touring_odometer
-        type: column
-        yaxis_id: mi
-        group_by:
-          func: diff
-          duration: 1d
-          start_with_last: true
-      - entity: sensor.2023_ascent_touring_odometer
-        yaxis_id: cost
-        type: column
-        unit: USD
-        float_precision: 2
-        group_by:
-          func: diff
-          duration: 1d
-          start_with_last: true
-        transform: >-
-          const gal_used =  x /
-          hass.states['sensor.2023_ascent_touring_average_fuel_consumption'].state;
-
-          return gal_used * hass.states['sensor.average_gas_price'].state;
+        type: bar
+        statistic: state
+        period: day
+        name: Cost
+        unit_of_measurement: USD
+        customdata: |-
+          $fn ({statistics, vars}) =>
+            statistics.map(({change: distance}, i) => {
+              const mpg = vars.mpg.ys[i];
+              const price = vars.price.ys[i];
+              const gals = distance / mpg;
+              return {
+                gals,
+                price,
+                distance
+              };
+            });
+        hovertemplate: >-
+          <b>%{x}</b><br> %{y:$.2f}<br> %{customdata.gals:.2f} gal @
+          %{customdata.price:$.2f}<br> %{customdata.distance:2,} mi <extra></extra>
+        texttemplate: "%{y:$.2f}<br> %{customdata.distance:2,}mi"
+        filters:
+          - delta
+          - resample: 1d
+          - map_x: new Date(+x - 3600000 * 17)
+          - map_y: |-
+              {
+                const gals = y / vars.mpg.ys[i];
+                return gals * vars.price.ys[i];
+              }
