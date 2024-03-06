@@ -53,8 +53,8 @@ cards:
     graph_span: 1w
     yaxis:
       - decimals: 2
-        min: '|-0.01|'
-        max: '|0.01|'
+        min: "|-0.01|"
+        max: "|0.01|"
     series:
       - entity: sensor.average_gas_price
         stroke_width: 1

@@ -1,45 +1,45 @@
 play_xbox_script:
   alias: Play Xbox Script
   sequence:
-  - parallel:
+    - parallel:
+        - if:
+            - condition: state
+              entity_id: light.theater_floor_lamps
+              state: "off"
+          then:
+            - type: turn_on
+              device_id: ae78864a7dc874b6ad71a0df69c2ecb9
+              entity_id: f7534391d26bbf638ba4efbc15e2310c
+              domain: light
+        - service: select.select_option
+          metadata: {}
+          data:
+            option: Play Xbox
+          target:
+            entity_id: select.harmony_hub_activities
     - if:
-      - condition: state
-        entity_id: light.theater_floor_lamps
-        state: 'off'
+        - condition: template
+          value_template: "{{ game is defined }}"
       then:
-      - type: turn_on
-        device_id: ae78864a7dc874b6ad71a0df69c2ecb9
-        entity_id: f7534391d26bbf638ba4efbc15e2310c
-        domain: light
-    - service: select.select_option
-      metadata: {}
-      data:
-        option: Play Xbox
-      target:
-        entity_id: select.harmony_hub_activities
-  - if:
-    - condition: template
-      value_template: '{{ game is defined }}'
-    then:
-    - if:
-      - condition: state
-        entity_id: media_player.xbox
-        state: 'off'
-      then:
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - media_player.xbox
-          to: 'on'
-          for:
-            hours: 0
-            minutes: 0
-            seconds: 0
-    - service: media_player.play_media
-      target:
-        entity_id: media_player.xbox
-      data:
-        media_content_type: ''
-        media_content_id: '{{ game }}'
+        - if:
+            - condition: state
+              entity_id: media_player.xbox
+              state: "off"
+          then:
+            - wait_for_trigger:
+                - platform: state
+                  entity_id:
+                    - media_player.xbox
+                  to: "on"
+                  for:
+                    hours: 0
+                    minutes: 0
+                    seconds: 0
+        - service: media_player.play_media
+          target:
+            entity_id: media_player.xbox
+          data:
+            media_content_type: ""
+            media_content_id: "{{ game }}"
   mode: single
   icon: mdi:microsoft-xbox

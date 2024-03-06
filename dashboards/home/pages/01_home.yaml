@@ -147,9 +147,9 @@ cards:
     url: rtsps://10.0.0.1:7441/0Dw1XJxrDxEz0awB
     ui: true
     poster: camera.g4_doorbell_pro_poe_high
-    style: '.screenshot, .mode {display: none}'
+    style: ".screenshot, .mode {display: none}"
   - type: custom:webrtc-camera
     url: rtsps://10.0.0.1:7441/tq3oFVRurMYMcI1c?enableSrtp
     ui: true
     poster: camera.g4_doorbell_pro_poe_package_camera
-    style: '.screenshot, .mode {display: none}'
+    style: ".screenshot, .mode {display: none}"
