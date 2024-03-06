@@ -148,14 +148,12 @@ cards:
     card:
       type: custom:mushroom-template-card
       primary: '{{ states(entity, with_unit=True) }} last hour'
-      secondary: >
-        {{ states('sensor.weather_station_rain_day', with_unit=True) }}
-        / 24h
-
-        St: {{ states('sensor.weather_station_storm_rain',
-        with_unit=True) }} / {{
+      secondary: >-
+        {{ states('sensor.weather_station_rain_day', with_unit=True) }}/d
+        • {{ states('sensor.weather_station_storm_rain',
+        with_unit=True) }}/{{
         states('sensor.weather_station_storm_start') | as_datetime |
-        relative_time }}
+        relative_time | regex_replace('(\d+)\s([dhms]).*', '\\1\\2')}}
       icon: '{{ state_attr(entity, ''icon'') }}'
       entity: sensor.weather_station_rain_hour
       icon_color: '{{ (states(entity) | float > 0) | iif("blue", "primary") }}'
