@@ -1,16 +1,3 @@
-temp-hum-chart:
-  card:
-    type: custom:apexcharts-card
-    config_templates: temp_hum
-    header:
-      title: '[[name]]'
-    series:
-      - entity: '[[entity]]_temperature'
-        name: Temperature
-        yaxis_id: temp
-      - entity: '[[entity]]_humidity'
-        name: Humidity
-        yaxis_id: hum
 climate-chart:
   card:
     type: custom:apexcharts-card
@@ -81,39 +68,17 @@ climate-chart:
         show:
           legend_value: false
           in_header: false
-slider-button:
-  card:
-    entity: '[[entity]]'
-    type: custom:slider-button-card
-    slider:
-      direction: left-right
-      background: gradient
-      use_state_color: true
-      use_percentage_bg_opacity: true
-      show_track: false
-      toggle_on_click: false
-      force_square: false
-      show_attribute: false
-    show_name: true
-    show_state: true
-    compact: true
-    icon:
-      show: true
-      use_state_color: true
-      tap_action:
-        action: more-info
-    action_button:
-      mode: toggle
-      show: true
-      show_spinner: true
-      tap_action:
-        action: toggle
-    name: '[[name]]'
-    card_mod:
-      style: |
-        ha-card {
-          --slider-color: var(--state-light-active-color);
-          --paper-item-icon-active-color: var(--state-light-active-color);
-          --switch-checked-button-color: oklch(from var(--state-light-active-color) calc(l - 0.2) c h);
-          --switch-checked-track-color: oklch(from var(--state-light-active-color) l calc(c + .05) h);
-        }
+      - entity: binary_sensor.sandberg_system_home_state
+        transform: "return x == 'off' ? 1 : 0"
+        name: Away
+        yaxis_id: state
+        type: area
+        curve: stepline
+        color: grey
+        fill_raw: last
+        opacity: 0.5
+        stroke_width: 0
+        unit: ''
+        show:
+          legend_value: false
+          in_header: false

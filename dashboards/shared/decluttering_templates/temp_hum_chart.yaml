@@ -1,0 +1,13 @@
+temp-hum-chart:
+  card:
+    type: custom:apexcharts-card
+    config_templates: temp_hum
+    header:
+      title: '[[name]]'
+    series:
+      - entity: '[[entity]]_temperature'
+        name: Temperature
+        yaxis_id: temp
+      - entity: '[[entity]]_humidity'
+        name: Humidity
+        yaxis_id: hum
