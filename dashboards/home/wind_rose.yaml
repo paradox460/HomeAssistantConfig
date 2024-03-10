@@ -101,13 +101,14 @@ entities:
     internal: true
     filters:
       - resample: 5m
-      - map_y: parseFloat(y)
+      - force_numeric
     dn: $fn ({ ys, vars }) => { vars.windDirections = ys }
   - entity: sensor.weather_station_wind_gust
     internal: true
     filters:
       - resample: 5m
-      - map_y: parseFloat(y)
+      - force_numeric
+      - filter: y !== null && +y > 0
     sn: $fn ({ ys, vars }) => { vars.windSpeeds = ys }
   - entity: ''
     type: barpolar
