@@ -50,7 +50,7 @@ cards:
       title: Gas Prices
       show_states: true
       colorize_states: true
-    graph_span: 1w
+    graph_span: 10d
     yaxis:
       - decimals: 2
         min: "|-0.01|"
