@@ -1,0 +1,18 @@
+- binary_sensor:
+  - name: "Weather is bad for flag"
+    unique_id: "weather_is_bad_for_flag"
+    icon: mdi:flag-remove
+    state: >-
+      {{
+        states('sensor.weather_station_wind_speed') | float(0) >= 40 or
+        states('sensor.weather_station_wind_gust') | float(0) >= 40 or
+        states('sensor.weather_station_rain_rate') | float(0) >= 0.05
+      }}
+    delay_on: "0:01:00"
+    delay_off: "1:00:00"
+  trigger:
+    - platform: state
+      entity_id:
+        - sensor.weather_station_wind_speed
+        - sensor.weather_station_wind_gust
+        - sensor.weather_station_rain_rate
