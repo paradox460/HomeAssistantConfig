@@ -1,3 +1,4 @@
+# lovelace_gen
 title: Home
 icon: mdi:home
 type: custom:vertical-layout
@@ -5,22 +6,16 @@ badges: []
 cards:
   - type: horizontal-stack
     cards:
-      - type: tile
-        entity: person.jeff
-        show_entity_picture: true
-        vertical: true
-        hide_state: false
-        state_content:
-          - state
-          - last-changed
-      - type: tile
-        entity: person.stephanie
-        show_entity_picture: true
-        vertical: true
-        hide_state: false
-        state_content:
-          - state
-          - last-changed
+      {% for e in ['person.jeff', 'person.stephanie'] %}
+        - type: tile
+          entity: {{ e }}
+          show_entity_picture: true
+          vertical: false
+          hide_state: false
+          state_content:
+            - state
+            - last-changed
+      {% endfor %}
   - type: custom:layout-card
     layout_type: custom:grid-layout
     cards:
@@ -46,6 +41,16 @@ cards:
         variables:
           - name: Nursery B
           - entity: light.nursery_zone_02
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: F's Window
+          - entity: light.ferrin_s_window_spotlight
+      - type: custom:decluttering-card
+        template: slider-button
+        variables:
+          - name: F's Main
+          - entity: light.ferrin_s_main_lighting
       - type: custom:bubble-card
         card_type: separator
         name: Bedrooms
@@ -123,25 +128,22 @@ cards:
       grid-template-columns: 1fr 1fr
   - type: horizontal-stack
     cards:
-      - features:
-          - type: cover-open-close
-        type: tile
-        entity: cover.big_door
-        state_content:
-          - state
-          - last-changed
-      - features:
-          - type: cover-open-close
-        type: tile
-        entity: cover.small_door
-        state_content:
-          - state
-          - last-changed
+      {% for e in ['big_door', 'small_door'] %}
+        - type: custom:mushroom-cover-card
+          entity: cover.{{ e }}
+          show_position_control: false
+          show_tilt_position_control: false
+          show_buttons_control: true
+          layout: horizontal
+          secondary_info: last-changed
+          tap_action:
+            action: more-info
+      {% endfor %}
   - type: custom:layout-break
+  - !include ../weather_glance.yaml
   - type: energy-distribution
     link_dashboard: true
   - type: energy-usage-graph
-  - !include ../weather_glance.yaml
   - type: custom:layout-break
   - type: custom:webrtc-camera
     url: rtsps://10.0.0.1:7441/0Dw1XJxrDxEz0awB
