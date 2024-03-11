@@ -1,5 +1,14 @@
 type: custom:plotly-graph
 title: Wind Gust Speeds
+card_mod:
+  # Made titles match ApexChartsCards better
+  style: |-
+    ha-card > #title {
+      text-align: left;
+      padding: 8px 16px;
+      font-size: 16px;
+      font-weight: 500;
+    }
 layout:
   legend:
     orientation: h
