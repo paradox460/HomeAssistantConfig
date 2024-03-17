@@ -8,7 +8,6 @@
         states('sensor.weather_station_wind_gust') | float(0) >= 40 or
         states('sensor.weather_station_rain_rate') | float(0) >= 0.05
       }}
-    delay_on: "0:01:00"
     delay_off: "1:00:00"
   trigger:
     - platform: state
