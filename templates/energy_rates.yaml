@@ -12,13 +12,13 @@
       minutes: 0
     - platform: state
       entity_id:
-        - sensor.powerwall_import_month
+        - sensor.electricity_import_month
   sensor:
-    - name: Energy Price
-      unit_of_measurement: "$/kWh"
-      unique_id: energy_price_rate
+    - name: Electricity Price
+      unit_of_measurement: "USD/kWh"
+      unique_id: electricity_price_rate
       state: >-
-        {% set useTariffLow = states('sensor.powerwall_import_month') | float(0) < 400 %}
+        {% set useTariffLow = states('sensor.electricity_import_month') | float(0) < 400 %}
         {% set summerTime = (now().month >= 5 and now().month <= 9) %}
         {% if summerTime %}
           {{iif(useTariffLow, 0.090279, 0.11721) | float(0)}}
@@ -39,9 +39,9 @@
     - platform: homeassistant
       event: start
   sensor:
-    - name: Energy Payment
-      unit_of_measurement: "$/kWh"
-      unique_id: energy_payment_rate
+    - name: Electricity Payment
+      unit_of_measurement: "USD/kWh"
+      unique_id: electricity_payment_rate
       state: >-
         {% set summerTime = (now().month >= 5 and now().month <= 9) %}
         {% if summerTime %}

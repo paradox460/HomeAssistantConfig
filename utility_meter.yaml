@@ -1,8 +1,10 @@
 energy_import_month:
-  source: sensor.powerwall_site_import
-  name: Powerwall import month
+  source: sensor.electricity_import_meter
+  name: Electricity Import Month
+  unique_id: electricity_import_month
   cron: "0 0 27 * *"
 energy_export_month:
-  source: sensor.powerwall_site_export
-  name: Powerwall export month
+  source: sensor.electricity_export_meter
+  name: Electricity Export Month
+  unique_id: electricity_export_month
   cron: "0 0 27 * *"
