@@ -33,4 +33,8 @@ slider-button:
           --paper-item-icon-active-color: var(--state-light-active-color);
           --switch-checked-button-color: oklch(from var(--state-light-active-color) calc(l - 0.2) c h);
           --switch-checked-track-color: oklch(from var(--state-light-active-color) l calc(c + .05) h);
+
+          .button {
+            padding: 17px;
+          }
         }

@@ -34,6 +34,7 @@ climate-chart:
         attribute: current_humidity
         name: Humidity
         yaxis_id: humidity
+        unit: '%'
         group_by:
           func: avg
         show:

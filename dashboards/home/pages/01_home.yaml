@@ -114,6 +114,13 @@ cards:
         variables:
           - name: Holiday
           - entity: switch.holiday_lights
+      - type: custom:mushroom-fan-card
+        entity: fan.upstairs_hallway
+        icon_animation: true
+        fill_container: false
+        show_oscillate_control: false
+        collapsible_controls: true
+        show_percentage_control: false
       - type: custom:mushroom-entity-card
         entity: button.esphome_web_659621_feed_cat
         icon_color: primary
