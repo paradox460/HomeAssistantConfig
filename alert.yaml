@@ -13,8 +13,12 @@ emqx_down:
   name: "EMQX went down"
   done_message: clear_notification
   entity_id: binary_sensor.emqx_running
-  repeat: 30
+  state: off
+  repeat:
+    - 5
+    - 30
   can_acknowledge: true
+  skip_first: true
   message: "EMQX is down, please investigate"
   notifiers:
     - mobile_app_pixel_8_pro
