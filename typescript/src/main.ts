@@ -2,7 +2,6 @@ import { CreateApplication } from "@digital-alchemy/core";
 import { LIB_HASS } from "@digital-alchemy/hass";
 
 import { ElectricityTariffs } from "./electricity-tariffs";
-import { TheaterTest } from "./theater-test";
 
 // define your application, doesn't do anything productive without services
 const HOME_AUTOMATION = CreateApplication({
