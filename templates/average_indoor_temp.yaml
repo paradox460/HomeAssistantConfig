@@ -1,0 +1,10 @@
+- sensor:
+  - name: "average_indoor_temperature"
+    unit_of_measurement: "°F"
+    icon: mdi:thermometer
+    state_class: measurement
+    state: >-
+      {{ states.sensor | selectattr("entity_id", 'contains', 't_h_temperature') | map(attribute='entity_id') | map('states') | map('float') | list | average() }}
+  trigger:
+    - platform: time_pattern
+      minutes: '/1'
