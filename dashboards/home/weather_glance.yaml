@@ -162,6 +162,7 @@ cards:
         action: more-info
 layout_type: custom:grid-layout
 layout:
+  margin: 0
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
   place-items: end stretch
 view_layout:

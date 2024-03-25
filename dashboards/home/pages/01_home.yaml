@@ -133,6 +133,7 @@ cards:
           action: more-info
     layout:
       grid-template-columns: 1fr 1fr
+      margin: 0
   - type: horizontal-stack
     cards:
       {% for e in ['big_door', 'small_door'] %}
