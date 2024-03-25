@@ -16,6 +16,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@digital-alchemy/automation": "^0.3.3",
     "@digital-alchemy/core": "^0.3.6",
     "@digital-alchemy/hass": "^0.3.6",
     "@digital-alchemy/synapse": "^0.3.4"

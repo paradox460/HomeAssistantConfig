@@ -38,3 +38,5 @@ lovelace:
       title: Home
       icon: mdi:home
       show_in_sidebar: true
+
+synapse:

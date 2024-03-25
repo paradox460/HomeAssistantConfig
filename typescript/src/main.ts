@@ -1,5 +1,7 @@
 import { CreateApplication } from "@digital-alchemy/core";
 import { LIB_HASS } from "@digital-alchemy/hass";
+import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
+import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 
 import { ElectricityTariffs } from "./electricity-tariffs";
 
@@ -17,34 +19,12 @@ const HOME_AUTOMATION = CreateApplication({
     },
   },
 
-  /**
-   * @digital-alchemy/core also provides:
-   *
-   * - LIB_SYNAPSE: entity generation tools (requires custom component)
-   * - LIB_AUTOMATION: higher level automation functions (requires synapse)
-   */
   libraries: [
-    /**
-     * LIB_HASS provides basic interactions for Home Assistant
-     *
-     * Will automatically start websocket as part of bootstrap
-     */
     LIB_HASS,
-
-    /**
-     * Un comment to enable the synapse library
-     *
-     */
-    // LIB_SYNAPSE,
+    LIB_SYNAPSE,
+    LIB_AUTOMATION,
   ],
 
-  /**
-   * must match key used in LoadedModules
-   * affects:
-   *  - import name in TServiceParams
-   *  - and files used for configuration
-   *  - log context
-   */
   name: "typescript",
 
   /**
