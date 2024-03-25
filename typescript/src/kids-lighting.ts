@@ -1,4 +1,4 @@
-import { TServiceParams } from "@digital-alchemy/core";
+import { TServiceParams, sleep } from "@digital-alchemy/core";
 
 
 export function KidsLighting({ automation, context, hass, scheduler, logger }: TServiceParams) {
@@ -30,7 +30,8 @@ export function KidsLighting({ automation, context, hass, scheduler, logger }: T
   automation.solar.onEvent({
     context,
     eventName: "sunriseEnd",
-    exec() {
+    async exec() {
+      await sleep(60*60*1000)
       logger.info("turning off kids lights")
       hass.call.light.turn_off({
         entity_id: [
