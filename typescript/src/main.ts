@@ -4,6 +4,7 @@ import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 
 import { UtilityTariffs } from "./utility-tariffs";
+import { KidsLighting } from "./kids-lighting";
 
 // define your application, doesn't do anything productive without services
 const HOME_AUTOMATION = CreateApplication({
@@ -40,6 +41,7 @@ const HOME_AUTOMATION = CreateApplication({
    */
   services: {
     UtilityTariffs,
+    KidsLighting
   },
 });
 
