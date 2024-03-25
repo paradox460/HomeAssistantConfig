@@ -62,7 +62,7 @@ setImmediate(
        */
       configuration: {
         // default value: trace
-        boilerplate: { LOG_LEVEL: "debug" },
+        boilerplate: { LOG_LEVEL: "info" },
       },
     }),
 );
