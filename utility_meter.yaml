@@ -39,3 +39,28 @@ electricity_export_month:
   tariffs:
     - winter
     - summer
+gas_import_day:
+  source: sensor.gas_meter
+  name: Gas Import Day
+  unique_id: gas_import_day
+  cycle: daily
+  tariffs:
+    - winter_lt_45
+    - winter_gt_45
+    - summer_lt_45
+    - summer_gt_45
+gas_import_month:
+  source: sensor.gas_meter
+  name: Gas Import Month
+  unique_id: gas_import_month
+  cron: "0 0 20 * *"
+  tariffs:
+    - winter_lt_45
+    - winter_gt_45
+    - summer_lt_45
+    - summer_gt_45
+gas_import_month_total:
+  source: sensor.gas_meter
+  name: Gas Import Month Total
+  unique_id: gas_import_month_total
+  cron: "0 0 20 * *"

@@ -3,7 +3,7 @@ import { LIB_HASS } from "@digital-alchemy/hass";
 import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 
-import { ElectricityTariffs } from "./electricity-tariffs";
+import { UtilityTariffs } from "./utility-tariffs";
 
 // define your application, doesn't do anything productive without services
 const HOME_AUTOMATION = CreateApplication({
@@ -39,7 +39,7 @@ const HOME_AUTOMATION = CreateApplication({
    * context: ServiceFunction
    */
   services: {
-    ElectricityTariffs
+    UtilityTariffs,
   },
 });
 
