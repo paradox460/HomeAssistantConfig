@@ -9,6 +9,7 @@ bring_in_flag:
     - all
   data:
     tag: flag–alert
+    clickAction: "entityId:alert.bring_in_flag"
 emqx_down:
   name: "EMQX went down"
   done_message: clear_notification
