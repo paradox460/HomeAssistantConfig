@@ -7,7 +7,7 @@ layout:
   grid-template-columns: minmax(300px, 800px) 300px
   place-content: center
   mediaquery:
-    '(max-width: 900px)':
+    "(max-width: 900px)":
       grid-template-columns: auto
 badges: []
 cards:
@@ -19,16 +19,16 @@ cards:
     layout_type: grid
     layout:
       mediaquery:
-        '(max-width: 900px)':
+        "(max-width: 900px)":
           grid-template-columns: 2fr 1fr
     cards:
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: Ede's Room
-          - entity: light.ede_s_room_zone_01
+          - entity: light.edes_room_ceiling
       - type: tile
-        entity: switch.equipment_room_virtual_ede_s_bedtime_led
+        entity: switch.virtual_ede_s_bedtime
         name: Ede's bedtime
         icon: mdi:bed-clock
         hide_state: true
@@ -38,12 +38,12 @@ cards:
           action: call-service
           service: scene.turn_on
           data:
-            entity_id: scene.equipment_room_virtual_ede_s_bedtime
+            entity_id: scene.virtual_ede_s_bedtime
         tap_action:
           action: call-service
           service: scene.turn_on
           data:
-            entity_id: scene.equipment_room_virtual_ede_s_bedtime
+            entity_id: scene.virtual_ede_s_bedtime
       - show_name: false
         show_icon: true
         show_state: true
@@ -62,15 +62,15 @@ cards:
         template: slider-button
         variables:
           - name: Ceiling
-          - entity: light.nursery_zone_01
+          - entity: light.ferrins_room_main_lighting
       - type: custom:decluttering-card
         template: slider-button
         variables:
-          - name: Bedside
-          - entity: light.nursery_zone_02
-      - entity: switch.equipment_room_virtual_nursery_bedtime_led
+          - name: Window
+          - entity: light.ferrins_room_window_spotlight
+      - entity: switch.virtual_button_3
         type: tile
-        name: Nursery Bedtime
+        name: Ferrin's Bedtime
         icon: mdi:bed-clock
         hide_state: true
         vertical: false
@@ -79,12 +79,12 @@ cards:
           action: call-service
           service: scene.turn_on
           data:
-            entity_id: scene.equipment_room_virtual_nursery_bedtime
+            entity_id: scene.virtual_ferrins_bedtime
         tap_action:
           action: call-service
           service: scene.turn_on
           data:
-            entity_id: scene.equipment_room_virtual_nursery_bedtime
+            entity_id: scene.virtual_ferrins_bedtime
         view_layout:
           grid-area: c
       - show_name: false
@@ -92,8 +92,8 @@ cards:
         show_state: true
         type: glance
         entities:
-          - entity: sensor.nursery_t_h_temperature
-          - entity: sensor.nursery_t_h_humidity
+          - entity: sensor.ferrin_s_room_t_h_temperature
+          - entity: sensor.ferrin_s_room_t_h_humidity
     layout:
       grid-template-columns: auto
       grid-template-areas: |-
@@ -101,7 +101,7 @@ cards:
         "b"
         "c"
       mediaquery:
-        '(max-width: 900px)':
+        "(max-width: 900px)":
           grid-template-columns: 1fr 1fr
           grid-template-areas: |-
             "a b"

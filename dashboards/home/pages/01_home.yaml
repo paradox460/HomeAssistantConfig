@@ -29,28 +29,28 @@ cards:
         template: slider-button
         variables:
           - name: Ede's Room
-          - entity: light.ede_s_room_zone_01
+          - entity: light.edes_room_ceiling
       - type: custom:gap-card
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: Nursery C
-          - entity: light.nursery_zone_01
+          - entity: light.nursery_ceiling
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: Nursery B
-          - entity: light.nursery_zone_02
+          - entity: light.nursery_bedside
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: F's Window
-          - entity: light.ferrin_s_window_spotlight
+          - entity: light.ferrins_room_window_spotlight
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: F's Main
-          - entity: light.ferrin_s_main_lighting
+          - entity: light.ferrins_room_main_lighting
       - type: custom:bubble-card
         card_type: separator
         name: Bedrooms
@@ -71,12 +71,12 @@ cards:
         template: slider-button
         variables:
           - name: U Guest
-          - entity: light.upstairs_guest_room_zone_01
+          - entity: light.upstairs_guest_ceiling
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: G Guest
-          - entity: light.ground_bedroom_zone_01
+          - entity: light.ground_guest_ceiling
       - type: custom:bubble-card
         card_type: separator
         name: Wax Melters
@@ -108,7 +108,7 @@ cards:
         template: slider-button
         variables:
           - name: Office
-          - entity: light.office_zone_01
+          - entity: light.office_ceiling
       - type: custom:decluttering-card
         template: slider-button
         variables:
