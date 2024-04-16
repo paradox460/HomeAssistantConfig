@@ -18,9 +18,8 @@ export function KidsLighting({ automation, context, hass, scheduler, logger }: T
       logger.info("triggering kids lights on")
       hass.call.light.turn_on({
         brightness_pct: 50,
-        entity_id: [
-          "light.kids_lights"
-        ]
+        entity_id: hass.entity.byLabel("kids"),
+        transition: 30
       })
     }
   });
@@ -34,9 +33,7 @@ export function KidsLighting({ automation, context, hass, scheduler, logger }: T
       await sleep(60*60*1000)
       logger.info("turning off kids lights")
       hass.call.light.turn_off({
-        entity_id: [
-          "light.kids_lights"
-        ]
+        entity_id: hass.entity.byLabel("kids")
       })
     }
   })
@@ -49,8 +46,8 @@ export function KidsLighting({ automation, context, hass, scheduler, logger }: T
       logger.info("kids bedtime")
       hass.call.scene.turn_on({
         entity_id: [
-          "scene.equipment_room_virtual_ede_s_bedtime",
-          "scene.equipment_room_virtual_nursery_bedtime"
+          "scene.virtual_ede_s_bedtime",
+          "scene.virtual_ferrins_bedtime"
         ]
       })
     },
