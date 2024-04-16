@@ -25,3 +25,17 @@ emqx_down:
     - mobile_app_pixel_8_pro
   data:
     tag: emqx-alert
+freezer_malfunction:
+  name: "Freezer malfunction"
+  done_message: clear_notification
+  entity_id: binary_sensor.freezer_temp_alert
+  repeat: 10
+  message: "Freezer Temp High Alert: {{states('sensor.freezer_temperature', with_unit=True)}}"
+  notifiers:
+    - all
+  data:
+    tag: freezer-alert
+    clickCtion: "entityId:alert.freezer_malfunction"
+    ttl: 0
+    priority: high
+    channel: alarm_stream

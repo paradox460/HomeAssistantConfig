@@ -1,0 +1,105 @@
+substitutions:
+  name: freezer-monitor-95cc6c
+  friendly_name: Freezer Monitor
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: false
+  project:
+    name: jeffs.freezer-monitor
+    version: '2024.04.10'
+
+esp32:
+  board: adafruit_feather_esp32_v2
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption: 
+    key: !secret freezer_api
+# Allow Over-The-Air updates
+ota:
+
+# Allow provisioning Wi-Fi via serial
+improv_serial:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Set up a wifi access point
+  ap:
+    ssid: "freezer-monitor-95cc6c"
+    password: "7h9sQ2jh8CRd"
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+captive_portal:
+
+# dashboard_import:
+#   package_import_url: github://esphome/example-configs/esphome-web/esp32.yaml@main
+#   import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+# esp32_improv:
+#   authorizer: none
+
+# To have a "next url" for improv serial
+# web_server:
+
+i2c:
+  sda: 22
+  scl: 20
+
+spi:
+  clk_pin: 5
+  miso_pin: 21
+
+sensor:
+  - platform: aht10
+    variant: aht20
+    update_interval: 20s
+    temperature:
+      name: "Garage T/H Temperature"
+      unit_of_measurement: °C
+      device_class: temperature
+      state_class: measurement
+      filters:
+      # 60÷5 = 12 
+      - median:
+          window_size: 9
+          send_every: 3
+          send_first_at: 1
+
+    humidity:
+      name: "Garage T/H Humidity"
+      unit_of_measurement: '%'
+      device_class: humidity
+      state_class: measurement
+      filters:
+      # 60÷5 = 12 
+      - median:
+          window_size: 9
+          send_every: 3
+          send_first_at: 1
+  - platform: max31855
+    name: "Freezer Temperature"
+    cs_pin: 4
+    update_interval: 12s
+    unit_of_measurement: °C
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 2
+    filters:
+      # Consistently read 1 degre too hot
+      - offset: -1
+      # 60÷5 = 12 
+      - median:
+          window_size: 9
+          send_every: 5
+          send_first_at: 1

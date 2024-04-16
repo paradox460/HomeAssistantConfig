@@ -66,3 +66,24 @@ cards:
     variables:
       - name: Kitchen
       - entity: sensor.kitchen_t_h
+  - type: custom:decluttering-card
+    template: temp-hum-chart
+    variables:
+      - name: Garage
+      - entity: sensor.garage_t_h
+  - type: custom:apexcharts-card
+    config_templates: tufte
+    header:
+      title: "Garage Freezer"
+      show: true
+      show_states: true
+      colorize_states: true
+    series:
+      - entity: "sensor.garage_freezer_temperature"
+        name: Temperature
+        statistics:
+          type: mean
+      - entity: "sensor.garage_freezer_temperature"
+        name: "Last reading"
+        show:
+          in_chart: false

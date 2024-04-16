@@ -1,0 +1,10 @@
+- binary_sensor:
+    - name: "Freezer Temp Alert"
+      unique_id: "freezer_temp_alert"
+      icon: mdi:snowflake-alert
+      state: >-
+        {{
+          states('sensor.freezer_temperature') | float(0) >= 5
+        }}
+      delay_on: "0:10:00"
+      delay_off: "0:10:00"
