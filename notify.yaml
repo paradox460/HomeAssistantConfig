@@ -1,0 +1,15 @@
+- name: all
+  platform: group
+  services:
+    - service: mobile_app_jeffs_macbook_pro
+    - service: mobile_app_pixel_6
+    - service: mobile_app_pixel_8_pro
+- name: jeff
+  platform: group
+  services:
+    - service: mobile_app_jeffs_macbook_pro
+    - service: mobile_app_pixel_8_pro
+- name: stephanie
+  platform: group
+  services:
+    - service: mobile_app_pixel_6

@@ -6,7 +6,7 @@ bring_in_flag:
   can_acknowledge: true
   message: "Weather is not suitable to fly the flag. Please take it down"
   notifiers:
-    - mobile_app_pixel_8_pro
+    - all
   data:
     tag: flag–alert
 emqx_down:
