@@ -1,5 +1,5 @@
 esphome:
-  name: esphome-web-659621
+  name: cat-feeder-659621
   friendly_name: Cat Feeder
 
 esp8266:
