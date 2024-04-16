@@ -149,15 +149,7 @@ cards:
       {% endfor %}
   - type: custom:layout-break
 
-  - type: custom:mod-card
-    card_mod:
-      style:
-        "layout-card $ grid-layout $": |-
-          #root *:nth-child(2n-1):nth-last-child(1) {
-            grid-column: span 2;
-          }
-    card:
-      !include ../weather_glance.yaml
+  - !include ../weather_glance.yaml
   - type: energy-distribution
     link_dashboard: true
   - type: energy-usage-graph
