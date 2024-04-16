@@ -1,0 +1,20 @@
+- sensor:
+    - name: "average_indoor_temperature"
+      unit_of_measurement: "°F"
+      icon: mdi:thermometer
+      state_class: measurement
+      state: >-
+        {{ label_entities("indoor temp") | map('states') | map('float') | average() }}
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"
+- sensor:
+    - name: "average_indoor_humidity"
+      unit_of_measurement: "%"
+      icon: mdi:water-percent
+      state_class: measurement
+      state: >-
+        {{ label_entities("indoor humidity") | map('states') | map('float') | average() }}
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"

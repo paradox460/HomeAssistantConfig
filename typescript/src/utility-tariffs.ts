@@ -1,4 +1,5 @@
-import { TServiceParams } from "@digital-alchemy/core";
+import { Logger, TServiceParams } from "@digital-alchemy/core";
+import { select } from "async";
 
 function isElectricitySummer(): Boolean {
   const month = new Date().getMonth() + 1;
@@ -11,7 +12,7 @@ function isGasSummer(): Boolean {
 }
 
 
-export function UtilityTariffs({ hass, scheduler, lifecycle }: TServiceParams) {
+export function UtilityTariffs({ hass, scheduler, lifecycle, logger }: TServiceParams) {
   const electricityImports = [
     hass.entity.byId("select.electricity_import_day"),
     hass.entity.byId("select.electricity_import_month")
@@ -56,7 +57,9 @@ export function UtilityTariffs({ hass, scheduler, lifecycle }: TServiceParams) {
 
   function updateGasImports(entity) {
     const season = isGasSummer() ? "summer" : "winter";
-    const threshold = parseFloat(entity.state) >= 45 ? "gt" : "lt";
+    const dth = parseFloat(entity.state) * 0.088728;
+    const threshold = dth >= 45 ? "gt" : "lt";
+    logger.info(`therms for month: ${dth}, which is ${threshold} 45`)
     setGasImports(`${season}_${threshold}_45`);
   }
 
