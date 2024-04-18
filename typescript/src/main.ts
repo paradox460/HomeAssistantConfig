@@ -3,6 +3,7 @@ import { LIB_HASS } from "@digital-alchemy/hass";
 import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 
+import { Away } from "./away";
 import { CoolChickens } from "./cool-chickens";
 import { KidsLighting } from "./kids-lighting";
 import { UtilityTariffs } from "./utility-tariffs";
@@ -41,6 +42,7 @@ const HOME_AUTOMATION = CreateApplication({
    * context: ServiceFunction
    */
   services: {
+    Away,
     CoolChickens,
     KidsLighting,
     UtilityTariffs
