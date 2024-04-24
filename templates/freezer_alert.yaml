@@ -4,7 +4,7 @@
       icon: mdi:snowflake-alert
       state: >-
         {{
-          states('sensor.freezer_temperature') | float(0) >= 5
+          states('sensor.garage_freezer_temperature') | float(0) >= 5
         }}
       delay_on: "0:10:00"
       delay_off: "0:10:00"

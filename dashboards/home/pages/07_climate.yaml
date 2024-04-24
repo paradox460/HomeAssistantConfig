@@ -83,6 +83,7 @@ cards:
         name: Temperature
         statistics:
           type: mean
+          period: hour
       - entity: "sensor.garage_freezer_temperature"
         name: "Last reading"
         show:

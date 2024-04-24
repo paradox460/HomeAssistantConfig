@@ -70,11 +70,9 @@ sensor:
       device_class: temperature
       state_class: measurement
       filters:
-      # 60÷5 = 12 
-      - median:
-          window_size: 9
+      - exponential_moving_average:
+          alpha: 0.1
           send_every: 3
-          send_first_at: 1
 
     humidity:
       name: "Garage T/H Humidity"
@@ -82,24 +80,21 @@ sensor:
       device_class: humidity
       state_class: measurement
       filters:
-      # 60÷5 = 12 
-      - median:
-          window_size: 9
+      - exponential_moving_average:
+          alpha: 0.1
           send_every: 3
-          send_first_at: 1
   - platform: max31855
     name: "Freezer Temperature"
     cs_pin: 4
-    update_interval: 12s
+    update_interval: 10s
     unit_of_measurement: °C
     device_class: temperature
     state_class: measurement
     accuracy_decimals: 2
     filters:
-      # Consistently read 1 degre too hot
+      # Consistently read 1 degree too hot
       - offset: -1
-      # 60÷5 = 12 
-      - median:
-          window_size: 9
-          send_every: 5
-          send_first_at: 1
+      - exponential_moving_average:
+          alpha: 0.05
+          send_every: 6
+
