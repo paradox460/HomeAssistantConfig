@@ -1,15 +1,15 @@
 import { TServiceParams } from "@digital-alchemy/core";
-import { stringify } from "js-yaml";
+import { PICK_ENTITY } from "@digital-alchemy/hass";
 
 // 1 mile = 5,280 feet.
 const HOME_RADIUS = 5_280;
 
 /**
  * Automated away and return home states
- * 
+ *
  * Turns off my furnace, and all entities with the `awayable` label applied.
  * Saves a snapshot of the state of entities upon leaving, and restores it when
- * returning home 
+ * returning home
  */
 export function Away({ hass, context, synapse }: TServiceParams) {
   const awaySwitch = synapse.switch({
@@ -37,7 +37,9 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     // Take snapshot of all awayable entities current state
     hass.call.scene.create({
       scene_id: "awayable_restore",
-      snapshot_entities: stringify(awayableEntities)
+      // As of the commit date on this comment, you have to lie to the typechecker to make it accept an entity list
+      // Passing a string in yaml format WILL fail, despite what the docs say
+      snapshot_entities: awayableEntities as any
     })
 
 
@@ -55,8 +57,9 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     // force the system back into home mode
     if (!["towards", "arrived"].includes(direction) && awaySwitch.on) { return; }
 
-    // We have to cast the dynamically generated scene to a known, preconfigured scene, so the type checker passes
-    const awayableScene = "scene.awayable_restore" as "scene.enclosure_device_001_away_scene"
+    // We have to lie to the type checker again, this time because the generated
+    // types don't know about our dynamic type
+    const awayableScene = "scene.awayable_restore" as PICK_ENTITY<"scene">;
 
     hass.call.switch.turn_off({ entity_id: "switch.sandberg_system_manual_away_mode" });
 
@@ -93,4 +96,3 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     triggerHomeMode();
   });
 }
-
