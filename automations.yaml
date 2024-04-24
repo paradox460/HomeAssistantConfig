@@ -19,3 +19,23 @@
     target:
       entity_id: '{{ trigger.entity_id }}'
   mode: single
+- id: '1713917815664'
+  alias: Turn off office fan
+  description: Turn off the office fan after 6 hours
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.office
+    to: 'on'
+    for:
+      hours: 6
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: fan.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: fan.office
+  mode: single
