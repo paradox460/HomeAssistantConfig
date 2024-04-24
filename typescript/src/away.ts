@@ -6,7 +6,7 @@ const HOME_RADIUS = 5_280;
 export function Away({ hass, context, synapse }: TServiceParams) {
   const awaySwitch = synapse.switch({
     context,
-    name: "Automatic Away",
+    name: "Away Automations",
     defaultState: "on",
     icon: "mdi:home-map-marker"
   });
@@ -23,7 +23,9 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     // trigger HVAC away
     hass.call.switch.turn_on({ entity_id: "switch.sandberg_system_manual_away_mode" });
 
-    hass.call.light.turn_off({ entity_id: hass.entity.byLabel("awayable") });
+    // Use the generic homeassistant.turn_off service because we might have a variety of things in the label
+    // i.e. lights and fans and so forth
+    hass.call.homeassistant.turn_off({ entity_id: hass.entity.byLabel("awayable") });
 
     // Confusing because this is an occupany sensor, so awayMode true == home and false == away
     awayMode.on = false;
