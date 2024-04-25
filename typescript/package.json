@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@cspell/eslint-plugin": "^8.7.0",
-    "@digital-alchemy/type-writer": "^0.3.8",
+    "@digital-alchemy/type-writer": "^0.3.10",
     "@types/async": "^3.2.24",
     "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^7.7.1",

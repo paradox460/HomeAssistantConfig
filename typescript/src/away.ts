@@ -43,7 +43,7 @@ export function Away({ hass, context, synapse }: TServiceParams) {
       scene_id: "awayable_restore",
       // As of the commit date on this comment, you have to lie to the typechecker to make it accept an entity list
       // Passing a string in yaml format WILL fail, despite what the docs say
-      snapshot_entities: awayableEntities as unknown as string,
+      snapshot_entities: awayableEntities,
     });
 
     // Use the generic homeassistant.turn_off service because we might have a variety of things in the label
