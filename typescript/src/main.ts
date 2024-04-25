@@ -1,7 +1,7 @@
+import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 import { CreateApplication } from "@digital-alchemy/core";
 import { LIB_HASS } from "@digital-alchemy/hass";
 import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
-import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 
 import { Away } from "./away";
 import { CatfoodConsume } from "./catfood-consume";
@@ -23,11 +23,7 @@ const HOME_AUTOMATION = CreateApplication({
     },
   },
 
-  libraries: [
-    LIB_HASS,
-    LIB_SYNAPSE,
-    LIB_AUTOMATION,
-  ],
+  libraries: [LIB_HASS, LIB_SYNAPSE, LIB_AUTOMATION],
 
   name: "typescript",
 
@@ -47,7 +43,7 @@ const HOME_AUTOMATION = CreateApplication({
     CatfoodConsume,
     CoolChickens,
     KidsLighting,
-    UtilityTariffs
+    UtilityTariffs,
   },
 });
 

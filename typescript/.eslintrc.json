@@ -23,8 +23,7 @@
         "plugin:jsonc/recommended-with-jsonc",
         "plugin:sonarjs/recommended",
         "plugin:unicorn/recommended",
-        "plugin:prettier/recommended",
-        "plugin:@cspell/recommended"
+        "plugin:prettier/recommended"
       ],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
