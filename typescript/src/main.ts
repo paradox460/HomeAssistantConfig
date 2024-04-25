@@ -6,6 +6,7 @@ import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 import { Away } from "./away";
 import { CatfoodConsume } from "./catfood-consume";
 import { CoolChickens } from "./cool-chickens";
+import { HolidayLights } from "./holiday-lights";
 import { KidsLighting } from "./kids-lighting";
 import { UtilityTariffs } from "./utility-tariffs";
 
@@ -42,6 +43,7 @@ const HOME_AUTOMATION = CreateApplication({
     Away,
     CatfoodConsume,
     CoolChickens,
+    HolidayLights,
     KidsLighting,
     UtilityTariffs,
   },
