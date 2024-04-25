@@ -4,6 +4,7 @@ import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 
 import { Away } from "./away";
+import { CatfoodConsume } from "./catfood-consume";
 import { CoolChickens } from "./cool-chickens";
 import { KidsLighting } from "./kids-lighting";
 import { UtilityTariffs } from "./utility-tariffs";
@@ -43,6 +44,7 @@ const HOME_AUTOMATION = CreateApplication({
    */
   services: {
     Away,
+    CatfoodConsume,
     CoolChickens,
     KidsLighting,
     UtilityTariffs
