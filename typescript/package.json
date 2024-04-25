@@ -17,8 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "@digital-alchemy/automation": "^0.3.5",
-    "@digital-alchemy/core": "^0.3.11",
-    "@digital-alchemy/hass": "^0.3.14",
+    "@digital-alchemy/core": "^0.3.12",
+    "@digital-alchemy/hass": "^0.3.16",
     "@digital-alchemy/synapse": "^0.3.5"
   },
   "devDependencies": {
@@ -26,8 +26,8 @@
     "@digital-alchemy/type-writer": "^0.3.8",
     "@types/async": "^3.2.24",
     "@types/node": "^20.12.7",
-    "@typescript-eslint/eslint-plugin": "7.7.0",
-    "@typescript-eslint/parser": "7.7.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "^2.29.1",
@@ -44,7 +44,7 @@
     "npm-check-updates": "^16.14.18",
     "prettier": "^3.2.5",
     "tsx": "^4.7.2",
-    "type-fest": "^4.15.0",
+    "type-fest": "^4.17.0",
     "typescript": "^5.4.5"
   }
 }
