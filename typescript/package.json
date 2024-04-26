@@ -4,6 +4,7 @@
   "description": "A quick start demo workspace to building code with @digital-alchemy. Tuned for supervised Home Assistant installs",
   "scripts": {
     "build:deploy": "./scripts/deploy.sh",
+    "build:deploy:restart": "./scripts/deploy_restart.sh",
     "build": "tsc",
     "develop:watch": "tsx watch src/main.ts",
     "develop": "tsx src/main.ts",
