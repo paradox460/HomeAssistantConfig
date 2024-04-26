@@ -26,7 +26,7 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     name: "Away Mode",
   });
 
-  function triggerAwayMode() {
+  async function triggerAwayMode() {
     if (!awaySwitch.on) {
       return;
     }
@@ -39,7 +39,7 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     });
 
     // Take snapshot of all awayable entities current state
-    hass.call.scene.create({
+    await hass.call.scene.create({
       scene_id: "awayable_restore",
       // As of the commit date on this comment, you have to lie to the typechecker to make it accept an entity list
       // Passing a string in yaml format WILL fail, despite what the docs say
@@ -54,7 +54,7 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     awayMode.on = false;
   }
 
-  function triggerHomeMode() {
+  async function triggerHomeMode() {
     const { state: direction } = hass.entity.byId(
       "sensor.home_nearest_direction_of_travel",
     );
@@ -73,7 +73,7 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     });
 
     // Restore the previous scene state
-    hass.call.scene.turn_on({
+    await hass.call.scene.turn_on({
       entity_id: awayableScene,
       transition: 30,
     });
