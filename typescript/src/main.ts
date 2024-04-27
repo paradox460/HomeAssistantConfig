@@ -9,6 +9,7 @@ import { CoolChickens } from "./cool-chickens";
 import { HolidayLights } from "./holiday-lights";
 import { KidsLighting } from "./kids-lighting";
 import { UtilityTariffs } from "./utility-tariffs";
+import { WasherDryerSolar } from "./washer-dryer-solar";
 
 // define your application, doesn't do anything productive without services
 const HOME_AUTOMATION = CreateApplication({
@@ -46,6 +47,7 @@ const HOME_AUTOMATION = CreateApplication({
     HolidayLights,
     KidsLighting,
     UtilityTariffs,
+    WasherDryerSolar,
   },
 });
 
