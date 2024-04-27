@@ -19,7 +19,7 @@
   "dependencies": {
     "@digital-alchemy/automation": "^0.3.5",
     "@digital-alchemy/core": "^0.3.12",
-    "@digital-alchemy/hass": "^0.3.16",
+    "@digital-alchemy/hass": "^0.3.20",
     "@digital-alchemy/synapse": "^0.3.5",
     "dayjs": "^1.11.10"
   },
@@ -43,9 +43,9 @@
     "eslint-plugin-unicorn": "^52.0.0",
     "figlet-cli": "^0.1.1",
     "lolcatjs": "^2.4.3",
-    "npm-check-updates": "^16.14.18",
+    "npm-check-updates": "^16.14.20",
     "prettier": "^3.2.5",
-    "tsx": "^4.7.2",
+    "tsx": "^4.7.3",
     "type-fest": "^4.17.0",
     "typescript": "^5.4.5"
   }
