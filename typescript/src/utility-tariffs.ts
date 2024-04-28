@@ -14,7 +14,6 @@ export function UtilityTariffs({
   hass,
   scheduler,
   lifecycle,
-  logger,
 }: TServiceParams) {
   const electricityImports = [
     hass.entity.byId("select.electricity_import_day"),
@@ -62,7 +61,6 @@ export function UtilityTariffs({
     const season = isGasSummer() ? "summer" : "winter";
     const dth = Number.parseFloat(entity.state) * 0.088_728;
     const threshold = dth >= 45 ? "gt" : "lt";
-    logger.info(`therms for month: ${dth}, which is ${threshold} 45`);
     setGasImports(`${season}_${threshold}_45`);
   }
 

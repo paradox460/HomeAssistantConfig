@@ -5,7 +5,6 @@ export function KidsLighting({
   context,
   hass,
   scheduler,
-  logger,
 }: TServiceParams) {
   function isAway(): boolean {
     return hass.entity.byId("binary_sensor.away_mode").state != "on";
@@ -23,7 +22,6 @@ export function KidsLighting({
       if (new Date().getHours() >= 21) {
         return;
       }
-      logger.info("triggering kids lights on");
       hass.call.light.turn_on({
         brightness_pct: 50,
         entity_id: hass.entity.byLabel("kids"),
@@ -39,7 +37,6 @@ export function KidsLighting({
     eventName: "sunriseEnd",
     async exec() {
       await sleep(60 * 60 * 1000);
-      logger.info("turning off kids lights");
       hass.call.light.turn_off({
         entity_id: hass.entity.byLabel("kids"),
       });
@@ -52,7 +49,6 @@ export function KidsLighting({
       if (isAway()) {
         return;
       }
-      logger.info("kids bedtime");
       hass.call.scene.turn_on({
         entity_id: [
           "scene.virtual_ede_s_bedtime",
