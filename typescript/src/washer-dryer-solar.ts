@@ -4,6 +4,10 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
+// Configure the floor of when a delay should be considered a "smart delay", in
+// minutes
+const LOWER_DELAY_THRESHOLD = 60 * 4;
+
 /**
  * Generate a name and an icon for notifications
  */
@@ -74,7 +78,7 @@ export function WasherDryerSolar({ hass }: TServiceParams): void {
         hass.entity.byId(
           `sensor.${machine}_start_time` as PICK_ENTITY<"sensor">,
         ).state,
-      ) > 60
+      ) > LOWER_DELAY_THRESHOLD
     );
   }
 
@@ -124,7 +128,10 @@ export function WasherDryerSolar({ hass }: TServiceParams): void {
             `sensor.${machine}_start_time` as PICK_ENTITY<"sensor">,
           ).state,
         );
-        if (state == "waiting_to_start" && minsTillStart > 60) {
+        if (
+          state == "waiting_to_start" &&
+          minsTillStart > LOWER_DELAY_THRESHOLD
+        ) {
           notifyWait(minsTillStart, machine);
           registerSolarListenerForMachine(machine);
         } else {
