@@ -11,7 +11,7 @@ const HOME_RADIUS = 5280;
  * Saves a snapshot of the state of entities upon leaving, and restores it when
  * returning home
  */
-export function Away({ hass, context, synapse }: TServiceParams) {
+export function Away({ hass, context, logger, synapse }: TServiceParams) {
   const awaySwitch = synapse.switch({
     context,
     defaultState: "on",
@@ -19,6 +19,9 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     name: "Away Automations",
   });
 
+  // In HomeAssistant, I've changed the type of this switch to be `presence`,
+  // which means that `on` is Home and `off` is Away. Slightly confusing with
+  // its name being AwayMode, but w/e
   const awayMode = synapse.binary_sensor({
     context,
     defaultState: "on",
@@ -27,7 +30,9 @@ export function Away({ hass, context, synapse }: TServiceParams) {
   });
 
   async function triggerAwayMode() {
-    if (!awaySwitch.on) {
+    // Disable if awaySwitch is off, for manually turning off automations
+    // Also return early if we're already away
+    if (!awaySwitch.on || !awayMode.on) {
       return;
     }
 
@@ -38,23 +43,26 @@ export function Away({ hass, context, synapse }: TServiceParams) {
       entity_id: "switch.sandberg_system_manual_away_mode",
     });
 
-    // Take snapshot of all awayable entities current state
     await hass.call.scene.create({
       scene_id: "awayable_restore",
-      // As of the commit date on this comment, you have to lie to the typechecker to make it accept an entity list
-      // Passing a string in yaml format WILL fail, despite what the docs say
       snapshot_entities: awayableEntities,
     });
 
-    // Use the generic homeassistant.turn_off service because we might have a variety of things in the label
-    // i.e. lights and fans and so forth
+    // Use the generic homeassistant.turn_off service because we might have a
+    // variety of things in the label i.e. lights and fans and so forth
     hass.call.homeassistant.turn_off({ entity_id: awayableEntities });
 
-    // Confusing because this is an occupany sensor, so awayMode true == home and false == away
+    // Confusing because this is an occupany sensor, so awayMode true == home
+    // and false == away
     awayMode.on = false;
   }
 
   async function triggerHomeMode() {
+    // return early if we're already home
+    if (awayMode.on) {
+      return;
+    }
+
     const { state: direction } = hass.entity.byId(
       "sensor.home_nearest_direction_of_travel",
     );
@@ -73,10 +81,7 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     });
 
     // Restore the previous scene state
-    await hass.call.scene.turn_on({
-      entity_id: awayableScene,
-      transition: 30,
-    });
+    await hass.call.scene.turn_on({ entity_id: awayableScene });
     // And delete it so its not floating around
     hass.call.scene.delete({ entity_id: awayableScene });
 
