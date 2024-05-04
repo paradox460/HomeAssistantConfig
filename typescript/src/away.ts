@@ -83,7 +83,8 @@ export function Away({ hass, context, synapse }: TServiceParams) {
     // Restore the previous scene state
     await hass.call.scene.turn_on({ entity_id: awayableScene });
     // And delete it so its not floating around
-    hass.call.scene.delete({ entity_id: awayableScene });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    hass.call.scene.delete({ entity_id: awayableScene as any });
 
     awayMode.on = true;
   }
