@@ -11,7 +11,7 @@ const HOME_RADIUS = 5280;
  * Saves a snapshot of the state of entities upon leaving, and restores it when
  * returning home
  */
-export function Away({ hass, context, logger, synapse }: TServiceParams) {
+export function Away({ hass, context, synapse }: TServiceParams) {
   const awaySwitch = synapse.switch({
     context,
     defaultState: "on",
