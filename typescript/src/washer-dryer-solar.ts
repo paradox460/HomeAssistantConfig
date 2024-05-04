@@ -1,8 +1,6 @@
 import { TServiceParams } from "@digital-alchemy/core";
 import { PICK_ENTITY } from "@digital-alchemy/hass";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-dayjs.extend(utc);
 
 // Configure the floor of when a delay should be considered a "smart delay", in
 // minutes
@@ -67,7 +65,7 @@ export function WasherDryerSolar({ hass }: TServiceParams): void {
    * Checks if the washer/dryer is "waiting"
    *
    * Machine is defined as waiting if its got a `waiting_to_start` state, and a
-   * delayed start time greater than 1 hour
+   * delayed start time greater than a configured threshold
    */
   function isWaiting(machine: string) {
     return (
@@ -78,7 +76,7 @@ export function WasherDryerSolar({ hass }: TServiceParams): void {
         hass.entity.byId(
           `sensor.${machine}_start_time` as PICK_ENTITY<"sensor">,
         ).state,
-      ) > LOWER_DELAY_THRESHOLD
+      ) >= LOWER_DELAY_THRESHOLD
     );
   }
 
@@ -130,11 +128,24 @@ export function WasherDryerSolar({ hass }: TServiceParams): void {
         );
         if (
           state == "waiting_to_start" &&
-          minsTillStart > LOWER_DELAY_THRESHOLD
+          minsTillStart >= LOWER_DELAY_THRESHOLD
         ) {
+          // If solar production is high enough at the time of update, just trigger the machine
+          if (
+            Number.parseFloat(
+              hass.entity.getCurrentState("sensor.powerwall_solar_now").state,
+            ) > 1
+          ) {
+            hass.call.button.press({
+              entity_id: `button.${machine}_start` as PICK_ENTITY<"button">,
+            });
+            scheduledStarts[machine]?.call();
+            return;
+          }
           notifyWait(minsTillStart, machine);
           registerSolarListenerForMachine(machine);
         } else {
+          // Clean up if we get an update that isn't waiting_to_start
           scheduledStarts[machine]?.call();
         }
       });
