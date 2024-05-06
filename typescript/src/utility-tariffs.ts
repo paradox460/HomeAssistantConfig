@@ -10,11 +10,7 @@ function isGasSummer(): boolean {
   return month >= 4 && month <= 11;
 }
 
-export function UtilityTariffs({
-  hass,
-  scheduler,
-  lifecycle,
-}: TServiceParams) {
+export function UtilityTariffs({ hass, scheduler, lifecycle }: TServiceParams) {
   const electricityImports = [
     hass.entity.byId("select.electricity_import_day"),
     hass.entity.byId("select.electricity_import_month"),
