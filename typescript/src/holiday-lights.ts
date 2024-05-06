@@ -23,8 +23,13 @@ export function HolidayLights({
   }
 
   function turnOff() {
+    const lights = [
+      ...hass.entity.byLabel("holiday_lights"),
+      ...hass.entity.byDevice("472b85724d32602711e6e74a02d6d2ff", "light"),
+    ];
+
     hass.call.homeassistant.turn_off({
-      entity_id: hass.entity.byLabel("holiday_lights"),
+      entity_id: lights,
     });
     manualSwitch.on = false;
   }
