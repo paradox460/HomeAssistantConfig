@@ -41,6 +41,13 @@ export function HolidayLights({
     },
   });
 
+  scheduler.cron({
+    exec() {
+      turnOff();
+    },
+    schedule: CronExpression.EVERY_DAY_AT_2AM,
+  });
+
   scheduler.sliding({
     exec() {
       turnOn();
