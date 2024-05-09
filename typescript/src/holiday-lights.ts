@@ -25,6 +25,7 @@ export function HolidayLights({
   function turnOff() {
     const lights = [
       ...hass.entity.byLabel("holiday_lights"),
+      // Pixel controller:
       ...hass.entity.byDevice("472b85724d32602711e6e74a02d6d2ff", "light"),
     ];
 
