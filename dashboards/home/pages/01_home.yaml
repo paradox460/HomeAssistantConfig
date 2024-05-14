@@ -115,7 +115,7 @@ cards:
           - name: Holiday
           - entity: switch.holiday_lights
       - type: custom:mushroom-fan-card
-        entity: fan.upstairs_hallway
+        entity: fan.vornado
         icon_animation: true
         fill_container: false
         show_oscillate_control: false
