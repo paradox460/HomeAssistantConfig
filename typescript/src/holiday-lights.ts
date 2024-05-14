@@ -51,7 +51,7 @@ export function HolidayLights({
     exec() {
       turnOff();
     },
-    schedule: CronExpression.EVERY_DAY_AT_2AM,
+    schedule: CronExpression.EVERY_DAY_AT_MIDNIGHT,
   });
 
   scheduler.sliding({
@@ -61,7 +61,7 @@ export function HolidayLights({
     next() {
       return automation.solar.nightEnd.subtract(1, "hour");
     },
-    reset: CronExpression.EVERY_DAY_AT_2AM,
+    reset: CronExpression.EVERY_DAY_AT_1AM,
   });
 
   automation.solar.onEvent({
