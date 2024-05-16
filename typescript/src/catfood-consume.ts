@@ -1,8 +1,5 @@
 import { TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
-import dayOfyear from "dayjs/plugin/dayOfYear";
-
-dayjs.extend(dayOfyear);
 
 export function CatfoodConsume({ hass, scheduler }: TServiceParams) {
   scheduler.cron({

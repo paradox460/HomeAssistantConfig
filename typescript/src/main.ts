@@ -1,3 +1,5 @@
+import "./dayjs-extends";
+
 import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 import { CreateApplication } from "@digital-alchemy/core";
 import { LIB_HASS } from "@digital-alchemy/hass";
@@ -69,6 +71,7 @@ setImmediate(
       configuration: {
         // default value: trace
         boilerplate: { LOG_LEVEL: "info" },
+        synapse: { ANNOUNCE_AT_CONNECT: true },
       },
     }),
 );

@@ -1,11 +1,6 @@
-import { sleep, TServiceParams } from "@digital-alchemy/core";
+import { TServiceParams } from "@digital-alchemy/core";
 
-export function KidsLighting({
-  automation,
-  context,
-  hass,
-  scheduler,
-}: TServiceParams) {
+export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   function isAway(): boolean {
     return hass.entity.byId("binary_sensor.away_mode").state != "on";
   }
@@ -13,7 +8,6 @@ export function KidsLighting({
   // Sunset
 
   automation.solar.onEvent({
-    context,
     eventName: "sunsetStart",
     exec() {
       if (isAway()) {
@@ -28,19 +22,19 @@ export function KidsLighting({
         transition: 30,
       });
     },
+    offset: "-30M",
   });
 
   // Sunrise
   // Turn off kids lights after sunrise
   automation.solar.onEvent({
-    context,
     eventName: "sunriseEnd",
-    async exec() {
-      await sleep(60 * 60 * 1000);
+    exec() {
       hass.call.light.turn_off({
         entity_id: hass.entity.byLabel("kids"),
       });
     },
+    offset: "1H",
   });
 
   // Bedtime
