@@ -69,6 +69,7 @@ setImmediate(
       configuration: {
         // default value: trace
         boilerplate: { LOG_LEVEL: "info" },
+        synapse: { ANNOUNCE_AT_CONNECT: true },
       },
     }),
 );
