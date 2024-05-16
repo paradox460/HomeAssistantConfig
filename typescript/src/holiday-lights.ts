@@ -42,22 +42,16 @@ export function HolidayLights({
   automation.solar.onEvent({
     context,
     eventName: "sunsetStart",
-    exec() {
-      turnOn();
-    },
+    exec: turnOn,
   });
 
   scheduler.cron({
-    exec() {
-      turnOff();
-    },
+    exec: turnOff,
     schedule: CronExpression.EVERY_DAY_AT_MIDNIGHT,
   });
 
   scheduler.sliding({
-    exec() {
-      turnOn();
-    },
+    exec: turnOn,
     next() {
       return automation.solar.nightEnd.subtract(1, "hour");
     },
