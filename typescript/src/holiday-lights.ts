@@ -23,16 +23,17 @@ export function HolidayLights({
   }
 
   function turnOff() {
-    const lights = [
-      ...hass.entity.byLabel("holiday_lights"),
-      // Pixel controller:
-      ...hass.entity.byDevice("472b85724d32602711e6e74a02d6d2ff", "light"),
-    ];
-
     hass.call.homeassistant.turn_off({
-      entity_id: lights,
+      entity_id: hass.entity.byLabel("holiday_lights"),
     });
     manualSwitch.on = false;
+  }
+
+  function turnOffAll() {
+    turnOff();
+    hass.call.light.turn_off({
+      entity_id: "light.roof_trim_main"
+    });
   }
 
   manualSwitch.onUpdate(() => {
@@ -45,7 +46,7 @@ export function HolidayLights({
   });
 
   scheduler.cron({
-    exec: turnOff,
+    exec: turnOffAll,
     schedule: CronExpression.EVERY_DAY_AT_MIDNIGHT,
   });
 
@@ -57,7 +58,7 @@ export function HolidayLights({
 
   automation.solar.onEvent({
     eventName: "sunriseEnd",
-    exec: turnOff,
+    exec: turnOffAll,
     offset: "1H",
   });
 
