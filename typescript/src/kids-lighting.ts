@@ -1,4 +1,4 @@
-import { sleep, TServiceParams } from "@digital-alchemy/core";
+import { TServiceParams } from "@digital-alchemy/core";
 
 export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   function isAway(): boolean {
@@ -22,18 +22,19 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
         transition: 30,
       });
     },
+    offset: "-30M",
   });
 
   // Sunrise
   // Turn off kids lights after sunrise
   automation.solar.onEvent({
     eventName: "sunriseEnd",
-    async exec() {
-      await sleep(60 * 60 * 1000);
+    exec() {
       hass.call.light.turn_off({
         entity_id: hass.entity.byLabel("kids"),
       });
     },
+    offset: "1H",
   });
 
   // Bedtime

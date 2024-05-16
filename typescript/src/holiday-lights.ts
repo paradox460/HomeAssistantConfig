@@ -1,4 +1,4 @@
-import { CronExpression, sleep, TServiceParams } from "@digital-alchemy/core";
+import { CronExpression, TServiceParams } from "@digital-alchemy/core";
 
 export function HolidayLights({
   automation,
@@ -49,20 +49,16 @@ export function HolidayLights({
     schedule: CronExpression.EVERY_DAY_AT_MIDNIGHT,
   });
 
-  scheduler.sliding({
+  automation.solar.onEvent({
+    eventName: "nightEnd",
     exec: turnOn,
-    next() {
-      return automation.solar.nightEnd.subtract(1, "hour");
-    },
-    reset: CronExpression.EVERY_DAY_AT_1AM,
+    offset: "-1H",
   });
 
   automation.solar.onEvent({
     eventName: "sunriseEnd",
-    async exec() {
-      await sleep(60 * 1000 * 60);
-      turnOff();
-    },
+    exec: turnOff,
+    offset: "1H",
   });
 
   // Force state sync for manual control, to ensure the switch reflects reality
