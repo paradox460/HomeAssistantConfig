@@ -8,7 +8,6 @@ import { CatfoodConsume } from "./catfood-consume";
 import { CoolChickens } from "./cool-chickens";
 import { HolidayLights } from "./holiday-lights";
 import { KidsLighting } from "./kids-lighting";
-import { SportsLights } from "./sports-lights";
 import { UtilityTariffs } from "./utility-tariffs";
 import { WasherDryerSolar } from "./washer-dryer-solar";
 
@@ -47,7 +46,6 @@ const HOME_AUTOMATION = CreateApplication({
     CoolChickens,
     HolidayLights,
     KidsLighting,
-    SportsLights,
     UtilityTariffs,
     WasherDryerSolar,
   },
