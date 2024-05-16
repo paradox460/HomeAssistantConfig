@@ -51,19 +51,14 @@ export function SportsLights({ hass, context, synapse }: TServiceParams) {
       !sportsLightsSwitch.on ||
       !(state == "POST" && oldState == "IN") ||
       !win ||
-      hass.entity.getCurrentState("light.roof_trim").state == "on"
+      hass.entity.getCurrentState("light.roof_trim_main").state == "on"
     ) {
       return;
     }
 
-    const lights = hass.entity.byDevice(
-      "472b85724d32602711e6e74a02d6d2ff",
-      "light",
-    );
-
-    hass.call.light.turn_on({
-      color_name: "red",
-      entity_id: lights,
+    hass.call.select.select_option({
+      entity_id: "select.roof_trim_preset",
+      option: "Utah",
     });
   }
   for (const team in hass.entity.byPlatform("teamtracker")) {
