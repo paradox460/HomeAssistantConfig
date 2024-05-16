@@ -40,7 +40,6 @@ export function HolidayLights({
   });
 
   automation.solar.onEvent({
-    context,
     eventName: "sunsetStart",
     exec: turnOn,
   });
@@ -59,7 +58,6 @@ export function HolidayLights({
   });
 
   automation.solar.onEvent({
-    context,
     eventName: "sunriseEnd",
     async exec() {
       await sleep(60 * 1000 * 60);
