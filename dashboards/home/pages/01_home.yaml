@@ -109,11 +109,19 @@ cards:
         variables:
           - name: Office
           - entity: light.office_ceiling
-      - type: custom:decluttering-card
-        template: slider-button
-        variables:
-          - name: Holiday
-          - entity: switch.holiday_lights
+      - type: custom:mushroom-template-card
+        {% raw %}
+        icon: '{{ is_state(entity, "on") | iif("mdi:string-lights", "mdi:string-lights-off") }}'
+        icon_color: '{{ is_state(entity, "on") | iif("accent", "primary") }}'
+        {% endraw %}
+        badge_icon: mdi:menu
+        primary: Holiday Lights…
+        entity: switch.holiday_lights
+        tap_action:
+          action: navigate
+          navigation_path: "#holiday"
+        hold_action:
+          action: toggle
       - type: custom:mushroom-fan-card
         entity: fan.vornado
         icon_animation: true
@@ -164,3 +172,4 @@ cards:
     ui: true
     poster: camera.g4_doorbell_pro_poe_package_camera
     style: ".screenshot, .mode {display: none}"
+  - !include ../popups/holiday_lights.yaml
