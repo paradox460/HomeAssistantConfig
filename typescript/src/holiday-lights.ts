@@ -1,4 +1,5 @@
 import { CronExpression, TServiceParams } from "@digital-alchemy/core";
+import dayjs from "dayjs";
 
 export function HolidayLights({
   automation,
@@ -32,7 +33,7 @@ export function HolidayLights({
   function turnOffAll() {
     turnOff();
     hass.call.light.turn_off({
-      entity_id: "light.roof_trim_main"
+      entity_id: "light.roof_trim_main",
     });
   }
 
@@ -45,9 +46,13 @@ export function HolidayLights({
     exec: turnOn,
   });
 
-  scheduler.cron({
+  scheduler.sliding({
     exec: turnOffAll,
-    schedule: CronExpression.EVERY_DAY_AT_MIDNIGHT,
+    next() {
+      const offset = Math.random() * 30 * 60 * 1000;
+      return dayjs().add(1, "d").startOf("day").add(offset);
+    },
+    reset: CronExpression.EVERY_DAY_AT_1AM,
   });
 
   automation.solar.onEvent({
