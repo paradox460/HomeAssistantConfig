@@ -14,6 +14,7 @@ cards:
     icon: mdi:led-on
   - type: custom:mushroom-light-card
     entity: light.roof_trim_main
+    show_brightness_control: true
   - type: custom:mushroom-select-card
     entity: select.roof_trim_preset
   - type: custom:mushroom-template-card
