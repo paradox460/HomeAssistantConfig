@@ -16,11 +16,22 @@ export function HolidayLights({
     name: "Holiday Lights",
   });
 
+  const roofStripAutomation = synapse.switch({
+    context,
+    defaultState: "off",
+    icon: "mdi:clock-star-four-points",
+    name: "Roof Light Automation",
+  });
+
   function turnOn() {
     hass.call.homeassistant.turn_on({
       entity_id: hass.entity.byLabel("holiday_lights"),
     });
     manualSwitch.on = true;
+
+    if (roofStripAutomation.on) {
+      hass.call.homeassistant.turn_on({ entity_id: "light.roof_trim_main" });
+    }
   }
 
   function turnOff() {
