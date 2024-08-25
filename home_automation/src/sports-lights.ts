@@ -1,5 +1,4 @@
 import { TServiceParams } from "@digital-alchemy/core";
-import { ENTITY_STATE, PICK_ENTITY } from "@digital-alchemy/hass";
 
 /**
  * Service that turns on the lights whenever a teamtracker team wins
@@ -33,36 +32,22 @@ import { ENTITY_STATE, PICK_ENTITY } from "@digital-alchemy/hass";
 export function SportsLights({ hass, context, synapse }: TServiceParams) {
   const sportsLightsSwitch = synapse.switch({
     context,
-    defaultState: "on",
     icon: "mdi:football",
     name: "Sports Win LED automation",
+    is_on: true,
   });
 
-  function updateHandler(
-    {
-      state,
-      attributes: { team_winner: win },
-    }: NonNullable<ENTITY_STATE<"sensor.team_tracker_utes_football">>,
-    {
-      state: oldState,
-    }: NonNullable<ENTITY_STATE<"sensor.team_tracker_utes_football">>,
-  ) {
-    if (
-      !sportsLightsSwitch.on ||
-      !(state == "POST" && oldState == "IN") ||
-      !win ||
-      hass.entity.getCurrentState("light.roof_trim_main").state == "on"
-    ) {
-      return;
-    }
+  const roofTrimMain = hass.refBy.id("light.roof_trim_main");
+  const roofTrimPreset = hass.refBy.id("select.roof_trim_preset");
 
-    hass.call.select.select_option({
-      entity_id: "select.roof_trim_preset",
-      option: "Utah",
+  for (const team of hass.refBy.platform("teamtracker")) {
+    team.onUpdate((current, old) => {
+      if (!current.attributes.team_winner) return;
+      if (!sportsLightsSwitch.is_on) return;
+      if (!(current.state == "POST" && old.state == "IN")) return;
+      if (roofTrimMain.state == "on") return;
+
+      roofTrimPreset.select_option({ option: "Utah" });
     });
-  }
-  for (const team in hass.entity.byPlatform("teamtracker")) {
-    const entityId = team as PICK_ENTITY<"sensor">;
-    hass.entity.byId(entityId).onUpdate(updateHandler);
   }
 }

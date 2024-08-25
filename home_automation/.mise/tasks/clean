@@ -1,0 +1,6 @@
+
+#!/usr/bin/env fish
+# mise description="clean up the build"
+
+rm ../.da-dist
+mkdir ../.da-dist

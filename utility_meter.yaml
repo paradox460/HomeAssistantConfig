@@ -3,64 +3,28 @@ electricity_import_day:
   name: Electricity Import Day
   unique_id: electricity_import_day
   cycle: daily
-  tariffs:
-    - winter_lt_400
-    - winter_gt_400
-    - summer_lt_400
-    - summer_gt_400
 electricity_import_month:
   source: sensor.electricity_import_meter
   name: Electricity Import Month
   unique_id: electricity_import_month
-  cron: "0 0 27 * *"
-  tariffs:
-    - winter_lt_400
-    - winter_gt_400
-    - summer_lt_400
-    - summer_gt_400
-electricity_import_month_total:
-  source: sensor.electricity_import_meter
-  name: Electricity Import Month Total
-  unique_id: electricity_import_month_total
-  cron: "0 0 27 * *"
+  cycle: monthly
 electricity_export_day:
   source: sensor.electricity_export_meter
   name: Electricity Export day
   unique_id: electricity_export_day
   cycle: daily
-  tariffs:
-    - winter
-    - summer
 electricity_export_month:
   source: sensor.electricity_export_meter
   name: Electricity Export Month
   unique_id: electricity_export_month
-  cron: "0 0 27 * *"
-  tariffs:
-    - winter
-    - summer
+  cycle: monthly
 gas_import_day:
   source: sensor.gas_meter
   name: Gas Import Day
   unique_id: gas_import_day
   cycle: daily
-  tariffs:
-    - winter_lt_45
-    - winter_gt_45
-    - summer_lt_45
-    - summer_gt_45
 gas_import_month:
   source: sensor.gas_meter
   name: Gas Import Month
   unique_id: gas_import_month
-  cron: "0 0 20 * *"
-  tariffs:
-    - winter_lt_45
-    - winter_gt_45
-    - summer_lt_45
-    - summer_gt_45
-gas_import_month_total:
-  source: sensor.gas_meter
-  name: Gas Import Month Total
-  unique_id: gas_import_month_total
-  cron: "0 0 20 * *"
+  cycle: monthly

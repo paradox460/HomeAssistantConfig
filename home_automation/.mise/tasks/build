@@ -1,0 +1,4 @@
+#!/usr/bin/env fish
+# mise description="Runs yarn build, lazy bones"
+
+yarn build

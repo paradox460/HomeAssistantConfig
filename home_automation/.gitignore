@@ -1,0 +1,6 @@
+/build
+node_modules
+/backup
+/deploy
+previous_deploy.tar.gz
+.yarn/install-state.gz

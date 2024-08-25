@@ -1,9 +1,0 @@
-addon
-build
-node_modules
-deploy
-scripts/**/*
-previous_deploy.tar.gz
-.type_writer
-.typescript
-!scripts/deploy_restart.sh

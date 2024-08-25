@@ -2,9 +2,10 @@ import { TServiceParams } from "@digital-alchemy/core";
 
 export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   function isAway(): boolean {
-    return hass.entity.byId("binary_sensor.away_mode").state != "on";
+    return hass.refBy.id("binary_sensor.home_presence").state !== "on";
   }
 
+  const kidsLights = hass.idBy.label("kids");
   // Sunset
 
   automation.solar.onEvent({
@@ -16,9 +17,10 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
       if (new Date().getHours() >= 21) {
         return;
       }
+
       hass.call.light.turn_on({
         brightness_pct: 50,
-        entity_id: hass.entity.byLabel("kids"),
+        entity_id: kidsLights,
         transition: 30,
       });
     },
@@ -31,7 +33,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
     eventName: "sunriseEnd",
     exec() {
       hass.call.light.turn_off({
-        entity_id: hass.entity.byLabel("kids"),
+        entity_id: kidsLights,
       });
     },
     offset: "1H",
@@ -44,10 +46,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
         return;
       }
       hass.call.scene.turn_on({
-        entity_id: [
-          "scene.virtual_ede_s_bedtime",
-          "scene.virtual_ferrins_bedtime",
-        ],
+        entity_id: ["scene.virtual_ede_s_bedtime", "scene.virtual_ferrins_bedtime"],
       });
     },
     schedule: "0 21 * * *",

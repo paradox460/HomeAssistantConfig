@@ -40,8 +40,6 @@ lovelace:
       icon: mdi:home
       show_in_sidebar: true
 
-synapse:
-
 zha:
   zigpy_config:
     ota:

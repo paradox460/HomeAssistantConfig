@@ -1,0 +1,7 @@
+#!/usr/bin/env fish
+# mise description="trigger a yarn build, wait a bit for syncthing, and then restart the addon"
+# mise depends=["build"]
+
+echo "Waiting for Syncthing"
+sleep 30
+ssh homeassistant -t ha addons restart 3f718f42_code_runner

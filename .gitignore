@@ -16,6 +16,8 @@
 !/dashboards/**/*
 !/typescript/
 !/typescript/**/*
+!/home_automation/
+!/home_automation/**/*
 !.gitignore
 !LICENSE
 
