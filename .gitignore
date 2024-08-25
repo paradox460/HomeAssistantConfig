@@ -14,8 +14,6 @@
 !/custom_templates/**/*
 !/dashboards/
 !/dashboards/**/*
-!/typescript/
-!/typescript/**/*
 !/home_automation/
 !/home_automation/**/*
 !.gitignore
