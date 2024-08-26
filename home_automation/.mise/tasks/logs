@@ -1,0 +1,4 @@
+#!/usr/bin/env fish
+# mise description="tail the logs of the addon"
+ssh homeassistant -t 'docker logs -f $(docker ps | awk \'/code_runner/{print $1}\')'
+trap exit 0 SIGINT

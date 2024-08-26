@@ -5,3 +5,4 @@
 echo "Waiting for Syncthing"
 sleep 30
 ssh homeassistant -t ha addons restart 3f718f42_code_runner
+mise run logs
