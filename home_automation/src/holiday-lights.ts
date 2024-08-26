@@ -1,5 +1,6 @@
 import { CronExpression, TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
+import { toggleIcons } from "./utils";
 
 export function HolidayLights({
   automation,
@@ -11,16 +12,16 @@ export function HolidayLights({
 }: TServiceParams) {
   const holidayLights = hass.refBy.label("holiday_lights");
   const roofTrimLights = hass.refBy.id("light.roof_trim_main");
-
   const roofStripAutomation = synapse.switch({
     context,
     name: "Roof Light Automation",
   });
 
+  toggleIcons(roofStripAutomation, "mdi:led-strip-variant", "mdi:led-strip-variant-off");
+
   const holidayLightSwitch = synapse.switch({
     context,
     name: "Holiday Lights",
-    icon: "mdi:string-lights-off",
     turn_on() {
       for (const light of holidayLights) light.turn_on();
 
@@ -36,6 +37,8 @@ export function HolidayLights({
       }
     },
   });
+
+  toggleIcons(holidayLightSwitch, "mdi:string-lights", "mdi:string-lights-off");
 
   automation.solar.onEvent({
     eventName: "sunsetStart",

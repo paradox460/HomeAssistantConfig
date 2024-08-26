@@ -1,5 +1,6 @@
 import { TServiceParams } from "@digital-alchemy/core";
 import { PICK_ENTITY } from "@digital-alchemy/hass";
+import { toggleIcons } from "./utils";
 
 // 1 mile = 5,280 feet.
 const HOME_RADIUS = 5280;
@@ -24,9 +25,10 @@ export function Away({ hass, context, synapse, lifecycle }: TServiceParams) {
   const homePresence = synapse.binary_sensor({
     context,
     device_class: "presence",
-    icon: "mdi:location-exit",
     name: "Home Presence",
   });
+
+  toggleIcons(homePresence, "mdi:home", "mdi:home-off");
 
   const awayableEntities = hass.refBy.label("awayable");
   const hvacAway = hass.refBy.id("switch.sandberg_system_manual_away_mode");

@@ -13,3 +13,9 @@ dayjs.extend(isBetween);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 dayjs.extend(weekOfYear);
+
+export function toggleIcons(entity, on: string, off: string) {
+  entity.onUpdate(() => {
+    entity.icon = entity.is_on ? on : off;
+  });
+}
