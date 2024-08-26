@@ -1,7 +1,14 @@
 import { CronExpression, TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
 
-export function HolidayLights({ automation, context, hass, scheduler, synapse }: TServiceParams) {
+export function HolidayLights({
+  automation,
+  context,
+  hass,
+  lifecycle,
+  scheduler,
+  synapse,
+}: TServiceParams) {
   const holidayLights = hass.refBy.label("holiday_lights");
   const roofTrimLights = hass.refBy.id("light.roof_trim_main");
 
@@ -13,12 +20,6 @@ export function HolidayLights({ automation, context, hass, scheduler, synapse }:
   const holidayLightSwitch = synapse.switch({
     context,
     name: "Holiday Lights",
-    is_on: {
-      onUpdate: holidayLights,
-      current() {
-        return holidayLights.some(light => light.state === "on");
-      },
-    },
     icon: "mdi:string-lights-off",
     turn_on() {
       for (const light of holidayLights) light.turn_on();
@@ -68,5 +69,10 @@ export function HolidayLights({ automation, context, hass, scheduler, synapse }:
       holidayLightSwitch.is_on = false;
     },
     offset: "1H",
+  });
+
+  // Slightly more resillient state syncs at boot
+  lifecycle.onReady(() => {
+    if (holidayLights.some(light => light.state === "on")) holidayLightSwitch.is_on = true;
   });
 }
