@@ -1,7 +1,8 @@
 import { TServiceParams } from "@digital-alchemy/core";
 
 /**
- * Service that turns on the lights whenever a teamtracker team wins
+ * Service that turns on the lights whenever a teamtracker team has a game in
+ * progress, and then changes the profile if the team loses
  *
  * # Setup
  *
@@ -42,12 +43,18 @@ export function SportsLights({ hass, context, synapse }: TServiceParams) {
 
   for (const team of hass.refBy.platform("teamtracker")) {
     team.onUpdate((current, old) => {
-      if (!current.attributes.team_winner) return;
       if (!sportsLightsSwitch.is_on) return;
-      if (!(current.state == "POST" && old.state == "IN")) return;
-      if (roofTrimMain.state == "on") return;
-
-      roofTrimPreset.select_option({ option: "Utah" });
+      if (current.state == "IN" && old.state == "PRE" && roofTrimMain.state != "on") {
+        roofTrimPreset.select_option({ option: "Utah" });
+      } else if (
+        current.state == "POST" &&
+        old.state == "IN" &&
+        roofTrimMain.state == "on" &&
+        roofTrimPreset.state == "Utah" &&
+        current.attributes.opponent_winner
+      ) {
+        roofTrimPreset.select_option({ option: "Default" });
+      }
     });
   }
 }
