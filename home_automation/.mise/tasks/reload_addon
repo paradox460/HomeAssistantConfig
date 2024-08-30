@@ -1,0 +1,4 @@
+#!/usr/bin/env fish
+# mise description="restart the addon, tailing the logs"
+ssh homeassistant -t ha addons restart 3f718f42_code_runner
+mise run logs
