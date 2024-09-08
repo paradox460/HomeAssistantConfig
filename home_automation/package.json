@@ -17,18 +17,21 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@digital-alchemy/automation": "^24.7.1",
+    "@digital-alchemy/automation": "^24.9.2",
     "@digital-alchemy/core": "^24.8.4",
     "@digital-alchemy/fastify-extension": "^24.8.1",
-    "@digital-alchemy/hass": "^24.8.1",
+    "@digital-alchemy/hass": "^24.9.1",
     "@digital-alchemy/mqtt-extension": "^24.7.1",
-    "@digital-alchemy/synapse": "^24.8.2",
+    "@digital-alchemy/synapse": "^24.9.3",
+    "better-sqlite3": "^11.2.1",
     "dayjs": "^1.11.13",
-    "tsc": "^2.0.4"
+    "tsc": "^2.0.4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@digital-alchemy/type-writer": "^24.7.2",
+    "@digital-alchemy/type-writer": "^24.9.1",
     "@types/node": "^20.12.7",
+    "@types/uuid": "^10",
     "@typescript-eslint/eslint-plugin": "7.6.0",
     "@typescript-eslint/parser": "7.6.0",
     "eslint": "8.57.0",
