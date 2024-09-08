@@ -1,4 +1,4 @@
-import { TServiceParams } from "@digital-alchemy/core";
+import { TServiceParams, sleep } from "@digital-alchemy/core";
 
 /**
  * Service that turns on the lights whenever a teamtracker team has a game in
@@ -30,7 +30,8 @@ import { TServiceParams } from "@digital-alchemy/core";
  * switched off automatically by my Holiday Lights automation
  * (holiday-lights.ts), so I don't need it.
  */
-export function SportsLights({ hass, context, synapse }: TServiceParams) {
+export function SportsLights({ automation, hass, context, logger, synapse }: TServiceParams) {
+  const sun = hass.refBy.id("sun.sun");
   const sportsLightsSwitch = synapse.switch({
     context,
     icon: "mdi:football",
@@ -43,16 +44,34 @@ export function SportsLights({ hass, context, synapse }: TServiceParams) {
 
   for (const team of hass.refBy.platform("teamtracker")) {
     team.onUpdate((current, old) => {
+      logger.info("starting update");
       if (!sportsLightsSwitch.is_on) return;
+      logger.info("sports lighs enabled, continuing");
       if (current.state == "IN" && old.state == "PRE" && roofTrimMain.state != "on") {
-        roofTrimPreset.select_option({ option: "Utah" });
+        logger.info("transition from PRE to IN");
+        if (sun.state == "below_horizon") {
+          logger.info("sun is set, turning on lights");
+          roofTrimPreset.select_option({ option: "Utah" });
+        } else {
+          logger.info("sun is up, scheduling lights");
+          sleep(automation.solar.sunsetStart.toDate()).then(() => {
+            if (
+              (team.state == "IN" || (team.state == "POST" && team.attributes.team_winner)) &&
+              roofTrimMain.state != "on"
+            ) {
+              roofTrimPreset.select_option({ option: "Utah" });
+            }
+          });
+        }
       } else if (
         current.state == "POST" &&
         old.state == "IN" &&
         roofTrimMain.state == "on" &&
         roofTrimPreset.state == "Utah" &&
-        current.attributes.opponent_winner
+        current.attributes.opponent_winner &&
+        sun.state == "below_horizon"
       ) {
+        logger.info("we lost, turning lights from red to white");
         roofTrimPreset.select_option({ option: "Default" });
       }
     });
