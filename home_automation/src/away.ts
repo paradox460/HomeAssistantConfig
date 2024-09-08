@@ -5,6 +5,8 @@ import { toggleIcons } from "./utils";
 // 1 mile = 5,280 feet.
 const HOME_RADIUS = 5280;
 
+const awayableScene = "scene.awayable_restore" as PICK_ENTITY<"scene">;
+
 /**
  * Automated away and return home states
  *
@@ -12,7 +14,7 @@ const HOME_RADIUS = 5280;
  * Saves a snapshot of the state of entities upon leaving, and restores it when
  * returning home
  */
-export function Away({ hass, context, synapse, lifecycle }: TServiceParams) {
+export function Away({ hass, context, synapse, logger, lifecycle }: TServiceParams) {
   const awaySwitch = synapse.switch({
     context,
     name: "Away Automations",
@@ -34,6 +36,13 @@ export function Away({ hass, context, synapse, lifecycle }: TServiceParams) {
   const hvacAway = hass.refBy.id("switch.sandberg_system_manual_away_mode");
   const homeZone = hass.refBy.id("zone.home");
 
+  function createScene() {
+    return hass.call.scene.create({
+      scene_id: "awayable_restore",
+      snapshot_entities: awayableEntities.map(entity => entity.entity_id),
+    });
+  }
+
   async function triggerAwayMode() {
     // Disable if awaySwitch is off, for manually turning off automations
     // Also return early if we're already away
@@ -44,10 +53,7 @@ export function Away({ hass, context, synapse, lifecycle }: TServiceParams) {
     // trigger HVAC away
     hvacAway.turn_on();
 
-    await hass.call.scene.create({
-      scene_id: "awayable_restore",
-      snapshot_entities: awayableEntities.map(entity => entity.entity_id),
-    });
+    await createScene();
 
     // Use the generic homeassistant.turn_off service because we might have a
     // variety of things in the label i.e. lights and fans and so forth
@@ -72,17 +78,10 @@ export function Away({ hass, context, synapse, lifecycle }: TServiceParams) {
       return;
     }
 
-    // We have to lie to the type checker again, this time because the generated
-    // types don't know about our dynamic type
-    const awayableScene = "scene.awayable_restore" as PICK_ENTITY<"scene">;
-
-    hvacAway.turn_off();
+    await hvacAway.turn_off();
 
     // Restore the previous scene state
     await hass.call.scene.turn_on({ entity_id: awayableScene });
-    // And delete it so its not floating around
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    hass.call.scene.delete({ entity_id: awayableScene as any });
 
     homePresence.is_on = true;
   }

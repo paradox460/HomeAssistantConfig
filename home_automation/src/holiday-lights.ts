@@ -7,6 +7,7 @@ export function HolidayLights({
   context,
   hass,
   lifecycle,
+  logger,
   scheduler,
   synapse,
 }: TServiceParams) {
@@ -24,26 +25,27 @@ export function HolidayLights({
     name: "Holiday Lights",
     turn_on() {
       for (const light of holidayLights) light.turn_on();
-
-      if (roofStripAutomation.is_on) {
-        roofTrimLights.turn_on();
-      }
     },
     turn_off() {
       for (const light of holidayLights) light.turn_off();
-
-      if (roofStripAutomation.is_on) {
-        roofTrimLights.turn_off();
-      }
+      roofTrimLights.turn_off();
     },
   });
 
   toggleIcons(holidayLightSwitch, "mdi:string-lights", "mdi:string-lights-off");
 
+  function maybeTurnOnRoofLights() {
+    if (roofStripAutomation.is_on) {
+      logger.info("turning on roof lights due to automation being enabled");
+      roofTrimLights.turn_on();
+    }
+  }
+
   automation.solar.onEvent({
     eventName: "sunsetStart",
     exec: () => {
       holidayLightSwitch.is_on = true;
+      maybeTurnOnRoofLights();
     },
   });
 
@@ -62,6 +64,7 @@ export function HolidayLights({
     eventName: "nightEnd",
     exec: () => {
       holidayLightSwitch.is_on = true;
+      maybeTurnOnRoofLights();
     },
     offset: "-1H",
   });
