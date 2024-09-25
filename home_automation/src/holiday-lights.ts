@@ -1,6 +1,6 @@
 import { CronExpression, TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
-import { toggleIcons } from "./utils";
+import { toggleIcons } from "./utils.mjs";
 
 export function HolidayLights({
   automation,

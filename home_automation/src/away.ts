@@ -1,6 +1,6 @@
 import { TServiceParams } from "@digital-alchemy/core";
 import { PICK_ENTITY } from "@digital-alchemy/hass";
-import { toggleIcons } from "./utils";
+import { toggleIcons } from "./utils.mjs";
 
 // 1 mile = 5,280 feet.
 const HOME_RADIUS = 5280;
