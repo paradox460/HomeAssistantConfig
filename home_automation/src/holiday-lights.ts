@@ -24,11 +24,12 @@ export function HolidayLights({
     context,
     name: "Holiday Lights",
     turn_on() {
+      logger.info("turn_on callback");
       for (const light of holidayLights) light.turn_on();
     },
     turn_off() {
+      logger.info("turn_off callback")
       for (const light of holidayLights) light.turn_off();
-      roofTrimLights.turn_off();
     },
   });
 
@@ -41,6 +42,11 @@ export function HolidayLights({
     }
   }
 
+  function automationTurnOff() {
+    holidayLightSwitch.is_on = false;
+    roofTrimLights.turn_off();
+  }
+
   automation.solar.onEvent({
     eventName: "sunsetStart",
     exec: () => {
@@ -51,13 +57,13 @@ export function HolidayLights({
 
   scheduler.sliding({
     exec: () => {
-      holidayLightSwitch.is_on = false;
+      automationTurnOff();
     },
     next() {
       const offset = Math.random() * 30 * 60 * 1000;
       return dayjs().add(1, "d").startOf("day").add(offset);
     },
-    reset: CronExpression.EVERY_DAY_AT_1AM,
+    reset: CronExpression.EVERY_DAY_AT_3AM,
   });
 
   automation.solar.onEvent({
@@ -72,7 +78,7 @@ export function HolidayLights({
   automation.solar.onEvent({
     eventName: "sunriseEnd",
     exec: () => {
-      holidayLightSwitch.is_on = false;
+      automationTurnOff();
     },
     offset: "1H",
   });
