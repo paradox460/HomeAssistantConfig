@@ -16,7 +16,7 @@ export function Bambu({ hass }: TServiceParams) {
     // Turn off 10 minutes after a print finishes
     if (!printing(newState) && printing(oldState)) {
       await sleep(dayjs.duration(10, "minutes").asMilliseconds());
-      printerLight.turn_off();
+      if (!printing(printStatus.state)) printerLight.turn_off();
     }
   });
 }
