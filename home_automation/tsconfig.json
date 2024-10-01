@@ -20,6 +20,6 @@
     "target": "ESNext",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*.ts", "src/utils.mts"],
-  "exclude": ["node_modules", "tmp", "dist", "src/**/*.spec.ts"]
+  "include": ["src/**/*.ts", "src/utils.ts"],
+  "exclude": ["node_modules", "tmp", "dist"]
 }
