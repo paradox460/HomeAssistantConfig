@@ -4,4 +4,7 @@
 
 echo "Waiting for Syncthing"
 sleep 30
+mise run reload_addon nolog
+echo "Waiting for addon to boot once"
+sleep 30
 mise run reload_addon
