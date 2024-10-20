@@ -1,0 +1,10 @@
+- name: "Front Door"
+  unique_id: "front_door"
+  device_class: "door"
+  state_topic: "rtl_433/MichaelRosensFridge/devices/Interlogix-Security/contact/af42c7/switch5"
+  state_closed: "CLOSED"
+  state_open: "OPEN"
+  device:
+    manufacturer: RTL433
+    name: rtl433
+    identifiers: "RTL433 sensor"
