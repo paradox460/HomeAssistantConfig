@@ -24,6 +24,7 @@ template: !include_dir_merge_list templates/
 sensor: !include_dir_merge_list sensors/
 mqtt:
   sensor: !include_dir_merge_list mqtt/sensor/
+  cover: !include_dir_merge_list mqtt/cover/
 utility_meter: !include utility_meter.yaml
 alert: !include alert.yaml
 notify: !include notify.yaml
@@ -39,20 +40,3 @@ lovelace:
       title: Home
       icon: mdi:home
       show_in_sidebar: true
-
-zha:
-  zigpy_config:
-    ota:
-      thirdreality_provider: true
-      otau_directory: ./zigbee_ota
-      z2m_remote_index: https://raw.githubusercontent.com/Koenkk/zigbee-OTA/master/index.json
-#       # Download the index over HTTPS
-#       # Or, load the index offline
-#       # z2m_local_index: /path/to/index.json
-#       allow_advanced_ota_dir:
-#         I understand I can *destroy* my devices by enabling OTA
-#         updates from files. Some OTA updates can be mistakenly applied to the
-#         wrong device, breaking it. I am consciously using this at my own risk.
-#       advanced_ota_dir: ./zigbee_ota
-
-zha_toolkit:

@@ -87,12 +87,12 @@ cards:
         template: slider-button
         variables:
           - name: U.G. Wax Melter
-          - entity: switch.upstairs_guest_bedroom_wax_melter_switch
+          - entity: switch.upstairs_guest_wax_melter
       - type: custom:decluttering-card
         template: slider-button
         variables:
           - name: Wax Melter
-          - entity: switch.wax_melter_switch
+          - entity: switch.kitchen_wax_melter
       - type: custom:bubble-card
         card_type: separator
         name: Misc
