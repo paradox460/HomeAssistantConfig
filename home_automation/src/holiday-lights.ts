@@ -11,47 +11,60 @@ export function HolidayLights({
   scheduler,
   synapse,
 }: TServiceParams) {
-  const holidayLights = hass.refBy.label("holiday_lights");
-  const roofTrimLights = hass.refBy.id("light.roof_trim_main");
-  const roofStripAutomation = synapse.switch({
+  const ledAutomation = synapse.switch({
     context,
-    name: "Roof Light Automation",
+    name: "Holiday LED Automation",
   });
 
-  toggleIcons(roofStripAutomation, "mdi:led-strip-variant", "mdi:led-strip-variant-off");
+  toggleIcons(ledAutomation, "mdi:led-strip-variant", "mdi:led-strip-variant-off");
 
   const holidayLightSwitch = synapse.switch({
     context,
     name: "Holiday Lights",
     turn_on() {
       logger.info("turn_on callback");
-      for (const light of holidayLights) light.turn_on();
+      const holidayLights = hass.refBy.label("holiday_lights");
+      for (const light of holidayLights) {
+        light.turn_on();
+      }
     },
     turn_off() {
-      logger.info("turn_off callback")
-      for (const light of holidayLights) light.turn_off();
+      logger.info("turn_off callback");
+      const holidayLights = hass.refBy.label("holiday_lights");
+      for (const light of holidayLights) {
+        light.turn_off();
+      }
     },
   });
 
   toggleIcons(holidayLightSwitch, "mdi:string-lights", "mdi:string-lights-off");
 
-  function maybeTurnOnRoofLights() {
-    if (roofStripAutomation.is_on) {
+  function maybeTurnOnLEDs() {
+    if (ledAutomation.is_on) {
+      const holidayLEDs = hass.refBy.label("holiday_leds");
       logger.info("turning on roof lights due to automation being enabled");
-      roofTrimLights.turn_on();
+      for (const l of holidayLEDs) {
+        logger.info(`turning on ${l.entity_id}`);
+        l.turn_on();
+      }
     }
   }
 
   function automationTurnOff() {
+    logger.info("turning off all holiday lights");
+    const holidayLEDs = hass.refBy.label("holiday_leds");
     holidayLightSwitch.is_on = false;
-    roofTrimLights.turn_off();
+    for (const l of holidayLEDs) {
+      logger.info(`turning off ${l.entity_id}`);
+      l.turn_off();
+    }
   }
 
   automation.solar.onEvent({
     eventName: "sunsetStart",
     exec: () => {
       holidayLightSwitch.is_on = true;
-      maybeTurnOnRoofLights();
+      maybeTurnOnLEDs();
     },
   });
 
@@ -61,7 +74,9 @@ export function HolidayLights({
     },
     next() {
       const offset = Math.random() * 30 * 60 * 1000;
-      return dayjs().add(1, "d").startOf("day").add(offset);
+      const n = dayjs().add(1, "d").startOf("day").add(offset);
+      logger.info(`turning off lights at ${n.format("YYYY-MM-DD HH:mm:ss")}`);
+      return n;
     },
     reset: CronExpression.EVERY_DAY_AT_3AM,
   });
@@ -70,7 +85,7 @@ export function HolidayLights({
     eventName: "nightEnd",
     exec: () => {
       holidayLightSwitch.is_on = true;
-      maybeTurnOnRoofLights();
+      maybeTurnOnLEDs();
     },
     offset: "-1H",
   });
@@ -85,6 +100,9 @@ export function HolidayLights({
 
   // Slightly more resillient state syncs at boot
   lifecycle.onReady(() => {
-    if (holidayLights.some(light => light.state === "on")) holidayLightSwitch.is_on = true;
+    const holidayLights = hass.refBy.label("holiday_lights");
+    if (holidayLights.some(light => light.state === "on")) {
+      holidayLightSwitch.is_on = true;
+    }
   });
 }

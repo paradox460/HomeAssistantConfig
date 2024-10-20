@@ -18,7 +18,7 @@ cards:
   - type: custom:mushroom-select-card
     entity: select.roof_trim_preset
   - type: custom:mushroom-light-card
-    entity: switch.roof_light_automation
+    entity: switch.holiday_led_automation
   - type: custom:mushroom-template-card
     icon: mdi:led-on
     badge_icon: mdi:menu
