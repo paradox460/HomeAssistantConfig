@@ -1,4 +1,4 @@
-import { TServiceParams, sleep } from "@digital-alchemy/core";
+import { sleep, TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
 function printing(stateVal: string): boolean {
   return ["init", "pause", "prepare", "running", "slicing"].includes(stateVal.toLowerCase());

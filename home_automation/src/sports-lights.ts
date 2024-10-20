@@ -1,4 +1,4 @@
-import { TServiceParams, sleep } from "@digital-alchemy/core";
+import { sleep, TServiceParams } from "@digital-alchemy/core";
 
 /**
  * Service that turns on the lights whenever a teamtracker team has a game in
