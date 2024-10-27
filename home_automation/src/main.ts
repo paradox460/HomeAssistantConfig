@@ -7,7 +7,8 @@ import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 
 import { Away } from "./away";
 import { Bambu } from "./bambu";
-import { CoolChickens } from "./cool-chickens";
+// import { CoolChickens } from "./cool-chickens";
+import { WarmChickens } from "./warm-chickens";
 import { HolidayLights } from "./holiday-lights";
 import { KidsLighting } from "./kids-lighting";
 import { Office } from "./office";
@@ -49,11 +50,12 @@ const HOME_AUTOMATION = CreateApplication({
   services: {
     Away,
     Bambu,
-    CoolChickens,
+    // CoolChickens,
     HolidayLights,
     KidsLighting,
     Office,
     SportsLights,
+    WarmChickens
   },
 });
 
