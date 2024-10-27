@@ -1,0 +1,29 @@
+cover:
+  - name: "Garage Inside Door"
+    unique_id: "garage_inside_door"
+    device_class: "door"
+    state_topic: "rtl_433/MichaelRosensFridge/devices/Interlogix-Security/contact/aaca4d/switch5"
+    state_closed: "CLOSED"
+    state_open: "OPEN"
+    payload_close:
+    device: &device
+      manufacturer: Interlogix Security
+      name: Garage Inside Door Sensor
+      serial_number: &serial aaca4d
+      identifiers:
+        - *serial
+binary_sensor:
+  - name: "Garage Inside Door Battery"
+    unique_id: "garage_inside_door_battery"
+    device_class: battery
+    state_topic: "rtl_433/MichaelRosensFridge/devices/Interlogix-Security/contact/aaca4d/battery_ok"
+    payload_off: 1
+    payload_on: 0
+    device: *device
+  - name: "Garage Inside Door Tamper State"
+    unique_id: "garage_inside_door_tamper"
+    device_class: tamper
+    state_topic: "rtl_433/MichaelRosensFridge/devices/Interlogix-Security/contact/aaca4d/switch3"
+    payload_off: "CLOSED"
+    payload_on: "OPEN"
+    device: *device
