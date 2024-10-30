@@ -55,7 +55,7 @@ const HOME_AUTOMATION = CreateApplication({
     KidsLighting,
     Office,
     SportsLights,
-    WarmChickens
+    WarmChickens,
   },
 });
 
