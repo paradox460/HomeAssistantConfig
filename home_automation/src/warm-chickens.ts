@@ -1,12 +1,14 @@
 import { TServiceParams } from "@digital-alchemy/core";
-import { debounce } from "es-toolkit";
+import { throttle } from "es-toolkit";
+import dayjs from "dayjs";
 
-// When its below 35º outside, turn on the hen house heater
-const THRESHOLD = 35;
+const THRESHOLD = 40;
+const THROTTLE = 10 * 60 * 1000; // 5 min
 
-export function WarmChickens({ context, hass, synapse, logger }: TServiceParams) {
+export function WarmChickens({ context, hass, synapse, logger, lifecycle }: TServiceParams) {
   const tempSensor = hass.refBy.id("sensor.weather_station_temperature");
-  synapse.select({
+  const heater = hass.refBy.id("switch.plug_in_outdoor_switch_300s");
+  const override = synapse.select({
     context,
     name: "Coop Heater Override",
     options: ["No Override", "Off", "On"],
@@ -24,11 +26,12 @@ export function WarmChickens({ context, hass, synapse, logger }: TServiceParams)
     },
   });
 
-  const controlFunc = debounce(
+  const controlFunc = throttle(
     ({ state: temp }) => {
-      const override = hass.refBy.id("select.coop_heater_override");
-      if (["On", "Off"].includes(override.state)) return;
-      const heater = hass.refBy.id("switch.plug_in_outdoor_switch_300s");
+      logger.info(
+        `Current temperature: ${temp}. Heater state: ${heater.state}. Override: ${override.current_option}. Next execution after ${dayjs().add(THROTTLE, "ms").format("YYYY-MM-DDTHH:mm:ssZ")}`,
+      );
+      if (["On", "Off"].includes(override.current_option)) return;
       if (temp > THRESHOLD && heater.state === "on") {
         logger.info(`Turning off coop heater, ${temp} > ${THRESHOLD}`);
         heater.turn_off();
@@ -37,9 +40,13 @@ export function WarmChickens({ context, hass, synapse, logger }: TServiceParams)
         heater.turn_on();
       }
     },
-    5 * 60 * 1000, // 5 min
+    THROTTLE,
     { edges: ["leading"] },
   );
 
   tempSensor.onUpdate(controlFunc);
+
+  lifecycle.onReady(() => {
+    controlFunc({ state: tempSensor.state });
+  });
 }
