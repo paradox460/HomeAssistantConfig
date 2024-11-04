@@ -7,7 +7,6 @@ export function HolidayLights({
   context,
   hass,
   lifecycle,
-  logger,
   scheduler,
   synapse,
 }: TServiceParams) {
@@ -22,14 +21,12 @@ export function HolidayLights({
     context,
     name: "Holiday Lights",
     turn_on() {
-      logger.info("turn_on callback");
       const holidayLights = hass.refBy.label("holiday_lights");
       for (const light of holidayLights) {
         light.turn_on();
       }
     },
     turn_off() {
-      logger.info("turn_off callback");
       const holidayLights = hass.refBy.label("holiday_lights");
       for (const light of holidayLights) {
         light.turn_off();
@@ -42,20 +39,16 @@ export function HolidayLights({
   function maybeTurnOnLEDs() {
     if (ledAutomation.is_on) {
       const holidayLEDs = hass.refBy.label("holiday_leds");
-      logger.info("turning on roof lights due to automation being enabled");
       for (const l of holidayLEDs) {
-        logger.info(`turning on ${l.entity_id}`);
         l.turn_on();
       }
     }
   }
 
   function automationTurnOff() {
-    logger.info("turning off all holiday lights");
     const holidayLEDs = hass.refBy.label("holiday_leds");
     holidayLightSwitch.is_on = false;
     for (const l of holidayLEDs) {
-      logger.info(`turning off ${l.entity_id}`);
       l.turn_off();
     }
   }
@@ -75,7 +68,6 @@ export function HolidayLights({
     next() {
       const offset = Math.random() * 30 * 60 * 1000;
       const n = dayjs().add(1, "d").startOf("day").add(offset);
-      logger.info(`turning off lights at ${n.format("YYYY-MM-DD HH:mm:ss")}`);
       return n;
     },
     reset: CronExpression.EVERY_DAY_AT_3AM,
