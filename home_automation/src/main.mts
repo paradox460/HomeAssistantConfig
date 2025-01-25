@@ -1,18 +1,18 @@
-import "./utils.mjs";
+import "./utils.mts";
 
 import { LIB_AUTOMATION } from "@digital-alchemy/automation";
 import { CreateApplication, StringConfig } from "@digital-alchemy/core";
 import { LIB_HASS } from "@digital-alchemy/hass";
 import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 
-import { Away } from "./away";
-import { Bambu } from "./bambu";
-// import { CoolChickens } from "./cool-chickens";
-import { WarmChickens } from "./warm-chickens";
-import { HolidayLights } from "./holiday-lights";
-import { KidsLighting } from "./kids-lighting";
-import { Office } from "./office";
-import { SportsLights } from "./sports-lights";
+import { Away } from "./away.mts";
+import { Bambu } from "./bambu.mts";
+// import { CoolChickens } from "./cool-chickens.mts";
+// import { WarmChickens } from "./warm-chickens.mts";
+import { HolidayLights } from "./holiday-lights.mts";
+import { KidsLighting } from "./kids-lighting.mts";
+import { Office } from "./office.mts";
+import { SportsLights } from "./sports-lights.mts";
 
 type Environments = "development" | "production" | "test";
 
@@ -55,7 +55,7 @@ const HOME_AUTOMATION = CreateApplication({
     KidsLighting,
     Office,
     SportsLights,
-    WarmChickens,
+    // WarmChickens,
   },
 });
 

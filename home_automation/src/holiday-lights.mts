@@ -1,6 +1,6 @@
 import { CronExpression, TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
-import { toggleIcons } from "./utils.mjs";
+import { toggleIcons } from "./utils.mts";
 
 export function HolidayLights({
   automation,
@@ -20,18 +20,19 @@ export function HolidayLights({
   const holidayLightSwitch = synapse.switch({
     context,
     name: "Holiday Lights",
-    turn_on() {
-      const holidayLights = hass.refBy.label("holiday_lights");
-      for (const light of holidayLights) {
-        light.turn_on();
+  });
+
+  holidayLightSwitch.onUpdate(({ state }) => {
+    switch (state) {
+      case "on": {
+        for (const light of hass.refBy.label("holiday_lights")) light.turn_on();
+        break;
       }
-    },
-    turn_off() {
-      const holidayLights = hass.refBy.label("holiday_lights");
-      for (const light of holidayLights) {
-        light.turn_off();
+      case "off": {
+        for (const light of hass.refBy.label("holiday_lights")) light.turn_off();
+        break;
       }
-    },
+    }
   });
 
   toggleIcons(holidayLightSwitch, "mdi:string-lights", "mdi:string-lights-off");

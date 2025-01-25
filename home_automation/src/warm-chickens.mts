@@ -3,7 +3,7 @@ import { throttle } from "es-toolkit";
 import dayjs from "dayjs";
 
 const THRESHOLD = 40;
-const THROTTLE = 10 * 60 * 1000; // 5 min
+const THROTTLE = 10 * 60 * 1000; // 10 min
 
 export function WarmChickens({ context, hass, synapse, logger, lifecycle }: TServiceParams) {
   const tempSensor = hass.refBy.id("sensor.weather_station_temperature");

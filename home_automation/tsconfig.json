@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": false,
+    "allowSyntheticDefaultImports": true,
     "alwaysStrict": false,
     "esModuleInterop": true,
     "importHelpers": true,
@@ -10,15 +11,15 @@
     "moduleResolution": "bundler",
     "noImplicitAny": false,
     "noImplicitReturns": false,
+    "outDir": "./build",
+    "rewriteRelativeImportExtensions": true,
     "rootDir": "./src",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "outDir": "./build",
     "strictBindCallApply": true,
     "strictFunctionTypes": false,
     "target": "ESNext",
-    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts", "src/utils.mts"],
   "exclude": ["node_modules", "tmp", "dist", "src/**/*.spec.ts"]
