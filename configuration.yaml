@@ -1,6 +1,9 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
+homeassistant:
+  packages: !include_dir_named packages/
+
 # Text to speech
 tts:
   - platform: google_translate
@@ -22,7 +25,6 @@ frontend:
 rest: !include_dir_merge_list rest/
 template: !include_dir_merge_list templates/
 sensor: !include_dir_merge_list sensors/
-mqtt: !include_dir_merge_named mqtt/
 utility_meter: !include utility_meter.yaml
 alert: !include alert.yaml
 notify: !include notify.yaml

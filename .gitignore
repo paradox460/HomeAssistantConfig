@@ -9,6 +9,8 @@
 !/esphome/
 !/mqtt/
 !/mqtt/**/*
+!/packages/
+!/packages/**/*
 !/sensors/
 !/custom_templates/
 !/custom_templates/**/*
