@@ -39,3 +39,22 @@ freezer_malfunction:
     ttl: 0
     priority: high
     channel: alarm_stream
+
+door_open:
+  name: Door Open
+  done_message: clear_notification
+  entity_id: binary_sensor.door_left_open
+  repeat: [5, 10]
+  skip_first: true
+  can_acknowledge: true
+  title: >-
+    {{ label_entities("door sensor") | map("states") |  select("equalto", "open") | list | length }}
+    door(s) open
+  message: |-
+    {% for door in label_entities("door sensor") if states(door) == "open" %}
+      • {{door | state_attr('friendly_name') }}
+    {% endfor %}
+  notifiers:
+    - all
+  data:
+    tag: door-alert

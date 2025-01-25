@@ -1,0 +1,8 @@
+- binary_sensor:
+  - name: "Door Left Open"
+    unique_id: "door_left_open"
+    icon: mdi:door-open
+    state: >-
+      {{
+        label_entities("door sensor") | map("states") |  select("equalto", "open") | first == "open"
+      }}
