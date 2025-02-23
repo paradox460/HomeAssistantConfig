@@ -28,15 +28,3 @@ sensor: !include_dir_merge_list sensors/
 utility_meter: !include utility_meter.yaml
 alert: !include alert.yaml
 notify: !include notify.yaml
-
-lovelace_gen:
-
-lovelace:
-  mode: storage
-  dashboards:
-    home-yaml:
-      mode: yaml
-      filename: dashboards/home.yaml
-      title: Home
-      icon: mdi:home
-      show_in_sidebar: true
