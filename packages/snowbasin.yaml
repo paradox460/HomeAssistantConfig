@@ -1,0 +1,622 @@
+multiscrape:
+  - name: Snowbasin
+    resource: "https://www.snowbasin.com/the-mountain/mountain-report/"
+    scan_interval: 3600
+    sensor:
+      # Snow sensors
+      - unique_id: snowbasin_overnight_snow
+        name: Overnight Snow
+        select: "body > .mc-weather .mc__tabs .mc__row .mc__cell:nth-child(1) .mc__cell:nth-child(1) .mc__num"
+        value_template: "{{ value | replace('”', '') }}"
+        unit_of_measurement: in
+        icon: mdi:snowflake-alert
+        force_update: true
+
+      - unique_id: snowbasin_base_snow
+        name: Base Snow
+        select: "body > .mc-weather .mc__tabs .mc__row .mc__cell:nth-child(1) .mc__cell:nth-child(2) .mc__num"
+        value_template: "{{ value | replace('”', '') }}"
+        unit_of_measurement: in
+        icon: mdi:snowflake-check
+        force_update: true
+
+      - unique_id: snowbasin_24h_snow
+        name: 24 hours Snow
+        select: "body > .mc-weather .mc__tabs .mc__row .mc__cell:nth-child(1) .mc__cell:nth-child(3) .mc__num"
+        value_template: "{{ value | replace('”', '') }}"
+        unit_of_measurement: in
+        icon: mdi:snowflake
+        force_update: true
+
+      - unique_id: snowbasin_season_snow
+        name: Season Snow
+        select: "body > .mc-weather .mc__tabs .mc__row .mc__cell:nth-child(1) .mc__cell:nth-child(4) .mc__num"
+        value_template: "{{ value | replace('”', '') }}"
+        unit_of_measurement: in
+        icon: mdi:snowflake
+        force_update: true
+
+      - unique_id: snowbasin_7d_snow
+        name: 7 Days Snow
+        select: "body > .mc-weather .mc__tabs .mc__row .mc__cell:nth-child(1) .mc__cell:nth-child(5) .mc__num"
+        value_template: "{{ value | replace('”', '') }}"
+        unit_of_measurement: in
+        icon: mdi:snowflake-
+        force_update: true
+
+      # Lift Reports
+      - unique_id: snowbasin_open_lifts
+        name: Open Lifts
+        select: "body > .mc-lifts .mc-lifts__graph-value"
+        force_update: true
+        value_template: >-
+          {{ value | regex_replace(find='(\d+).*', replace='\\1') }}
+
+        attributes:
+          - name: Total Lifts
+            select: "body > .mc-lifts .mc-lifts__graph-value"
+            value_template: >-
+              {{ value | regex_replace(find='\d+[^\d]*(\d+)', replace='\\1') }}
+
+      - unique_id: snowbasin_lift_allen_peak_tram
+        name: Allen Peak Tram
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(1) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+            value
+            | join(",")
+            | regex_replace(find=',?mc__icon-?', replace='')
+            | string
+            | trim
+            | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:gondola
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(1) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(1) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_strawberry_gondola
+        name: Strawberry Gondola
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(2) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:gondola
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(2) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(2) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_needles_gondola
+        name: Needles Gondola
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(3) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:gondola
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(3) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(3) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_littlecat_express
+        name: Littlecat Express
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(4) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(4) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(4) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_middle_bowl_express
+        name: Middle Bowl Express
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(5) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(5) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(5) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_wildcat_express
+        name: Wildcat Express
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(6) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(6) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(6) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_john_paul_express
+        name: John Paul Express
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(7) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(7) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(7) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_demoisy_express
+        name: DeMoisy Express
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(8) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(8) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(8) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_becker
+        name: Becker
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(9) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(9) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(9) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_porcupine
+        name: Porcupine
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(10) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(10) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(10) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_wildflower_carpet
+        name: Wildflower Carpet
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(11) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:slope-uphill
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(11) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(11) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_grizzly_carpet
+        name: Grizzly Carpet
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(12) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:slope-uphill
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(12) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(12) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      - unique_id: snowbasin_lift_wildcat_handle_tow
+        name: Wildcat Handle Tow
+        select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(13) td:nth-child(3) .mc__icon"
+        attribute: class
+        value_template: >-
+          {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+          }}
+        icon: >-
+          {% if value == "Open" %}
+            mdi:ski-water
+          {% elif value == "Expected" %}
+            mdi:clock
+          {% elif value == "Delayed" %}
+            mdi:clock-alert
+          {% else %}
+            mdi:close-octagon
+          {% endif %}
+        attributes:
+          - name: hours
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(13) td:nth-child(4)"
+          - name: type
+            select: "body > .mc-lifts .mc-lifts__table tbody tr:nth-child(13) td:nth-child(2) .mc__icon"
+            attribute: class
+            value_template: >-
+              {{
+                value
+                | join(",")
+                | regex_replace(find=',?mc__icon-?', replace='')
+                | string
+                | trim
+                | capitalize
+              }}
+
+      # Trails
+      - unique_id: snowbasin_trails_open
+        name: Trails Open
+        select: "body > .mc-trails .mc__graph:nth-child(1) canvas"
+        attribute: "data-values"
+        force_update: true
+        icon: mdi:check-circle
+        value_template: >-
+          {{ (value | from_json)[0] }}
+
+      - unique_id: snowbasin_trails_closed
+        name: Trails Closed
+        select: "body > .mc-trails .mc__graph:nth-child(1) canvas"
+        attribute: "data-values"
+        force_update: true
+        icon: mdi:close-octagon
+        value_template: >-
+          {{ (value | from_json)[1] }}
+
+      - unique_id: snowbasin_trails_groomed
+        name: Trails groomed
+        select: "body > .mc-trails .mc__graph:nth-child(2) canvas"
+        attribute: "data-values"
+        icon: mdi:broom
+        force_update: true
+        value_template: >-
+          {{ (value | from_json)[0] }}
+
+      - unique_id: snowbasin_trails_breakdown
+        name: Trails Breakdown
+        select: "body > .mc-trails .mc__graph:nth-child(3) canvas"
+        attribute: "data-values"
+        icon: mdi:chart-pie
+        value_template: >-
+          {% set raw_trails = value | from_json  %}
+          {{
+            {
+              "green": raw_trails[0] | default(0),
+              "blue": raw_trails[1] | default(0),
+              "black": raw_trails[2] | default(0),
+              "double_black": raw_trails[3] | default(0)
+            }
+          }}
+
+      # Parking
+      - unique_id: snowbasin_parking
+        name: Parking
+        select: "body > .mc-parking canvas"
+        attribute: "data-values"
+        unit_of_measurement: "%"
+        icon: mdi:parking
+        force_update: true
+        value_template: >-
+          {{ (value | from_json)[0] }}
