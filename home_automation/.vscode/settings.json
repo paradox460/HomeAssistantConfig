@@ -1,5 +1,13 @@
 {
   "[typescript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  }
+  },
+  "files.associations": {
+    "*.yaml": "home-assistant"
+  },
+  "erlang.erlangPath": "/Users/jeffsandberg/.local/share/mise/installs/erlang/27.2.1/bin",
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "/Users/jeffsandberg/.local/share/mise/shims/node"
+  },
+  "deno.path": "/Users/jeffsandberg/.local/share/mise/shims/deno"
 }

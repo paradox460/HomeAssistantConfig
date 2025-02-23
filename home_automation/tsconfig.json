@@ -21,6 +21,6 @@
     "strictFunctionTypes": false,
     "target": "ESNext",
   },
-  "include": ["src/**/*.ts", "src/utils.mts"],
+  "include": ["src/**/*.mts", "src/utils.mts"],
   "exclude": ["node_modules", "tmp", "dist", "src/**/*.spec.ts"]
 }
