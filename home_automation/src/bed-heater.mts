@@ -11,20 +11,13 @@ export function BedHeater({ context, hass, scheduler, synapse }: TServiceParams)
   });
 
   bedHeaterButton.onPress(() => {
-    bedHeaterSwitch.turn_on();
-  });
-
-  bedHeaterSwitch.onUpdate(async ({ state }) => {
-    if (state === "on") {
-      await sleep(500);
-      bedHeaterSwitch.turn_off();
-    }
+    bedHeaterSwitch.toggle();
   });
 
   scheduler.cron({
     exec() {
       if (hass.refBy.id("binary_sensor.home_presence").state === "on") {
-        bedHeaterSwitch.turn_on();
+        bedHeaterSwitch.toggle();
       }
     },
     schedule: CronExpression.EVERY_DAY_AT_MIDNIGHT,
