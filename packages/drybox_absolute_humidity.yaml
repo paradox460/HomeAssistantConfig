@@ -1,0 +1,7 @@
+thermal_comfort:
+  - custom_icons: true
+    sensor:
+    - name: Drybox
+      temperature_sensor: sensor.drybox_temperature
+      humidity_sensor: sensor.drybox_humidity
+      unique_id: '5D3AB733-C6AB-4C4A-8B17-D16F06AD9557'
