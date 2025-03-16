@@ -1,5 +1,5 @@
 import { sleep, TServiceParams } from "@digital-alchemy/core";
-import { AndroidNotificationData, NotificationData } from "@digital-alchemy/hass";
+import { AndroidNotificationData, AppleNotificationData, NotificationData } from "@digital-alchemy/hass";
 import dayjs from "dayjs";
 
 function printing(stateValue: string): boolean {
@@ -30,7 +30,7 @@ export function Bambu({ hass }: TServiceParams) {
 
     // notify if print finished successfully
     if (newState === "finish") {
-      notify("Print Success", `The print job "${taskName.state}" has finished successfully.`)
+      notify("Print Success", `The print job "${taskName.state}" has finished successfully.`, {push: { sound: "none"}})
     } else if (["pause", "failed"].includes(newState)) {
       const title = newState === "pause" ? "Print Paused" : "Print Failed"
       const notificationState = newState === "pause" ? "paused" : "failed"
@@ -43,7 +43,7 @@ export function Bambu({ hass }: TServiceParams) {
     }
   });
 
-  function notify(title: string, message: string, data: NotificationData & AndroidNotificationData = {}) {
+  function notify(title: string, message: string, data: NotificationData & (AndroidNotificationData | AppleNotificationData) = {}) {
       hass.call.notify.jeff({
         title,
         message,
