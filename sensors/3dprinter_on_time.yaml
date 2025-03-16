@@ -1,7 +1,0 @@
-- unique_id: 7F6C78A5-E61D-440A-8912-FE8490C89FBE
-  entity_id: switch.3d_printer
-  name: 3D Printer On Time
-  start: "{{ now().replace(hour=0, minute=0, second=0) }}"
-  end: "{{ now() }}"
-  state: "on"
-  platform: history_stats

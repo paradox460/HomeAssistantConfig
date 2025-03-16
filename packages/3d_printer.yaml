@@ -1,0 +1,25 @@
+sensor:
+  - unique_id: 7F6C78A5-E61D-440A-8912-FE8490C89FBE
+    entity_id: switch.3d_printer
+    name: 3D Printer On Time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+    state: "on"
+    platform: history_stats
+
+  - platform: history_stats
+    unique_id: E1554879-7105-40A2-9001-4A422D1C5356
+    entity_id: sensor.x1c_00m09c440501390_print_status
+    name: 3D Printer Printing Time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+    state:
+      - "prepare"
+      - "running"
+
+utility_meter:
+  3d_printer_daily_consumption:
+    source: sensor.3d_printer_energy
+    name: 3D Printer Daily Energy Usage
+    unique_id: 8A07F837-9509-4D09-9D51-ECC7B0E954AE
+    cycle: daily
