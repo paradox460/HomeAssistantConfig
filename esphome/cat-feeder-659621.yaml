@@ -22,7 +22,7 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Esphome-Web-659621"
+    ssid: "cat-feeder-659621"
     password: "7h9sQ2jh8CRd"
 
 captive_portal:
@@ -39,15 +39,29 @@ button:
     id: feed_cat
     output: motor_relay
     duration: 750ms
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: last_time
+            state: !lambda |-
+              auto time = id(ha_time).now().timestamp;
+              char str[20];
+              strftime(str, sizeof(str), "%Y-%m-%d %H:%M:%S", localtime(&time));
+              return str;
+
+text_sensor:
+  - platform: template
+    name: "Last feed time"
+    id: last_time
+    entity_category: EntityCategory.DIAGNOSTIC
+
 
 time:
   - platform: homeassistant
     id: ha_time
     on_time:
-      - hours: 14
+      - hours: "14,18"
         minutes: 0
         seconds: 0
         then:
           - button.press: feed_cat
-          - homeassistant.event:
-              event: esphome.feed_cat_cron_event
