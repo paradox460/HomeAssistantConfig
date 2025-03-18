@@ -1,5 +1,5 @@
 substitutions:
-  name: esphome-web-3243cc
+  name: "irrigation-controller-3243cc"
   friendly_name: Irrigation Controller
 
 esphome:

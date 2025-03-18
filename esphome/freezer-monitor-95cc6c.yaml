@@ -20,7 +20,7 @@ logger:
 
 # Enable Home Assistant API
 api:
-  encryption: 
+  encryption:
     key: !secret freezer_api
 # Allow Over-The-Air updates
 ota:
@@ -98,4 +98,3 @@ sensor:
       - exponential_moving_average:
           alpha: 0.05
           send_every: 6
-
