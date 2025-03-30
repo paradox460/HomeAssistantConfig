@@ -53,7 +53,7 @@ text_sensor:
   - platform: template
     name: "Last feed time"
     id: last_time
-    entity_category: EntityCategory.DIAGNOSTIC
+    entity_category: diagnostic
 
 
 time:
