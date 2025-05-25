@@ -13,6 +13,7 @@ import { BedHeater } from "./bed-heater.mts";
 import { HolidayLights } from "./holiday-lights.mts";
 import { KidsLighting } from "./kids-lighting.mts";
 import { Office } from "./office.mts";
+import { Traccar } from "./traccar.mts";
 // import { SportsLights } from "./sports-lights.mts";
 
 type Environments = "development" | "production" | "test";
@@ -56,6 +57,7 @@ const HOME_AUTOMATION = CreateApplication({
     HolidayLights,
     KidsLighting,
     Office,
+    Traccar
     // SportsLights,
     // WarmChickens,
   },
