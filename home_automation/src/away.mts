@@ -57,7 +57,7 @@ export function Away({ hass, context, synapse, logger, lifecycle }: TServicePara
 
     // Use the generic homeassistant.turn_off service because we might have a
     // variety of things in the label i.e. lights and fans and so forth
-    for (const entity of awayableEntities) entity.turn_off();
+    hass.call.homeassistant.turn_off({label_id: "awayable"});
 
     // Confusing because this is an occupany sensor, so awayMode true == home
     // and false == away

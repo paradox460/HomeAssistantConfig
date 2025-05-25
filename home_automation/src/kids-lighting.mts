@@ -5,7 +5,6 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
     return hass.refBy.id("binary_sensor.home_presence").state !== "on";
   }
 
-  const kidsLights = hass.idBy.label("kids");
   // Sunset
 
   automation.solar.onEvent({
@@ -20,7 +19,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
 
       hass.call.light.turn_on({
         brightness_pct: 50,
-        entity_id: kidsLights,
+        label_id: "kids",
         transition: 30,
       });
     },
@@ -33,7 +32,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
     eventName: "sunriseEnd",
     exec() {
       hass.call.light.turn_off({
-        entity_id: kidsLights,
+        label_id: "kids"
       });
     },
     offset: "1H",
