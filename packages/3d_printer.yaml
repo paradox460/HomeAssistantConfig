@@ -9,7 +9,7 @@ sensor:
 
   - platform: history_stats
     unique_id: E1554879-7105-40A2-9001-4A422D1C5356
-    entity_id: sensor.x1c_00m09c440501390_print_status
+    entity_id: sensor.h2d_0948ad532300342_print_status
     name: 3D Printer Printing Time
     start: "{{ now().replace(hour=0, minute=0, second=0) }}"
     end: "{{ now() }}"
@@ -23,3 +23,7 @@ utility_meter:
     name: 3D Printer Daily Energy Usage
     unique_id: 8A07F837-9509-4D09-9D51-ECC7B0E954AE
     cycle: daily
+  3d_printer_last_job_consumption:
+    source: sensor.3d_printer_energy
+    name: 3D Printer Last Job Energy Usage
+    unique_id: 8BC4EA72-3E02-415D-B135-741309735DE7
