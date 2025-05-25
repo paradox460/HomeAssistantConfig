@@ -10,13 +10,18 @@ export function BedHeater({ context, hass, scheduler, synapse }: TServiceParams)
     icon: "mdi:bed",
   });
 
+  const bedHeaterAutomation = synapse.switch({
+    context,
+    name: "Bed Heater Automation"
+  })
+
   bedHeaterButton.onPress(() => {
     bedHeaterSwitch.toggle();
   });
 
   scheduler.cron({
     exec() {
-      if (hass.refBy.id("binary_sensor.home_presence").state === "on") {
+      if (hass.refBy.id("binary_sensor.home_presence").state === "on" && bedHeaterAutomation.is_on) {
         bedHeaterSwitch.toggle();
       }
     },
