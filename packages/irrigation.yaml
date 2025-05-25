@@ -1,0 +1,32 @@
+# Convert to gallons per minute
+template:
+  - sensor:
+      - name: "OpenSprinkler Flow Rate (Gal/min)"
+        unique_id: 4269BF0D-F547-46C6-B3BA-6E373B33E560
+        unit_of_measurement: "gal/min"
+        state_class: measurement
+        device_class: volume_flow_rate
+        state: "{{ (states('sensor.opensprinkler_flow_rate')|float * 0.26417205) | round(1, 'floor') }}"
+        availability: "{{ states('sensor.opensprinkler_flow_rate') | is_number}}"
+        icon: mdi:waves-arrow-right
+
+sensor:
+  - platform: integration
+    source: sensor.opensprinkler_flow_rate_gal_min
+    name: OpenSprinkler Water Usage
+    unique_id: 4DDD9829-D7C7-411B-A846-3C789F63CE13
+    unit_time: min
+
+utility_meter:
+  irrigation_water_day:
+    source: sensor.opensprinkler_water_usage
+    name: Irrigation Water Usage (Day)
+    cycle: daily
+  irrigation_water_month:
+    source: sensor.opensprinkler_water_usage
+    name: Irrigation Water Usage (Month)
+    cycle: monthly
+  irrigation_water_year:
+    source: sensor.opensprinkler_water_usage
+    name: Irrigation Water Usage (Year)
+    cycle: yearly
