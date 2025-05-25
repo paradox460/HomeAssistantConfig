@@ -43,25 +43,3 @@ play_xbox_script:
         media_content_id: '{{ game }}'
   mode: single
   icon: mdi:microsoft-xbox
-petg_removal_script:
-  sequence:
-  - action: number.set_value
-    metadata: {}
-    data:
-      value: '70'
-    target:
-      entity_id: number.x1c_00m09c440501390_bed_target_temperature
-  - delay:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-  - action: number.set_value
-    metadata: {}
-    data:
-      value: '0'
-    target:
-      entity_id: number.x1c_00m09c440501390_bed_target_temperature
-  alias: PETG removal script
-  description: ''
-  icon: mdi:arrow-expand-up
