@@ -110,20 +110,47 @@ cover:
 time:
   - platform: homeassistant
 
+number:
+  - platform: template
+    name: "Open Delay"
+    id: open_delay
+    min_value: 0
+    max_value: 600
+    unit_of_measurement: "min"
+    mode: box
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 30
+    icon: mdi:weather-sunset-up
+  - platform: template
+    name: "Close Delay"
+    id: close_delay
+    min_value: 0
+    max_value: 600
+    unit_of_measurement: "min"
+    mode: box
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 15
+    icon: mdi:weather-sunset-down
+
+
 sun:
   latitude: !secret latitude
   longitude: !secret longitude
   on_sunrise:
       - then:
-        - delay: 30min
         - if:
             condition:
               lambda: "return id(auto_open).state;"
             then:
+              - delay: !lambda 'return id(open_delay).state * 60000;'
               - cover.open: chicken_coop_door
   on_sunset:
     - then:
-        - delay: 10min
+        - delay: !lambda 'return id(close_delay).state * 60000;'
         - cover.close: chicken_coop_door
 
 sensor:
@@ -137,15 +164,42 @@ text_sensor:
   - platform: sun
     name: Next Auto Open
     type: sunrise
-    elevation: 10°
+    format: "%Y-%m-%d %H:%M:%S"
     entity_category: "diagnostic"
-    update_interval: 1h
+    update_interval: 10min
+    filters:
+      lambda: |-
+        const std::string input_time(x);
+
+        ESPTime parsed_time;
+        ESPTime::strptime(input_time, parsed_time);
+
+        parsed_time.recalc_timestamp_local();
+        parsed_time = ESPTime::from_epoch_local(parsed_time.timestamp + id(open_delay).state * 60);
+
+        char buffer[64];
+        parsed_time.strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S");
+        return std::string(buffer);
+
   - platform: sun
     name: Next Auto Close
     type: sunset
-    elevation: -2°
+    format: "%Y-%m-%d %H:%M:%S"
     entity_category: "diagnostic"
-    update_interval: 1h
+    update_interval: 10min
+    filters:
+      lambda: |-
+        const std::string input_time(x);
+
+        ESPTime parsed_time;
+        ESPTime::strptime(input_time, parsed_time);
+
+        parsed_time.recalc_timestamp_local();
+        parsed_time = ESPTime::from_epoch_local(parsed_time.timestamp + id(close_delay).state * 60);
+
+        char buffer[64];
+        parsed_time.strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S");
+        return std::string(buffer);
   - platform: debug
     device:
       name: "Device Info"
