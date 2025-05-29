@@ -18,6 +18,7 @@ esp32:
 
 # Enable logging
 logger:
+  level: DEBUG
 
 # Enable Home Assistant API
 api:
@@ -30,6 +31,9 @@ ota:
 improv_serial:
 
 wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
   # Set up a wifi access point
   ap: {}
 
@@ -336,3 +340,100 @@ binary_sensor:
       number: 7
       mode: INPUT
       inverted: true
+
+# MARK: Sprinkler Setup
+sprinkler:
+  - id: main_sprinkler
+    main_switch:
+      name: Sprinklers
+      # internal: true
+    auto_advance_switch: Sprinklers Auto Advance
+    queue_enable_switch: Sprinklers Queue Enable
+    reverse_switch: Sprinklers Reverse
+    standby_switch: Sprinklers Standby
+    multiplier_number:
+      id: main_sprinkler_multiplier
+      name: "Sprinkler Multiplier"
+    repeat_number:
+      id: main_sprinkler_repeat
+      name: "Sprinkler Repeat"
+    valve_overlap: 1s
+    pump_start_pump_delay: 2s
+    pump_stop_valve_delay: 2s
+    valves:
+      - valve_switch: Front & Curb
+        enable_switch: Front & Curb Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output3
+      - valve_switch: Front Yard
+        enable_switch: Front Yard Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output4
+      - valve_switch: Patio
+        enable_switch: Patio Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output6
+      - valve_switch: North Side
+        enable_switch: North Side Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output7
+      - valve_switch: Near Backyard
+        enable_switch: Near Backyard Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output9
+      - valve_switch: Middle Backyard
+        enable_switch: Middle Backyard Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output10
+      - valve_switch: South Side
+        enable_switch: South Side Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output11
+      - valve_switch: Mid-far Backyard
+        enable_switch: Mid-far Backyard Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output12
+      - valve_switch: Far & South Backyard
+        enable_switch: Far & South Backyard Enable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output13
+      - valve_switch: Farthest Backyard
+        enable_switch: Farthest BackyardEnable
+        pump_switch_id: master_with_pump
+        run_duration: 5s
+        valve_switch_id: e16s_output14
+  # - id: low_pressure_sprinkler
+  #   main_switch:
+  #     name: Low Pressure Sprinklers
+  #     internal: true
+  #   auto_advance_switch: Low Pressure Sprinklers Auto Advance
+  #   reverse_switch: Low Pressure Sprinklers Reverse
+  #   standby_switch: Low Pressure Sprinklers Standby
+  #   queue_enable_switch: Low Pressure Sprinklers Queue Enable
+  #   multiplier_number:
+  #     id: low_pressure_sprinkler_multiplier
+  #     name: "Low Pressure Sprinkler Multiplier"
+  #   repeat_number:
+  #     id: low_pressure_sprinkler_repeat
+  #     name: "Low Pressure Sprinkler Repeat"
+  #   valve_overlap: 1s
+  #   valves:
+  #     - valve_switch: Front Flowerbeds
+  #       enable_switch: Front Flowerbeds Enable
+  #       run_duration: 5s
+  #       valve_switch_id: e16s_output5
+  #       pump_switch_id: e16s_output1
+  #     - valve_switch: North Flowerbeds
+  #       enable_switch: North Flowerbeds Enable
+  #       run_duration: 5s
+  #       valve_switch_id: e16s_output8
+  #       pump_switch_id: e16s_output1
