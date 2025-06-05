@@ -17,7 +17,7 @@ api:
 
 # Allow Over-The-Air updates
 ota:
-- platform: esphome
+  - platform: esphome
 
 wifi:
   ssid: !secret wifi_ssid
@@ -54,7 +54,6 @@ binary_sensor:
             state: ON
     filters:
       - delayed_on: 10ms
-    # internal: true
   - platform: gpio
     pin:
       number: GPIO7
@@ -72,7 +71,9 @@ binary_sensor:
             state: OFF
     filters:
       - delayed_on: 10ms
-    # internal: true
+
+  # If we move to deep sleep, this will have to be removed and reimplemented
+  # in homeassistant. Otherwise we couldn't use the manual clear/reset button
   - platform: template
     id: new_mail
     name: "New Mail"
@@ -96,15 +97,15 @@ sensor:
     device_class: battery
     update_interval: 60s
     lambda: |-
-        auto bat = id(battery_voltage).state;
-        if (bat < 3.0) {
-                return 0.0;
-        } else if (bat > 4.2) {
-          return 100.0;
-        } else {
-          // Linear interpolation between 3.0V and 4.2V
-          return (bat - 3.0) * (100.0 / (4.2 - 3.0));
-        }
+      auto bat = id(battery_voltage).state;
+      if (bat < 3.0) {
+              return 0.0;
+      } else if (bat > 4.2) {
+        return 100.0;
+      } else {
+        // Linear interpolation between 3.0V and 4.2V
+        return (bat - 3.0) * (100.0 / (4.2 - 3.0));
+      }
 
 button:
   - platform: template
