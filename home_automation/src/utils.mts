@@ -19,3 +19,18 @@ export function toggleIcons(entity, on: string, off: string) {
     entity.icon = entity.is_on ? on : off;
   });
 }
+
+/**
+ * Determines if an entity has just been turned on.
+ *
+ * @param newState - The current state of the entity (should be a string, e.g., "on" or "off").
+ * @param oldState - The previous state of the entity (should be a string, e.g., "on" or "off").
+ * @returns {boolean} True if the entity changed from "off" to "on", otherwise false.
+ *
+ * @example
+ * turnedOn("on", "off"); // returns true
+ * turnedOn("on", "on");  // returns false
+ */
+export function turnedOn(newState: string, oldState: string): boolean {
+  return newState === "on" && oldState === "off"
+}
