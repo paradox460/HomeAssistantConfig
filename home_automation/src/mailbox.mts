@@ -7,13 +7,13 @@ import {
 import { turnedOn } from "./utils.mts";
 import { throttle } from "es-toolkit";
 
-export function Mailbox({ hass }: TServiceParams) {
+export function Mailbox({ hass, logger }: TServiceParams) {
   const new_mail = hass.refBy.id("binary_sensor.mailbox_abe59c_new_mail");
   let notified = false;
 
-  new_mail.onUpdate(({ state: newState }, { state: oldState }) => {
-    if (turnedOn(newState, oldState)) {
-      throttle(() => {
+  const notifier = throttle(
+    () => {
+      logger.info("Notification ran");
       hass.call.notify.all({
         message: "You've got mail!",
         data: {
@@ -29,9 +29,17 @@ export function Mailbox({ hass }: TServiceParams) {
     },
     10 * 60 * 1000,
     {
-      edges: ["leading"]
-    });
+      edges: ["leading"],
+    },
+  );
+
+  new_mail.onUpdate(({ state: newState }, { state: oldState }) => {
+    logger.info(`Mailbox state changed: ${newState} -> ${oldState}`);
+    if (turnedOn(newState, oldState)) {
+      logger.info("Mailbox has new mail, attempting notification");
+      notifier();
     } else if (turnedOn(oldState, newState) && notified) {
+      logger.info("Mailbox cleared, notification state was set to true, sending notification");
       hass.call.notify.all({
         message: "clear_notification",
         data: {
