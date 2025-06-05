@@ -12,6 +12,7 @@ import { BedHeater } from "./bed-heater.mts";
 // import { WarmChickens } from "./warm-chickens.mts";
 import { HolidayLights } from "./holiday-lights.mts";
 import { KidsLighting } from "./kids-lighting.mts";
+import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
 import { Traccar } from "./traccar.mts";
 // import { SportsLights } from "./sports-lights.mts";
@@ -56,6 +57,7 @@ const HOME_AUTOMATION = CreateApplication({
     // CoolChickens,
     HolidayLights,
     KidsLighting,
+    Mailbox,
     Office,
     Traccar
     // SportsLights,
