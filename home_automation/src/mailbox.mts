@@ -33,13 +33,8 @@ export function Mailbox({ hass, logger }: TServiceParams) {
     },
   );
 
-  new_mail.onUpdate(({ state: newState }, { state: oldState }) => {
-    logger.info(`Mailbox state changed: ${newState} -> ${oldState}`);
-    if (turnedOn(newState, oldState)) {
-      logger.info("Mailbox has new mail, attempting notification");
-      notifier();
-    } else if (turnedOn(oldState, newState) && notified) {
-      logger.info("Mailbox cleared, notification state was set to true, sending notification");
+  const clearNotifier = throttle(
+    () => {
       hass.call.notify.all({
         message: "clear_notification",
         data: {
@@ -47,6 +42,19 @@ export function Mailbox({ hass, logger }: TServiceParams) {
           tag: "mailbox",
         },
       });
+    },
+    10 * 60 * 1000,
+    { edges: ["leading", "trailing"] },
+  );
+
+  new_mail.onUpdate(({ state: newState }, { state: oldState }) => {
+    logger.info(`Mailbox state changed: ${newState} -> ${oldState}`);
+    if (turnedOn(newState, oldState)) {
+      logger.info("Mailbox has new mail, attempting notification");
+      notifier();
+    } else if (newState == "off" && notified) {
+      logger.info("Mailbox cleared, notification state was set to true, sending notification");
+      clearNotifier();
     }
   });
 }
