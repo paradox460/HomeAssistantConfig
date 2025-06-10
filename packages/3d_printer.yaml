@@ -27,3 +27,9 @@ utility_meter:
     source: sensor.3d_printer_energy
     name: 3D Printer Last Job Energy Usage
     unique_id: 8BC4EA72-3E02-415D-B135-741309735DE7
+
+template:
+  - binary_sensor:
+      - name: "3D Printer AMS Drying"
+        unique_id: F4AF0F23-7741-4C29-B553-4E0E75171F97
+        state: "{{ states('sensor.h2d_0948ad532300342_ams_1_remaining_drying_time') | float > 0.0}}"
