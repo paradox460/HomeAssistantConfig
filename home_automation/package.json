@@ -30,7 +30,8 @@
     "es-toolkit": "^1.32.0",
     "node-cron": "^3.0.3",
     "tsc": "^2.0.4",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "xstate": "^5.19.4"
   },
   "devDependencies": {
     "@digital-alchemy/type-writer": "^25.2.1",

@@ -2705,6 +2705,7 @@ __metadata:
     type-fest: "npm:^4.35.0"
     typescript: "npm:^5.7.3"
     uuid: "npm:^11.1.0"
+    xstate: "npm:^5.19.4"
   languageName: unknown
   linkType: soft
 
@@ -5395,6 +5396,13 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10/3f38e9594f2af5b6324138e86b74df7d77bbb8e310bf8188679dd80bac0d1f47e51536a1923ac3365f31f3d8b25ea0b03e4ade466aa8292a86cd5defca64b19b
+  languageName: node
+  linkType: hard
+
+"xstate@npm:^5.19.4":
+  version: 5.19.4
+  resolution: "xstate@npm:5.19.4"
+  checksum: 10/72fe3d0a30b60cdf211b373261c117f076c23ffc65b1ddce0a8b3a75958573cb2e9593a4fda3fbe1a82d608f3dbb80f3769995410d3dab9bca5c77ca05be852b
   languageName: node
   linkType: hard
 

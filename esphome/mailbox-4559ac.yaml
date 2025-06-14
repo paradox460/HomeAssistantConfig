@@ -1,0 +1,192 @@
+esphome:
+  name: mailbox-4559ac
+  friendly_name: Mailbox
+  min_version: 2025.5.0
+  name_add_mac_suffix: false
+  on_boot:
+    then:
+      - light.turn_on: user_light
+      - script.execute: consider_deep_sleep
+  on_shutdown:
+    - priority: -200
+      then:
+      - lambda: |-
+          id(top_door_opened_this_boot).publish_state(false);
+          id(bottom_door_opened_this_boot).publish_state(false);
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+
+
+# Allow Over-The-Air updates
+ota:
+- platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+deep_sleep:
+  id: deep_sleep_1
+  run_duration: 30s
+  sleep_duration: 60min
+  esp32_ext1_wakeup:
+    mode: ANY_HIGH
+    pins:
+      - &TOPDOOR
+        number: GPIO2
+        allow_other_uses: true
+        mode:
+          input: true
+          pullup: false
+          pulldown: true
+      - &BOTTOMDOOR
+        number: GPIO4
+        allow_other_uses: true
+        mode:
+          input: true
+          pullup: false
+          pulldown: true
+
+
+binary_sensor:
+  - platform: gpio
+    pin: *TOPDOOR
+    name: "Top Door"
+    id: top_door
+    device_class: opening
+    publish_initial_state: true
+    filters:
+      - delayed_on: 10ms
+  - platform: gpio
+    pin: *BOTTOMDOOR
+    id: bottom_door
+    name: "Bottom Door"
+    device_class: opening
+    publish_initial_state: true
+    filters:
+      - delayed_on: 10ms
+  # Latching states to try and catch if the door opened and closed before wifi connects
+  - platform: template
+    id: top_door_opened_this_boot
+    name: "Top Door Opened This Boot"
+    publish_initial_state: true
+    lambda: |-
+      if (id(top_door).state) {
+        return true;
+      } else {
+        return {};
+      }
+  - platform: template
+    id: bottom_door_opened_this_boot
+    name: "Bottom Door Opened This Boot"
+    publish_initial_state: true
+    lambda: |-
+      if (id(bottom_door).state) {
+        return true;
+      } else {
+        return {};
+      }
+
+  - platform: status
+    name: "Mailbox Status"
+
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    name: "Prevent Deep Sleep"
+    entity_id: switch.mailbox_prevent_deep_sleep
+
+
+
+sensor:
+  - platform: adc
+    id: battery_voltage
+    name: "Battery Voltage"
+    pin: GPIO8
+    unit_of_measurement: "V"
+    device_class: voltage
+    update_interval: 15s
+    attenuation: auto
+    filters:
+      - multiply: 2.1
+    entity_category: "diagnostic"
+  - platform: template
+    id: battery_percentage
+    name: "Battery Percentage"
+    icon: mdi:battery
+    device_class: battery
+    update_interval: 15s
+    entity_category: "diagnostic"
+    lambda: |-
+      auto bat = id(battery_voltage).state;
+      if (bat < 3.0) {
+              return 0.0;
+      } else if (bat > 4.2) {
+        return 100.0;
+      } else {
+        // Linear interpolation between 3.0V and 4.2V
+        return (bat - 3.0) * (100.0 / (4.2 - 3.0));
+      }
+
+text_sensor:
+  - platform: template
+    name: "Wakeup Cause"
+    entity_category: "diagnostic"
+    lambda: |-
+        switch (esp_sleep_get_wakeup_cause()) {
+          case 0: return {"ESP_SLEEP_WAKEUP_UNDEFINED"};
+          case 1: return {"ESP_SLEEP_WAKEUP_ALL"};
+          case 2: return {"ESP_SLEEP_WAKEUP_EXT0"};
+          case 3: return {"ESP_SLEEP_WAKEUP_EXT1"};
+          case 4: return {"ESP_SLEEP_WAKEUP_TIMER"};
+          case 5: return {"ESP_SLEEP_WAKEUP_TOUCHPAD"};
+          case 6: return {"ESP_SLEEP_WAKEUP_ULP"};
+          case 7: return {"ESP_SLEEP_WAKEUP_GPIO"};
+          case 8: return {"ESP_SLEEP_WAKEUP_UART"};
+          case 9: return {"ESP_SLEEP_WAKEUP_WIFI"};
+          case 10: return {"ESP_SLEEP_WAKEUP_COCPU"};
+          case 11: return {"ESP_SLEEP_WAKEUP_COCPU_TRAP_TRIG"};
+          case 12: return {"ESP_SLEEP_WAKEUP_BT"};
+          default: return {"Unknown wakeup cause"};
+          }
+
+
+
+output:
+  - platform: gpio
+    pin: GPIO21
+    inverted: True
+    id: user_led
+
+light:
+  - platform: binary
+    name: "User LED"
+    output: user_led
+    id: user_light
+    internal: true
+
+script:
+  - id: consider_deep_sleep
+    mode: queued
+    then:
+      - if:
+          condition:
+            - binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: "Deep sleep disabled by mailbox_prevent_deep_sleep switch"
+            - deep_sleep.prevent: deep_sleep_1
+            - light.turn_on: user_light
+          else:
+            - deep_sleep.allow: deep_sleep_1
+            - light.turn_off: user_light
+      - delay: 15s
+      - script.execute: consider_deep_sleep
