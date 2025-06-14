@@ -153,13 +153,6 @@ sun:
         - delay: !lambda 'return id(close_delay).state * 60000;'
         - cover.close: chicken_coop_door
 
-sensor:
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-    name: "WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
-
 text_sensor:
   - platform: sun
     name: Next Auto Open
