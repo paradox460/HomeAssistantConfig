@@ -7,7 +7,7 @@ import {
 import dayjs from "dayjs";
 import { setup, createActor, stateIn } from "xstate";
 
-export function Bambu({ hass, lifecycle }: TServiceParams) {
+export function Bambu({ hass, lifecycle, logger }: TServiceParams) {
   const printStatus = hass.refBy.id("sensor.h2d_0948ad532300342_print_status");
   const taskName = hass.refBy.id("sensor.h2d_0948ad532300342_task_name");
   const hmsErrors = hass.refBy.id("binary_sensor.h2d_0948ad532300342_hms_errors");
@@ -91,7 +91,12 @@ export function Bambu({ hass, lifecycle }: TServiceParams) {
 
       power_off: {
         on: {
-          turnOn: "idle"
+          turnOn: {
+            target: "idle",
+            actions: {
+              type: "resetPowerMeter",
+            },
+          },
         },
       },
 
