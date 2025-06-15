@@ -1,4 +1,5 @@
 import { sleep, TServiceParams } from "@digital-alchemy/core";
+import { createActor, raise, setup, stateIn } from "xstate";
 
 /**
  * Service that turns on the lights whenever a teamtracker team has a game in
@@ -30,50 +31,209 @@ import { sleep, TServiceParams } from "@digital-alchemy/core";
  * switched off automatically by my Holiday Lights automation
  * (holiday-lights.ts), so I don't need it.
  */
-export function SportsLights({ automation, hass, context, logger, synapse }: TServiceParams) {
+export function SportsLights({
+  hass,
+  context,
+  lifecycle,
+  synapse,
+}: TServiceParams) {
   const sun = hass.refBy.id("sun.sun");
   const sportsLightsSwitch = synapse.switch({
     context,
     icon: "mdi:football",
     name: "Sports Win LED automation",
-    is_on: true,
+    is_on: false,
+  });
+  const roofTrimSwitch = hass.refBy.id("light.roof_trim_main");
+  const roofTrimPreset = hass.refBy.id("select.roof_trim_preset");
+  const team = hass.refBy.id("sensor.team_tracker_utes_football");
+
+  const machine = setup({
+    types: {
+      context: {} as {},
+      events: {} as
+        | { type: "turnOffAutomation" }
+        | { type: "turnOnAutomation" }
+        | { type: "gameStart" }
+        | { type: "win" }
+        | { type: "sunset" }
+        | { type: "sunrise" }
+        | { type: "turnOffLights" }
+        | { type: "loss" }
+        | { type: "turnOnLights" }
+        | { type: "reset" },
+    },
+    actions: {
+      turnOnLights: function () {
+        roofTrimPreset.select_option({ option: "Utah" });
+      },
+      turnOffLights: function () {
+        roofTrimSwitch.turn_off();
+      },
+    },
+  }).createMachine({
+    context: {},
+    id: "SportsLights",
+    initial: "automationOff",
+    on: {
+      turnOffAutomation: {
+        target: "#SportsLights.automationOff",
+      },
+    },
+    states: {
+      automationOff: {
+        on: {
+          turnOnAutomation: "automationOn",
+        },
+      },
+
+      automationOn: {
+        type: "parallel",
+
+        states: {
+          gameState: {
+            initial: "pre",
+            states: {
+              pre: {
+                on: {
+                  gameStart: {
+                    target: "inGame",
+                  },
+                },
+                entry: raise({ type: "turnOffLights" }),
+              },
+              inGame: {
+                on: {
+                  win: {
+                    target: "win",
+                  },
+                  loss: {
+                    target: "pre",
+                  },
+                },
+                entry: raise({ type: "turnOnLights" }),
+              },
+              win: {
+                on: {
+                  reset: {
+                    target: "pre",
+                  },
+                },
+                entry: raise({ type: "turnOnLights" }),
+              },
+            },
+          },
+
+          sunState: {
+            initial: "aboveHorizon",
+            states: {
+              aboveHorizon: {
+                on: {
+                  sunset: {
+                    target: "belowHorizon",
+                  },
+                },
+              },
+              belowHorizon: {
+                on: {
+                  sunrise: {
+                    target: "aboveHorizon",
+                  },
+                },
+                entry: raise({ type: "turnOnLights" }),
+              },
+            },
+          },
+
+          lighting: {
+            initial: "lightsOff",
+
+            states: {
+              lightsOff: {
+                on: {
+                  turnOnLights: [
+                    {
+                      target: "scheduledLightsOn",
+                      guard: stateIn({
+                        automationOn: { sunState: "aboveHorizon" },
+                      }),
+                    },
+                    {
+                      target: "lightsOn",
+                    },
+                  ],
+                },
+                entry: [{ type: "turnOffLights" }],
+              },
+              scheduledLightsOn: {
+                on: {
+                  turnOnLights: {
+                    target: "lightsOn",
+                    guard: stateIn({
+                      automationOn: { sunState: "belowHorizon" },
+                    }),
+                  },
+                },
+              },
+              lightsOn: {
+                entry: [{ type: "turnOnLights" }],
+              },
+            },
+
+            on: {
+              turnOffLights: ".lightsOff",
+            },
+          },
+        },
+      },
+    },
   });
 
-  const roofTrimMain = hass.refBy.id("light.roof_trim_main");
-  const roofTrimPreset = hass.refBy.id("select.roof_trim_preset");
+  const actor = createActor(machine);
+  actor.start();
 
-  for (const team of hass.refBy.platform("teamtracker")) {
-    team.onUpdate((current, old) => {
-      logger.info("starting update");
-      if (!sportsLightsSwitch.is_on) return;
-      logger.info("sports lighs enabled, continuing");
-      if (current.state == "IN" && old.state == "PRE" && roofTrimMain.state != "on") {
-        logger.info("transition from PRE to IN");
-        if (sun.state == "below_horizon") {
-          logger.info("sun is set, turning on lights");
-          roofTrimPreset.select_option({ option: "Utah" });
+  lifecycle.onReady(() => {
+    if (sportsLightsSwitch.is_on) {
+      actor.send({ type: "turnOnAutomation" });
+    }
+    if (sun.state === "below_horizon") {
+      actor.send({ type: "sunset" });
+    }
+    if (team.state === "IN" || team.state === "POST") {
+      actor.send({ type: "gameStart" });
+    }
+    if (team.state === "POST") {
+      actor.send({ type: team.attributes.team_winner ? "win" : "loss" });
+    }
+  });
+
+  sportsLightsSwitch.onUpdate(({ state }) => {
+    actor.send({ type: state === "on" ? "turnOnAutomation" : "turnOffAutomation" });
+  });
+
+  team.onUpdate(({ state }) => {
+    switch (state) {
+      case "PRE":
+        actor.send({ type: "reset" });
+        break;
+      case "IN":
+        actor.send({ type: "gameStart" });
+        break;
+      case "POST":
+        if (team.attributes.team_winner) {
+          actor.send({ type: "win" });
         } else {
-          logger.info("sun is up, scheduling lights");
-          sleep(automation.solar.sunsetStart.toDate()).then(() => {
-            if (
-              (team.state == "IN" || (team.state == "POST" && team.attributes.team_winner)) &&
-              roofTrimMain.state != "on"
-            ) {
-              roofTrimPreset.select_option({ option: "Utah" });
-            }
-          });
+          actor.send({ type: "loss" });
         }
-      } else if (
-        current.state == "POST" &&
-        old.state == "IN" &&
-        roofTrimMain.state == "on" &&
-        roofTrimPreset.state == "Utah" &&
-        current.attributes.opponent_winner &&
-        sun.state == "below_horizon"
-      ) {
-        logger.info("we lost, turning lights from red to white");
-        roofTrimPreset.select_option({ option: "Default" });
-      }
-    });
-  }
+        break;
+    }
+  });
+
+  sun.onUpdate(({ state }) => {
+    if (state === "below_horizon") {
+      actor.send({ type: "sunset" });
+    } else {
+      actor.send({ type: "sunrise" });
+    }
+  });
 }
