@@ -36,8 +36,19 @@
     target:
       device_id: 2db35465e9f3e6b2b44f7869757965fc
   mode: single
+- id: '1749605313166'
+  alias: Bedside Vornado toggle
+  description: ''
+  triggers:
+  - trigger: event
+    event_type: lutron_event
+    event_data:
+      full_id: master_bedroom_unknown_button_4
+  conditions: []
+  actions:
+  - action: switch.toggle
     metadata: {}
     data: {}
     target:
-      entity_id: fan.office
+      entity_id: switch.vornado
   mode: single
