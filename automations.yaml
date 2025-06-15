@@ -22,18 +22,20 @@
 - id: '1713917815664'
   alias: Turn off office fan
   description: Turn off the office fan after 6 hours
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - fan.office
     to: 'on'
-    for:
-      hours: 6
-      minutes: 0
-      seconds: 0
-  condition: []
-  action:
-  - service: fan.turn_off
+    trigger: state
+  conditions: []
+  actions:
+  - action: dyson_local.set_timer
+    metadata: {}
+    data:
+      timer: 360
+    target:
+      device_id: 2db35465e9f3e6b2b44f7869757965fc
+  mode: single
     metadata: {}
     data: {}
     target:
