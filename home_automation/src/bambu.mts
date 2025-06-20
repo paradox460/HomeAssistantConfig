@@ -263,7 +263,7 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
   printerPower.onUpdate(({ state: newState }) => {
     switch (newState) {
       case "on":
-        actor.send({ type: "powerOn" });
+        actor.send({ type: "turnOn" });
         break;
       case "off":
         actor.send({ type: "turnOff" });
