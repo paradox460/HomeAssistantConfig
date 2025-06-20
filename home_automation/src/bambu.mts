@@ -7,12 +7,25 @@ import {
 import dayjs from "dayjs";
 import { setup, createActor, stateIn } from "xstate";
 
-export function Bambu({ hass, lifecycle, logger }: TServiceParams) {
+export function Bambu({ context, hass, lifecycle, logger, synapse }: TServiceParams) {
   const printStatus = hass.refBy.id("sensor.h2d_0948ad532300342_print_status");
   const taskName = hass.refBy.id("sensor.h2d_0948ad532300342_task_name");
   const hmsErrors = hass.refBy.id("binary_sensor.h2d_0948ad532300342_hms_errors");
   const printerPower = hass.refBy.id("switch.3d_printer");
   const ams_drying = hass.refBy.id("binary_sensor.3d_printer_ams_drying");
+
+  const stateMachineState = synapse.sensor({
+    context,
+    name: "3D Printer State Machine State",
+    icon: "mdi:state-machine",
+  });
+  const printerAutoOffTime = synapse.sensor({
+    context,
+    name: "3D Printer Auto Off Time",
+    icon: "mdi:timer-cog",
+  });
+
+  const delayOff = dayjs.duration(2, "hours");
 
   // MARK: Utility Functions
   function notify(
@@ -75,7 +88,7 @@ export function Bambu({ hass, lifecycle, logger }: TServiceParams) {
       },
     },
     delays: {
-      idleTimeout: dayjs.duration(2, "hours").asMilliseconds(),
+      idleTimeout: delayOff.asMilliseconds(),
     },
   }).createMachine({
     context: {},
@@ -114,6 +127,16 @@ export function Bambu({ hass, lifecycle, logger }: TServiceParams) {
           },
         },
 
+        entry: [
+          () => {
+            printerAutoOffTime.state = dayjs().add(delayOff).format();
+          },
+        ],
+        exit: [
+          () => {
+            printerAutoOffTime.state = "";
+          },
+        ],
         after: {
           idleTimeout: {
             target: "power_off",
@@ -215,6 +238,9 @@ export function Bambu({ hass, lifecycle, logger }: TServiceParams) {
 
   const actor = createActor(machine);
   actor.start();
+  actor.subscribe(snapshot => {
+    stateMachineState.state = JSON.stringify(snapshot.value);
+  });
 
   // MARK: Initial State Setup
   // Bit of a hack to get initial state loaded into the stateMachine, since things could be in progress as we start up
