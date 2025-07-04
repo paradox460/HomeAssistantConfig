@@ -217,3 +217,7 @@ script:
             lambda: "return id(auto_open).state && id(chicken_coop_door).position == COVER_CLOSED;"
           then:
             - cover.open: chicken_coop_door
+
+button:
+  - platform: restart
+    name: "Restart Chicken Coop"
