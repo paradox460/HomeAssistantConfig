@@ -25,11 +25,11 @@ export function HolidayLights({
   holidayLightSwitch.onUpdate(({ state }) => {
     switch (state) {
       case "on": {
-        for (const light of hass.refBy.label("holiday_lights")) light.turn_on();
+        hass.call.homeassistant.turn_on({label_id: "holiday_lights"});
         break;
       }
       case "off": {
-        for (const light of hass.refBy.label("holiday_lights")) light.turn_off();
+        hass.call.homeassistant.turn_off({label_id: "holiday_lights"});
         break;
       }
     }
@@ -39,19 +39,13 @@ export function HolidayLights({
 
   function maybeTurnOnLEDs() {
     if (ledAutomation.is_on) {
-      const holidayLEDs = hass.refBy.label("holiday_leds");
-      for (const l of holidayLEDs) {
-        l.turn_on();
-      }
+      hass.call.homeassistant.turn_on({label_id: "holiday_leds"});
     }
   }
 
   function automationTurnOff() {
-    const holidayLEDs = hass.refBy.label("holiday_leds");
     holidayLightSwitch.is_on = false;
-    for (const l of holidayLEDs) {
-      l.turn_off();
-    }
+    hass.call.homeassistant.turn_off({label_id: "holiday_leds"});
   }
 
   automation.solar.onEvent({
