@@ -19,7 +19,7 @@ cd "$DEPLOY_ROOT" || exit
 tar -czf "$BACKUP_ARCHIVE" "$DEPLOY_ROOT/."
 cd - || exit
 
-rm -rf "$DEPLOY_ROOT/node_modules" "$DEPLOY_ROOT/src" "$DEPLOY_ROOT/yarn.lock" "$DEPLOY_ROOT/package-lock.json"
+rm -rf "$DEPLOY_ROOT/node_modules" "$DEPLOY_ROOT/src" "$DEPLOY_ROOT/bun.lock" "$DEPLOY_ROOT/package-lock.json"
 
 cp -R package.json src tsconfig.json "$DEPLOY_ROOT"
 

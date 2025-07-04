@@ -1,5 +1,13 @@
 [tools]
-yarn = "4.5.0"
+bun = "latest"
+node = "latest"
+"npm:tsx" = "latest"
+
+[hooks]
+postinstall = "bun install --frozen-lockfile"
 
 [settings]
-idiomatic_version_file_enable_tools = ["node"]
+lockfile = true
+
+[settings.npm]
+bun = true
