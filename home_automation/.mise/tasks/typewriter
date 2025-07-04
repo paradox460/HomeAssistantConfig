@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE tools=[ "bun" ]
+mise x -- bun run type-writer --config="$HOME/.config/type_writer"
