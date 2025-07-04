@@ -68,23 +68,6 @@ export function HolidayLights({
     reset: CronExpression.EVERY_DAY_AT_3AM,
   });
 
-  automation.solar.onEvent({
-    eventName: "nightEnd",
-    exec: () => {
-      holidayLightSwitch.is_on = true;
-      maybeTurnOnLEDs();
-    },
-    offset: "-1H",
-  });
-
-  automation.solar.onEvent({
-    eventName: "sunriseEnd",
-    exec: () => {
-      automationTurnOff();
-    },
-    offset: "1H",
-  });
-
   // Slightly more resillient state syncs at boot
   lifecycle.onReady(() => {
     const holidayLights = hass.refBy.label("holiday_lights");
