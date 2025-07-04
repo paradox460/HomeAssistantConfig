@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+#MISE raw=true
+#MISE tools=[ "node", "tsx" ]
+tsx quickboot.mts
