@@ -31,3 +31,4 @@ known_devices.yaml
 # using curl for something so simple.
 # See gas_price.md for a generic version of the restful integration
 /rest/gas_price.yaml
+home_automation/src/hass
