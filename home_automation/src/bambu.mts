@@ -142,6 +142,7 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
             target: "power_off",
             actions: [
               () => {
+                logger.info("Printer idle for too long, turning off");
                 printerPower.turn_off();
               },
             ],
@@ -240,17 +241,21 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
   actor.start();
   actor.subscribe(snapshot => {
     stateMachineState.state = JSON.stringify(snapshot.value);
+    logger.info(`New snapshot state: ${snapshot.value}`);
   });
 
   // MARK: Initial State Setup
   // Bit of a hack to get initial state loaded into the stateMachine, since things could be in progress as we start up
   lifecycle.onReady(() => {
     if (printerPower.state === "on") {
+      logger.info("Printer is powered on, setting state machine to 'running'");
       actor.send({ type: "running" });
       if (printing(printStatus.state) || printStatus.state === "pause") {
+        logger.info("Printer is printing, setting state machine to 'startPrinting'");
         actor.send({ type: "startPrinting" });
       }
       if (ams_drying.state === "on") {
+        logger.info("Printer is drying, setting state machine to 'startDrying'");
         actor.send({ type: "startDrying" });
       }
     } else {
@@ -261,6 +266,7 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
   // MARK: Event Handlers
 
   printerPower.onUpdate(({ state: newState }) => {
+    logger.info(`Printer power updated: ${newState}`);
     switch (newState) {
       case "on":
         actor.send({ type: "turnOn" });
@@ -275,6 +281,7 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
   });
 
   printStatus.onUpdate(({ state: newState }) => {
+    logger.info(`Print status updated: ${newState}`);
     switch (newState) {
       case "init":
       case "prepare":
@@ -300,9 +307,11 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
   ams_drying.onUpdate(({ state: newState }) => {
     switch (newState) {
       case "on":
+        logger.info("AMS Drying started");
         actor.send({ type: "startDrying" });
         break;
       case "off":
+        logger.info("AMS Drying stopped");
         actor.send({ type: "stopDrying" });
         break;
       default:
