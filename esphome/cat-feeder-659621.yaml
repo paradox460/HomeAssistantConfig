@@ -33,27 +33,28 @@ output:
     id: motor_relay
     inverted: true
 
+event:
+  - platform: template
+    id: feed_event
+    name: Feed Event
+    event_types:
+      - automated_feed
+      - manual_feed
+
 button:
   - platform: output
-    name: "Feed Cat"
-    id: feed_cat
+    id: feed_cycle
     output: motor_relay
     duration: 750ms
-    on_press:
-      then:
-        - text_sensor.template.publish:
-            id: last_time
-            state: !lambda |-
-              auto time = id(ha_time).now().timestamp;
-              char str[20];
-              strftime(str, sizeof(str), "%Y-%m-%d %H:%M:%S", localtime(&time));
-              return str;
-
-text_sensor:
+    internal: true
   - platform: template
-    name: "Last feed time"
-    id: last_time
-    entity_category: diagnostic
+    id: feed_cat
+    name: "Feed Cat"
+    on_press:
+      - button.press: feed_cycle
+      - event.trigger:
+          id: feed_event
+          event_type: manual_feed
 
 
 time:
@@ -64,4 +65,7 @@ time:
         minutes: 0
         seconds: 0
         then:
-          - button.press: feed_cat
+          - button.press: feed_cycle
+          - event.trigger:
+              id: feed_event
+              event_type: automated_feed
