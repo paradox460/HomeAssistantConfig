@@ -44,7 +44,7 @@ door_open:
   name: Door Open
   done_message: clear_notification
   entity_id: binary_sensor.door_left_open
-  repeat: [5, 10]
+  repeat: [5, 10, 30]
   skip_first: true
   can_acknowledge: true
   title: >-
