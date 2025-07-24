@@ -58,3 +58,17 @@ door_open:
     - all
   data:
     tag: door-alert
+door_unlocked:
+  name: Door Unlocked
+  done_message: clear_notification
+  entity_id: lock.front_door_deadbolt
+  repeat: [5, 10, 30]
+  skip_first: true
+  can_acknowledge: true
+  title: Front Door Unlocked
+  message: "The front door has been left unlocked."
+
+  notifiers:
+    - all
+  data:
+    tag: door-lock-alert
