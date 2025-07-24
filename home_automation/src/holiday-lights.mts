@@ -7,6 +7,7 @@ export function HolidayLights({
   context,
   hass,
   lifecycle,
+  logger,
   scheduler,
   synapse,
 }: TServiceParams) {
@@ -44,6 +45,7 @@ export function HolidayLights({
   }
 
   function automationTurnOff() {
+    logger.info("Turning off all holiday lights and LEDs");
     holidayLightSwitch.is_on = false;
     hass.call.homeassistant.turn_off({ label_id: "holiday_leds" });
   }
@@ -51,6 +53,7 @@ export function HolidayLights({
   automation.solar.onEvent({
     eventName: "sunsetStart",
     exec: () => {
+      logger.info(`Turning on Holiday LEDs at sunset`);
       holidayLightSwitch.is_on = true;
       maybeTurnOnLEDs();
     },
