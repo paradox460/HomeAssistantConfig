@@ -5,6 +5,7 @@ template:
         event_type: bubble_card_update_modules
     sensor:
       - name: "Bubble Card Modules"
+        unique_id: 69D182A7-0329-4741-8299-25C2CD3F5B87
         state: "saved"
         icon: "mdi:puzzle"
         attributes:
