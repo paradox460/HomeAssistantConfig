@@ -5,7 +5,7 @@
   "files.associations": {
     "*.yaml": "home-assistant"
   },
-  "erlang.erlangPath": "/Users/jeffsandberg/.local/share/mise/installs/erlang/27.2.1/bin",
+  "erlang.erlangPath": "/Users/jeffsandberg/.local/share/mise/installs/erlang/28.0.2/bin",
   "debug.javascript.defaultRuntimeExecutable": {
     "pwa-node": "/Users/jeffsandberg/.local/share/mise/shims/node"
   },

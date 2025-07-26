@@ -1,17 +1,19 @@
 [tools.bun]
-version = "1.2.18"
+version = "1.2.19"
 backend = "core:bun"
 
-[tools.bun.checksums]
-"bun-darwin-aarch64.zip" = "sha256:cca9eb52762bbd81eb894fc8275bba0a0654e81aad318d19869854a30f3769a2"
-"bun-linux-x64-baseline.zip" = "sha256:c7504c216d8729105d1781385665e3ac2c63debdbb5de4efdc12e2d6c4a6cb4a"
+[tools.bun.platforms.macos-arm64]
+checksum = "blake3:1d033789f9a12ddcc7b1e03c675af1dfcbf770aa7fbfa2c49dc6599e591e4779"
+size = 21573514
 
 [tools.node]
-version = "24.3.0"
+version = "24.4.1"
 backend = "core:node"
 
-[tools.node.checksums]
-"node-v24.3.0-linux-x64.tar.gz" = "sha256:bbeb5fb8113b44fc30f5a5887dbc0ab66af8e56139f5f9fbe7c7a1aa056246dc"
+[tools.node.platforms.macos-arm64]
+checksum = "sha256:55a772a600b7bdafb4b35945b3935090e27aff9934b4c11b281220fcd99139d7"
+size = 48848365
+url = "https://nodejs.org/dist/v24.4.1/node-v24.4.1-darwin-arm64.tar.gz"
 
 [tools."npm:tsx"]
 version = "4.20.3"
