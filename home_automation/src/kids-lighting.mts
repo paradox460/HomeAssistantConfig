@@ -1,6 +1,6 @@
 import { TServiceParams } from "@digital-alchemy/core";
 
-export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
+export function KidsLighting({ automation, hass, logger, scheduler }: TServiceParams) {
   function isAway(): boolean {
     return hass.refBy.id("binary_sensor.home_presence").state !== "on";
   }
@@ -10,6 +10,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   automation.solar.onEvent({
     eventName: "sunsetStart",
     exec() {
+      logger.info("Kids lighting: Sunset event triggered");
       if (isAway()) {
         return;
       }
@@ -31,6 +32,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   automation.solar.onEvent({
     eventName: "sunriseEnd",
     exec() {
+      logger.info("Kids lighting: Sunrise event triggered");
       hass.call.light.turn_off({
         label_id: "kids"
       });
@@ -41,6 +43,7 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   // Bedtime
   scheduler.cron({
     exec() {
+      logger.info("Kids lighting: Bedtime event triggered");
       if (isAway()) {
         return;
       }
