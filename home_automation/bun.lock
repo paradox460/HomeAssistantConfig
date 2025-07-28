@@ -20,6 +20,7 @@
         "xstate": "^5.20.1",
       },
       "devDependencies": {
+        "@digital-alchemy/type-writer": "^25.7.26",
         "@eslint/compat": "^1.3.1",
         "@eslint/eslintrc": "^3.3.1",
         "@eslint/js": "^9.32.0",
@@ -34,7 +35,6 @@
         "eslint-plugin-prettier": "^5.5.3",
         "eslint-plugin-unicorn": "^60.0.0",
         "figlet-cli": "^0.3.0",
-        "@digital-alchemy/type-writer": "github:Digital-Alchemy-TS/type-writer#fix/nested_comments",
         "globals": "^16.3.0",
         "lolcatjs": "^2.4.3",
         "nodemon": "^3.1.10",
@@ -62,7 +62,7 @@
 
     "@digital-alchemy/synapse": ["@digital-alchemy/synapse@25.3.1", "", { "dependencies": { "better-sqlite3": "^11.9.0" }, "peerDependencies": { "@digital-alchemy/core": "*", "@digital-alchemy/hass": "*", "dayjs": "*", "uuid": "*" } }, "sha512-W68HycPvGmV6DoT7rndOGzPB19QMLtXfTYRr1YwoHjQoiWXtozcF0ZVa23+AQ44P9iOxsTXH8C7RGs9aLXQ81A=="],
 
-    "@digital-alchemy/type-writer": ["@digital-alchemy/type-writer@github:Digital-Alchemy-TS/type-writer#fa34d26", { "dependencies": { "js-yaml": "^4.1.0", "prettier": "^3.6.2", "type-fest": "^4.41.0", "typescript": "^5.8.3" }, "peerDependencies": { "@digital-alchemy/core": "*", "@digital-alchemy/hass": "*" }, "bin": "./scripts/run.sh" }, "Digital-Alchemy-TS-type-writer-fa34d26"],
+    "@digital-alchemy/type-writer": ["@digital-alchemy/type-writer@25.7.26", "", { "dependencies": { "js-yaml": "^4.1.0", "prettier": "^3.6.2", "type-fest": "^4.41.0", "typescript": "^5.8.3" }, "peerDependencies": { "@digital-alchemy/core": "*", "@digital-alchemy/hass": "*" }, "bin": { "type-writer": "scripts/run.sh" } }, "sha512-M+RnHyOsAloVqXXElJEf51dHzf5BVUcm4TiySo9HM/Tp2g9rbwhfWWsqTMCOJrjw4Tt4cmdGhhYh2Rr057Xt8A=="],
 
     "@eslint-community/eslint-utils": ["@eslint-community/eslint-utils@4.7.0", "", { "dependencies": { "eslint-visitor-keys": "^3.4.3" }, "peerDependencies": { "eslint": "^6.0.0 || ^7.0.0 || >=8.0.0" } }, "sha512-dyybb3AcajC7uha6CvhdVRJqaKyn7w2YKqKyAN37NKYgZT36w+iRb0Dymmc5qEJ549c/S31cMMSFd75bteCpCw=="],
 
