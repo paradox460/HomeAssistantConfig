@@ -15,7 +15,7 @@ import { KidsLighting } from "./kids-lighting.mts";
 import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
 import { Traccar } from "./traccar.mts";
-import { SportsLights } from "./sports-lights.mts";
+// import { SportsLights } from "./sports-lights.mts";
 
 type Environments = "development" | "production" | "test";
 
@@ -60,7 +60,7 @@ const HOME_AUTOMATION = CreateApplication({
     Mailbox,
     Office,
     Traccar,
-    SportsLights,
+    // SportsLights,
     // WarmChickens,
   },
 });
