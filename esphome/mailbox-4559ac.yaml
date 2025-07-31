@@ -128,13 +128,13 @@ sensor:
     entity_category: "diagnostic"
     lambda: |-
       auto bat = id(battery_voltage).state;
-      if (bat < 3.0) {
+      if (bat < 3.5) {
               return 0.0;
       } else if (bat > 4.2) {
         return 100.0;
       } else {
-        // Linear interpolation between 3.0V and 4.2V
-        return (bat - 3.0) * (100.0 / (4.2 - 3.0));
+        // Linear interpolation between 3.5V and 4.2V
+        return (bat - 3.5) * (100.0 / (4.2 - 3.5));
       }
 
 text_sensor:
