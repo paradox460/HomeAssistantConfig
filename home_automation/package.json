@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@digital-alchemy/automation": "^25.3.1",
+    "@digital-alchemy/automation": "github:Digital-Alchemy-TS/automation/",
     "@digital-alchemy/core": "^25.7.1",
     "@digital-alchemy/fastify-extension": "^25.3.3",
     "@digital-alchemy/hass": "^25.7.1",
