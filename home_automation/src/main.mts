@@ -77,7 +77,7 @@ setImmediate(
     await HOME_AUTOMATION.bootstrap({
       bootLibrariesFirst: true,
       configuration: {
-        boilerplate: { LOG_LEVEL: "debug" },
+        boilerplate: { LOG_LEVEL: "trace" },
       },
     }),
 );
