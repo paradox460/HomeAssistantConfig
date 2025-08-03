@@ -25,6 +25,12 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
     icon: "mdi:timer-cog",
   });
 
+  const automationToggle = synapse.switch({
+    context,
+    name: "3D Printer Automation",
+    icon: "mdi:printer-3d",
+  });
+
   const delayOff = dayjs.duration(2, "hours");
 
   // MARK: Utility Functions
@@ -143,7 +149,11 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
             actions: [
               () => {
                 logger.info("Printer idle for too long, turning off");
-                printerPower.turn_off();
+                if (automationToggle.is_on) {
+                  printerPower.turn_off();
+                } else {
+                  logger.info("Automation turned off, not turning off printer");
+                }
               },
             ],
           },
