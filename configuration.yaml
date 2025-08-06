@@ -3,6 +3,8 @@ default_config:
 
 homeassistant:
   packages: !include_dir_named packages/
+  allowlist_external_dirs:
+    - /tmp
 
 # Text to speech
 tts:
