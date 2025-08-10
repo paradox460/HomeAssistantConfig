@@ -7,6 +7,7 @@ import { LIB_SYNAPSE } from "@digital-alchemy/synapse";
 
 import { Away } from "./away.mts";
 import { Bambu } from "./bambu.mts";
+import { BatteryMinder } from "./battery-minder.mts";
 import { BedHeater } from "./bed-heater.mts";
 // import { CoolChickens } from "./cool-chickens.mts";
 // import { WarmChickens } from "./warm-chickens.mts";
@@ -53,6 +54,7 @@ const HOME_AUTOMATION = CreateApplication({
   services: {
     Away,
     Bambu,
+    BatteryMinder,
     BedHeater,
     // CoolChickens,
     HolidayLights,
