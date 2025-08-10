@@ -35,6 +35,7 @@ export function Away({ hass, context, synapse, logger, lifecycle }: TServicePara
   const awayableEntities = hass.refBy.label("awayable");
   const hvacAway = hass.refBy.id("switch.sandberg_system_manual_away_mode");
   const homeZone = hass.refBy.id("zone.home");
+  const homeNearestDistance = hass.refBy.id("sensor.home_nearest_distance");
 
   function createScene() {
     return hass.call.scene.create({
@@ -94,11 +95,13 @@ export function Away({ hass, context, synapse, logger, lifecycle }: TServicePara
     }
   });
 
-  hass.refBy.id("sensor.home_nearest_distance").onUpdate(({ state }) => {
+  homeNearestDistance.onUpdate(({ state }) => {
     if (state >= HOME_RADIUS) {
       triggerAwayMode();
     } else {
-      triggerHomeMode();
+      if (hass.refBy.id("zone.church").state == 0) {
+        triggerHomeMode();
+      }
     }
   });
 
