@@ -15,6 +15,7 @@ import { HolidayLights } from "./holiday-lights.mts";
 import { KidsLighting } from "./kids-lighting.mts";
 import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
+import { Theater } from "./theater.mts";
 import { Traccar } from "./traccar.mts";
 import { SportsLights } from "./sports-lights.mts";
 
@@ -61,6 +62,7 @@ const HOME_AUTOMATION = CreateApplication({
     KidsLighting,
     Mailbox,
     Office,
+    Theater,
     Traccar,
     SportsLights,
     // WarmChickens,
