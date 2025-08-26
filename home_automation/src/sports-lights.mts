@@ -31,12 +31,7 @@ import { createActor, raise, setup, stateIn } from "xstate";
  * switched off automatically by my Holiday Lights automation
  * (holiday-lights.ts), so I don't need it.
  */
-export function SportsLights({
-  hass,
-  context,
-  lifecycle,
-  synapse,
-}: TServiceParams) {
+export function SportsLights({ hass, context, lifecycle, synapse }: TServiceParams) {
   const sun = hass.refBy.id("sun.sun");
   const sportsLightsSwitch = synapse.switch({
     context,
@@ -44,25 +39,16 @@ export function SportsLights({
     name: "Sports Win LED automation",
     is_on: false,
   });
+  const stateMachineState = synapse.sensor({
+    context,
+    name: "Sports Lights state machine state",
+    entity_category: "diagnostic",
+  });
   const roofTrimSwitch = hass.refBy.id("light.roof_trim_main");
   const roofTrimPreset = hass.refBy.id("select.roof_trim_preset");
   const team = hass.refBy.id("sensor.team_tracker_utes_football");
 
   const machine = setup({
-    types: {
-      context: {} as {},
-      events: {} as
-        | { type: "turnOffAutomation" }
-        | { type: "turnOnAutomation" }
-        | { type: "gameStart" }
-        | { type: "win" }
-        | { type: "sunset" }
-        | { type: "sunrise" }
-        | { type: "turnOffLights" }
-        | { type: "loss" }
-        | { type: "turnOnLights" }
-        | { type: "reset" },
-    },
     actions: {
       turnOnLights: function () {
         roofTrimPreset.select_option({ option: "Utah" });
@@ -191,6 +177,9 @@ export function SportsLights({
 
   const actor = createActor(machine);
   actor.start();
+  actor.subscribe(snapshot => {
+    stateMachineState.state = JSON.stringify(snapshot.value);
+  });
 
   lifecycle.onReady(() => {
     if (sportsLightsSwitch.is_on) {
