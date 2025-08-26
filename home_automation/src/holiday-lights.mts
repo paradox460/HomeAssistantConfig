@@ -11,9 +11,13 @@ export function HolidayLights({
   scheduler,
   synapse,
 }: TServiceParams) {
+  const subDevice = synapse.device.register("holiday_lights_automations", {
+    name: "Holiday Lights Automation",
+  });
   const ledAutomation = synapse.switch({
     context,
     name: "Holiday LED Automation",
+    device_id: subDevice,
   });
 
   toggleIcons(ledAutomation, "mdi:led-strip-variant", "mdi:led-strip-variant-off");
@@ -21,6 +25,7 @@ export function HolidayLights({
   const holidayLightSwitch = synapse.switch({
     context,
     name: "Holiday Lights",
+    device_id: subDevice,
   });
 
   holidayLightSwitch.onUpdate(({ state }) => {

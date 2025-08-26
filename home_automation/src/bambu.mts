@@ -14,21 +14,27 @@ export function Bambu({ context, hass, lifecycle, logger, synapse }: TServicePar
   const printerPower = hass.refBy.id("switch.3d_printer");
   const ams_drying = hass.refBy.id("binary_sensor.3d_printer_ams_drying");
 
+  const subDevice = synapse.device.register("3d_printer_automation", {
+    name: "3D Printer Automation"
+  })
   const stateMachineState = synapse.sensor({
     context,
     name: "3D Printer State Machine State",
     icon: "mdi:state-machine",
+    device_id: subDevice,
   });
   const printerAutoOffTime = synapse.sensor({
     context,
     name: "3D Printer Auto Off Time",
     icon: "mdi:timer-cog",
+    device_id: subDevice,
   });
 
   const automationToggle = synapse.switch({
     context,
     name: "3D Printer Automation",
     icon: "mdi:printer-3d",
+    device_id: subDevice,
   });
 
   const delayOff = dayjs.duration(2, "hours");
