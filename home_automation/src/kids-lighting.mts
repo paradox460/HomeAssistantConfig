@@ -2,7 +2,7 @@ import { TServiceParams } from "@digital-alchemy/core";
 
 export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
   function isAway(): boolean {
-    return hass.refBy.id("binary_sensor.home_presence").state !== "on";
+    return hass.refBy.id("binary_sensor.home_presence").state === "off";
   }
 
   // Sunset
