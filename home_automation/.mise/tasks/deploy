@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
-# mise description="trigger a yarn build, wait a bit for syncthing, and then restart the addon"
-# mise depends=["build"]
+#MISE description="trigger a yarn build, wait a bit for syncthing, and then restart the addon"
+#MISE depends=["build"]
 
 echo "Waiting for Syncthing"
 sleep 30

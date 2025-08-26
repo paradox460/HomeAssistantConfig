@@ -1,4 +1,4 @@
 #!/usr/bin/env fish
-# mise description="Runs bun build, lazy bones"
+#MISE description="Runs bun build, lazy bones"
 
 bun run build
