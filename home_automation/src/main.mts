@@ -17,7 +17,6 @@ import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
 import { Theater } from "./theater.mts";
 import { Traccar } from "./traccar.mts";
-import { SportsLights } from "./sports-lights.mts";
 
 type Environments = "development" | "production" | "test";
 
@@ -64,7 +63,6 @@ const HOME_AUTOMATION = CreateApplication({
     Office,
     Theater,
     Traccar,
-    SportsLights,
     // WarmChickens,
   },
 });
