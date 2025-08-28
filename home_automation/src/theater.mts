@@ -67,7 +67,7 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
             brightness_pct: previousBrightness,
           });
           motionSensorLight.turn_off();
-        } else {
+        } else if (context.previouslyVacant && theaterLights.state === "off") {
           theaterLights.turn_on({
             transition: 3,
           });
@@ -90,12 +90,14 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
       context: {
         synced: boolean;
         becomingVacant: boolean;
+        previouslyVacant: boolean;
       };
     },
   }).createMachine({
     context: {
       synced: false,
       becomingVacant: false,
+      previouslyVacant: false,
     },
 
     id: "Theater Vacancy",
@@ -105,6 +107,7 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
         target: ".vacant",
         guard: not("disabled"),
       },
+
       disable: {
         target: ".disabled",
         actions: [assign({ synced: false })],
@@ -126,13 +129,14 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
           ],
         },
       },
+
       active: {
         type: "parallel",
         always: {
           target: "idle",
           guard: "idle",
         },
-        entry: ["turnOn", assign({ becomingVacant: false })],
+        entry: ["turnOn", assign({ becomingVacant: false, previouslyVacant: false })],
         states: {
           tv: {
             initial: "idle",
@@ -231,7 +235,7 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
       },
 
       vacant: {
-        entry: ["turnAllOff", assign({ becomingVacant: false })],
+        entry: ["turnAllOff", assign({ becomingVacant: false, previouslyVacant: true })],
 
         on: {
           binaryOccupied: "active.binaryOccupancy.occupied",
