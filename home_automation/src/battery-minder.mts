@@ -26,7 +26,11 @@ export function BatteryMinder({ hass, scheduler }: TServiceParams) {
     try {
       let message = entities
         .map(e => {
-          return `• ${e.attributes.friendly_name}: ${e.state}`;
+          if (is.number(e.state)) {
+            return `• ${e.attributes.friendly_name}: ${Math.round(e.state)}%`;
+          } else {
+            return `• ${e.attributes.friendly_name} is low`;
+          }
         })
         .join("\n");
 
