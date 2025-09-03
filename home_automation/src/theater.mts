@@ -10,6 +10,9 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
     "sensor.apollo_r_pro_1_w_352144_ld2450_presence_target_count",
   );
 
+  // Couch Sensor
+  const couchPresence = hass.refBy.id("binary_sensor.bed_presence_2d1e78_couch_occupied_either");
+
   // TV entity
   const tv = hass.refBy.id("media_player.theater_screen");
 
@@ -83,7 +86,12 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
       hasPresence: () => binaryPresence.state === "on" || countPresence.state > 0,
       away: () => homePresence.state === "off",
       idle: stateIn({
-        active: { tv: "idle", binaryOccupancy: "unoccupied", countOccupancy: "unoccupied" },
+        active: {
+          tv: "idle",
+          binaryOccupancy: "unoccupied",
+          countOccupancy: "unoccupied",
+          couchOccupancy: "unoccupied",
+        },
       }),
     },
     types: {} as {
@@ -183,6 +191,21 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
               },
             },
           },
+          couchOccupancy: {
+            initial: "unoccupied",
+            states: {
+              unoccupied: {
+                on: {
+                  couchOccupied: "occupied",
+                },
+              },
+              occupied: {
+                on: {
+                  couchUnoccupied: "unoccupied",
+                },
+              },
+            },
+          },
         },
       },
 
@@ -231,6 +254,7 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
           countOccupied: "active.countOccupancy.occupied",
           binaryOccupied: "active.binaryOccupancy.occupied",
           tvActive: "active.tv.watching",
+          couchOccupied: "active.couchOccupancy.occupied",
         },
       },
 
@@ -241,6 +265,7 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
           binaryOccupied: "active.binaryOccupancy.occupied",
           countOccupied: "active.countOccupancy.occupied",
           tvActive: "active.tv.watching",
+          couchOccupied: "active.couchOccupancy.occupied",
         },
       },
     },
@@ -286,6 +311,13 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
     } else if (["paused", "idle", "off"].includes(tv.state)) {
       actor.send({ type: "tvIdle" });
     }
+
+    // Sync couch occupancy
+    if (couchPresence.state === "on") {
+      actor.send({ type: "couchOccupied" });
+    } else if (couchPresence.state === "off") {
+      actor.send({ type: "couchUnoccupied" });
+    }
   }
 
   lifecycle.onReady(() => {
@@ -316,6 +348,14 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
       actor.send({ type: "tvActive" });
     } else if (["paused", "idle", "off"].includes(state)) {
       actor.send({ type: "tvIdle" });
+    }
+  });
+
+  couchPresence.onUpdate(({ state }) => {
+    if (state === "on") {
+      actor.send({ type: "couchOccupied" });
+    } else if (state === "off") {
+      actor.send({ type: "couchUnoccupied" });
     }
   });
 
