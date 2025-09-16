@@ -25,3 +25,4 @@
 **/secrets.yaml
 ip_bans.yaml
 known_devices.yaml
+home_automation/src/secrets.mts

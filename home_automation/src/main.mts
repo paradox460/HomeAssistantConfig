@@ -17,6 +17,7 @@ import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
 import { Theater } from "./theater.mts";
 import { Traccar } from "./traccar.mts";
+import { WaterSoftener } from "./water-softener.mts";
 
 type Environments = "development" | "production" | "test";
 
@@ -63,6 +64,7 @@ const HOME_AUTOMATION = CreateApplication({
     Office,
     Theater,
     Traccar,
+    WaterSoftener
     // WarmChickens,
   },
 });

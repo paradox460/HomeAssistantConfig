@@ -23,6 +23,7 @@
     "@digital-alchemy/hass": "^25.7.1",
     "@digital-alchemy/mqtt-extension": "^25.1.1",
     "@digital-alchemy/synapse": "^25.3.1",
+    "@types/bun": "^1.2.22",
     "better-sqlite3": "^12.2.0",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.1",
