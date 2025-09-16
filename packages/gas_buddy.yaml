@@ -1,0 +1,21 @@
+# Doesn't work as of Sep 16, 2025, need to investigate alternatives
+# rest:
+#   - scan_interval: 3600
+#     resource: https://www.gasbuddy.com/graphql
+#     method: POST
+#     headers:
+#       Content-Type: application/json
+#     payload: |
+#       {
+#         "variables": {},
+#         "query": "query { locationBySearchTerm(search: \"zip\") { trends { today todayLow } } }"
+#       }
+#     sensor:
+#       - unique_id: average_gas_price
+#         name: Average Gas Price
+#         icon: mdi:gas-station
+#         unit_of_measurement: USD
+#         state_class: measurement
+#         force_update: true
+#         value_template: "{{ value_json.data.locationBySearchTerm.trends.0.today | float | round(3, 'ceil')}}"
+#         availability: "{{ value_json.data.locationBySearchTerm.trends.0.today | float > 0 }}"

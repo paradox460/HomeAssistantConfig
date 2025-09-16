@@ -24,7 +24,6 @@ frontend:
     - /hacsfiles/lovelace-card-mod/card-mod.js
     - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
 
-rest: !include_dir_merge_list rest/
 template: !include_dir_merge_list templates/
 sensor: !include_dir_merge_list sensors/
 utility_meter: !include utility_meter.yaml

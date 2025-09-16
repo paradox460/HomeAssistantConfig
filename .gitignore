@@ -25,10 +25,3 @@
 **/secrets.yaml
 ip_bans.yaml
 known_devices.yaml
-
-# Sadly, we have to ignore the gas price automation because it's not currently
-# possible to have template variables in rest payloads, and I don't feel like
-# using curl for something so simple.
-# See gas_price.md for a generic version of the restful integration
-/rest/gas_price.yaml
-home_automation/src/hass
