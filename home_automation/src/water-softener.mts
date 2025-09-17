@@ -144,6 +144,36 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       name: "Power Outage Count",
       device_id,
     }),
+    water_counter_gals: synapse.sensor({
+      context,
+      name: "Water Counter Gals",
+      unit_of_measurement: "gal",
+      device_class: "water",
+      state_class: "total_increasing",
+      device_id,
+    }),
+    total_salt_use_lbs: synapse.sensor({
+      context,
+      name: "Total Salt Use Lbs",
+      unit_of_measurement: "lbs",
+      device_id,
+    }),
+    total_outlet_water_gals: synapse.sensor({
+      context,
+      name: "Total Outlet Water Gals",
+      unit_of_measurement: "gal",
+      device_class: "water",
+      state_class: "total_increasing",
+      device_id,
+    }),
+    total_untreated_water_gals: synapse.sensor({
+      context,
+      name: "Total Untreated Water Gals",
+      unit_of_measurement: "gal",
+      device_class: "water",
+      state_class: "total_increasing",
+      device_id,
+    }),
   };
 
   async function login() {
