@@ -26,3 +26,5 @@
 ip_bans.yaml
 known_devices.yaml
 home_automation/src/secrets.mts
+home_automation/src/hass
+home_automation/src/hass/**/*
