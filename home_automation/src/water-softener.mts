@@ -147,12 +147,14 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
   };
 
   async function login() {
+    const auth = structuredClone(hydrolinkAuth);
+    delete auth.deviceId;
     const response = await fetch("https://api.hydrolinkhome.com/v1/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(hydrolinkAuth),
+      body: JSON.stringify(auth),
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
@@ -177,7 +179,7 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
     }
 
     const response = await fetch(
-      "https://api.hydrolinkhome.com/v1/devices?all=false&per_page=200",
+      `https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/detail-or-summary`,
       {
         method: "GET",
         headers: {
@@ -193,26 +195,24 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       throw new Error(`Network response was not ok, status ${response.status}`);
     }
     const json: any = await response.json();
-    json?.data?.forEach((device) => {
-      if (device.system_type !== "demand_softener") {
-        return;
-      }
+    if (json.device.system_type !== "demand_softener") {
+      return;
+    }
 
-      for (const [key, sensor] of Object.entries(sensors)) {
-        if (!is.undefined(device.properties[key]?.value)) {
-          let value;
-          switch (key) {
-            case "capacity_remaining_percent":
-              value = device.properties[key].value / 10.0;
-              break;
-            default:
-              value = device.properties[key].value;
-              break;
-          }
-          sensor.state = value;
+    for (const [key, sensor] of Object.entries(sensors)) {
+      if (!is.undefined(json.device.properties[key]?.value)) {
+        let value;
+        switch (key) {
+          case "capacity_remaining_percent":
+            value = json.device.properties[key].value / 10.0;
+            break;
+          default:
+            value = json.device.properties[key].value;
+            break;
         }
+        sensor.state = value;
       }
-    });
+    }
   }
 
   lifecycle.onReady(async () => {
