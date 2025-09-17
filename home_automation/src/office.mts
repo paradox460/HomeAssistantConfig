@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 export function Office({ hass, lifecycle }: TServiceParams) {
   const officeSwitch = hass.refBy.id("light.office_ceiling");
-  const officeWled = hass.refBy.id("light.office_wled_dig_uno");
+  const officeWled = hass.refBy.id("light.office_wled_dig2go");
 
   officeSwitch.onUpdate(async ({ state: state }) => {
     if (state === "on") {
