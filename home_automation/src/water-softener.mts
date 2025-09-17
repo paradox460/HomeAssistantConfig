@@ -1,4 +1,4 @@
-import { is, TServiceParams } from "@digital-alchemy/core";
+import { is, sleep, TServiceParams } from "@digital-alchemy/core";
 import { hydrolinkAuth } from "./secrets.mts";
 
 export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }: TServiceParams) {
@@ -186,11 +186,7 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       },
       body: JSON.stringify(auth),
       signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) {
-      logger.warn(`Login failed, status ${response.status}`);
-      throw new Error(`Network response was not ok, status ${response.status}`);
-    }
+    }).then(response => handleFailure(response, "login"));
 
     response.headers.getSetCookie().find(cookieString => {
       let cookies = new Bun.CookieMap(cookieString);
@@ -208,6 +204,19 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       await login();
     }
 
+    // The hydrolink api seems to only update from the device when the live
+    // endpoint is called, so we call it, wait 20s, then call the
+    // detail-or-summary endpoint
+    await fetch(`https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/live`, {
+      method: "GET",
+      headers: {
+        Cookie: `hhfoffoezyzzoeibwv=${authCookie.get("hhfoffoezyzzoeibwv")}`,
+      },
+      signal: AbortSignal.timeout(10_000),
+    }).then(response => handleFailure(response, "fetch live"));
+
+    await sleep(20_000);
+
     const response = await fetch(
       `https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/detail-or-summary`,
       {
@@ -217,13 +226,8 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
         },
         signal: AbortSignal.timeout(10_000),
       },
-    );
-    if (!response.ok) {
-      // Force Reauth next time
-      authCookie = new Bun.CookieMap();
-      logger.warn(`Failed to fetch devices, status ${response.status}`);
-      throw new Error(`Network response was not ok, status ${response.status}`);
-    }
+    ).then(response => handleFailure(response, "fetch detail-or-summary"));
+
     const json: any = await response.json();
     if (json.device.system_type !== "demand_softener") {
       return;
@@ -243,6 +247,16 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
         sensor.state = value;
       }
     }
+  }
+
+  function handleFailure(response, name) {
+    if (!response.ok) {
+      // Force Reauth next time
+      authCookie = new Bun.CookieMap();
+      logger.warn(`${name} failed, status ${response.status}`);
+      throw new Error(`Network response was not ok, status ${response.status}`);
+    }
+    return response;
   }
 
   lifecycle.onReady(async () => {
