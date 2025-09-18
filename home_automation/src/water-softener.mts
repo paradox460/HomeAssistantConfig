@@ -4,6 +4,51 @@ import { hydrolinkAuth } from "./secrets.mts";
 export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }: TServiceParams) {
   let authCookie = new Bun.CookieMap();
 
+  class WaterSoftenerSocket {
+    private messageCount = 0;
+    private url: string;
+    private closedPromise: {
+      promise: Promise<void>;
+      resolve: () => void;
+      reject: (reason?: any) => void;
+    };
+    private ws: WebSocket;
+
+    constructor(url: string) {
+      this.url = url;
+      this.closedPromise = Promise.withResolvers();
+      this.ws = new WebSocket(this.url);
+      // Close the promise and socket after 20 seconds
+      setTimeout(() => {
+        logger.warn("WebSocket timeout, closing connection");
+        this.ws.close();
+        this.closedPromise.resolve();
+      }, 20_000);
+      this.ws.addEventListener("open", () => {
+        logger.debug("WebSocket connection opened");
+      });
+      this.ws.addEventListener("close", event => {
+        logger.debug(`WebSocket connection closed, code=${event.code}, reason=${event.reason}`);
+        this.closedPromise.resolve();
+      });
+      this.ws.addEventListener("message", event => {
+        logger.debug(`WebSocket message received: ${event.data}`);
+        this.messageCount += 1;
+        if (this.messageCount >= 17) {
+          this.ws.close();
+          this.closedPromise.resolve();
+        }
+      });
+      this.ws.addEventListener("error", error => {
+        logger.error(`WebSocket error: ${error}`);
+      });
+    }
+
+    async waitForClose() {
+      return this.closedPromise.promise;
+    }
+  }
+
   const device_id = synapse.device.register("water_softener", {
     name: "Water Softener",
   });
@@ -199,23 +244,32 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
     return;
   }
 
+  async function fetchWebsocket() {
+    // The HydroLink backend seems to only update from devices (water softeners)
+    // when a WebSocket has been opened and received 17 messages.
+    // So we do that here.
+    const response = await fetch(
+      `https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/live`,
+      {
+        method: "GET",
+        headers: {
+          Cookie: `hhfoffoezyzzoeibwv=${authCookie.get("hhfoffoezyzzoeibwv")}`,
+        },
+        signal: AbortSignal.timeout(10_000),
+      },
+    ).then(response => handleFailure(response, "fetch live"));
+
+    const { websocket_uri } = await response.json();
+    const ws = new WaterSoftenerSocket(`wss://api.hydrolinkhome.com${websocket_uri}`);
+    await ws.waitForClose();
+  }
+
   async function fetchDevices() {
     if (authCookie.size === 0) {
       await login();
     }
 
-    // The hydrolink api seems to only update from the device when the live
-    // endpoint is called, so we call it, wait 20s, then call the
-    // detail-or-summary endpoint
-    await fetch(`https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/live`, {
-      method: "GET",
-      headers: {
-        Cookie: `hhfoffoezyzzoeibwv=${authCookie.get("hhfoffoezyzzoeibwv")}`,
-      },
-      signal: AbortSignal.timeout(10_000),
-    }).then(response => handleFailure(response, "fetch live"));
-
-    await sleep(20_000);
+    await fetchWebsocket();
 
     const response = await fetch(
       `https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/detail-or-summary`,
