@@ -13,6 +13,7 @@ import { BedHeater } from "./bed-heater.mts";
 // import { WarmChickens } from "./warm-chickens.mts";
 import { HolidayLights } from "./holiday-lights.mts";
 import { KidsLighting } from "./kids-lighting.mts";
+import { LaundryNotify } from "./laundry-notify.mts";
 import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
 import { Theater } from "./theater.mts";
@@ -60,6 +61,7 @@ const HOME_AUTOMATION = CreateApplication({
     // CoolChickens,
     HolidayLights,
     KidsLighting,
+    LaundryNotify,
     Mailbox,
     Office,
     Theater,
