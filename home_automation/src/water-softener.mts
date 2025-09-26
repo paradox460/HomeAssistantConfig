@@ -1,4 +1,5 @@
-import { is, sleep, TServiceParams } from "@digital-alchemy/core";
+import { is, TServiceParams } from "@digital-alchemy/core";
+import { throttle } from "es-toolkit";
 import { hydrolinkAuth } from "./secrets.mts";
 
 export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }: TServiceParams) {
@@ -326,11 +327,13 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
     return response;
   }
 
+  const throttledFetchDevices = throttle(fetchDevices, 60_000, { edges: ["leading"] });
+
   lifecycle.onReady(async () => {
-    await fetchDevices();
+    await throttledFetchDevices();
   });
   scheduler.cron({
     schedule: "*/5 * * * *",
-    exec: async () => await fetchDevices(),
+    exec: async () => await throttledFetchDevices(),
   });
 }
