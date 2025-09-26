@@ -291,36 +291,42 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
   }
 
   async function fetchDevices() {
-    if (authCookie.size === 0) {
-      await login();
-    }
-
-    await fetchWebsocket();
-
-    const response = await fetch(
-      `https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/detail-or-summary`,
-      {
-        method: "GET",
-        headers: {
-          Cookie: `hhfoffoezyzzoeibwv=${authCookie.get("hhfoffoezyzzoeibwv")}`,
-        },
-        signal: AbortSignal.timeout(10_000),
-      },
-    ).then(response => handleFailure(response, "fetch detail-or-summary"));
-
-    const json: any = await response.json();
-    if (json.device.system_type !== "demand_softener") {
-      return;
-    }
-
-    for (const [key, sensor] of Object.entries(sensors)) {
-      if (!is.undefined(json.device.properties[key]?.value)) {
-        let value = json.device.properties[key].value;
-        if (is.number(sensor?.attributes?.["factor"])) {
-          value /= sensor.attributes["factor"];
-        }
-        sensor.state = value;
+    try {
+      if (authCookie.size === 0) {
+        await login();
       }
+
+      await fetchWebsocket();
+
+      const response = await fetch(
+        `https://api.hydrolinkhome.com/v1/devices/${hydrolinkAuth.deviceId}/detail-or-summary`,
+        {
+          method: "GET",
+          headers: {
+            Cookie: `hhfoffoezyzzoeibwv=${authCookie.get("hhfoffoezyzzoeibwv")}`,
+          },
+          signal: AbortSignal.timeout(10_000),
+        },
+      ).then(response => handleFailure(response, "fetch detail-or-summary"));
+
+      const json: any = await response.json();
+      if (json.device.system_type !== "demand_softener") {
+        return;
+      }
+
+      for (const [key, sensor] of Object.entries(sensors)) {
+        if (!is.undefined(json.device.properties[key]?.value)) {
+          let value = json.device.properties[key].value;
+          if (is.number(sensor?.attributes?.["factor"])) {
+            value /= sensor.attributes["factor"];
+          }
+          sensor.state = value;
+        }
+      }
+    } catch (error) {
+      // Force Reauth next time
+      authCookie = new Bun.CookieMap();
+      logger.error(`Error fetching devices: ${error.message}`);
     }
   }
 
