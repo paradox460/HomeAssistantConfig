@@ -8,6 +8,7 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
   class WaterSoftenerSocket {
     private messageCount = 0;
     private url: string;
+    private open = false;
     private closedPromise: {
       promise: Promise<void>;
       resolve: () => void;
@@ -18,12 +19,18 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
     constructor(url: string) {
       this.url = url;
       this.closedPromise = Promise.withResolvers();
+      this.open = true;
+      this.closedPromise.promise.finally(() => {
+        this.open = false;
+      });
       this.ws = new WebSocket(this.url);
       // Close the promise and socket after 20 seconds
       setTimeout(() => {
-        logger.warn("WebSocket timeout, closing connection");
-        this.ws.close();
-        this.closedPromise.resolve();
+        if (this.open) {
+          logger.warn("WebSocket timeout, closing connection");
+          this.ws.close();
+          this.closedPromise.resolve();
+        }
       }, 20_000);
       this.ws.addEventListener("open", () => {
         logger.debug("WebSocket connection opened");
