@@ -1,7 +1,7 @@
 import { TServiceParams } from "@digital-alchemy/core";
 import dayjs from "dayjs";
 
-export function UtilityTariffs({ context, hass, synapse }: TServiceParams) {
+export function UtilityTariffs({ context, hass, lifecycle, synapse }: TServiceParams) {
   const waterCurrentCost = synapse.sensor({
     context,
     name: "Water Current Monthly Cost",
@@ -15,7 +15,7 @@ export function UtilityTariffs({ context, hass, synapse }: TServiceParams) {
 
   const waterUsageCounter = hass.refBy.id("sensor.water_usage");
 
-  waterUsageCounter.onUpdate(async ({ state: state }) => {
+  async function updateWaterCosts() {
     const data = await hass.call.recorder.get_statistics({
       statistic_ids: ["sensor.water_usage"],
       start_time: dayjs().startOf("month").toISOString(),
@@ -35,7 +35,11 @@ export function UtilityTariffs({ context, hass, synapse }: TServiceParams) {
     } else {
       waterCurrentCost.state = 23.9 + 2.13 * 8 + (kiloGallonsUsed - 15) * 4.32;
     }
-  });
+
+  }
+
+  waterUsageCounter.onUpdate(updateWaterCosts);
+  lifecycle.onReady(updateWaterCosts);
 
   // Water is easy to track so I track the cost of water. Electricity is far
   // more complex, because they adjust the rate with all sorts of bill
