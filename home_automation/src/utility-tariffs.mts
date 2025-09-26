@@ -8,6 +8,9 @@ export function UtilityTariffs({ context, hass, synapse }: TServiceParams) {
     unique_id: "utility_water_current_month_cost",
     icon: "mdi:water",
     unit_of_measurement: "USD",
+    state_class: "total_increasing",
+    device_class: "monetary",
+    last_reset: dayjs().startOf("month"),
   });
 
   const waterUsageCounter = hass.refBy.id("sensor.water_usage");
