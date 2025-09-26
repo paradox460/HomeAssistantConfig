@@ -59,6 +59,9 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       name: "Average Exhaustion Percent",
       unit_of_measurement: "%",
       device_id,
+      attributes: {
+        factor: 10.0,
+      },
     }),
     avg_daily_use_gals: synapse.sensor({
       context,
@@ -70,12 +73,18 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       context,
       name: "Avg Days Between Regens",
       device_id,
+      attributes: {
+        factor: 100.0,
+      },
     }),
     avg_salt_per_regen_lbs: synapse.sensor({
       context,
       name: "Avg Salt Per Regen Lbs",
       unit_of_measurement: "lbs",
       device_id,
+      attributes: {
+        factor: 10000.0,
+      },
     }),
     backwash_secs: synapse.sensor({
       context,
@@ -88,6 +97,9 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       name: "Capacity Remaining Percent",
       unit_of_measurement: "%",
       device_id,
+      attributes: {
+        factor: 10.0,
+      },
     }),
     current_valve_position_enum: synapse.sensor({
       context,
@@ -105,6 +117,9 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       name: "Daily Avg Rock Removed Lbs",
       unit_of_measurement: "lbs",
       device_id,
+      attributes: {
+        factor: 1000.0,
+      },
     }),
     days_in_operation: synapse.sensor({
       context,
@@ -202,6 +217,9 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       name: "Total Salt Use Lbs",
       unit_of_measurement: "lbs",
       device_id,
+      attributes: {
+        factor: 10.0,
+      },
     }),
     total_outlet_water_gals: synapse.sensor({
       context,
@@ -289,14 +307,9 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
 
     for (const [key, sensor] of Object.entries(sensors)) {
       if (!is.undefined(json.device.properties[key]?.value)) {
-        let value;
-        switch (key) {
-          case "capacity_remaining_percent":
-            value = json.device.properties[key].value / 10.0;
-            break;
-          default:
-            value = json.device.properties[key].value;
-            break;
+        let value = json.device.properties[key].value;
+        if (is.number(sensor?.attributes?.["factor"])) {
+          value /= sensor.attributes["factor"];
         }
         sensor.state = value;
       }
