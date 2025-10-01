@@ -62,25 +62,18 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
   });
 
   const sensors = {
-    average_exhaustion_percent: synapse.sensor({
-      context,
-      name: "Average Exhaustion Percent",
-      unit_of_measurement: "%",
-      device_id,
-      attributes: {
-        factor: 10.0,
-      },
-    }),
     avg_daily_use_gals: synapse.sensor({
       context,
       name: "Avg Daily Use Gals",
       unit_of_measurement: "gal",
+      icon: "mdi:water-circle",
       device_id,
     }),
     avg_days_between_regens: synapse.sensor({
       context,
       name: "Avg Days Between Regens",
       device_id,
+      icon: "mdi:timelapse",
       attributes: {
         factor: 100.0,
       },
@@ -90,91 +83,91 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       name: "Avg Salt Per Regen Lbs",
       unit_of_measurement: "lbs",
       device_id,
+      icon: "mdi:shaker",
       attributes: {
         factor: 10000.0,
       },
-    }),
-    backwash_secs: synapse.sensor({
-      context,
-      name: "Backwash Secs",
-      unit_of_measurement: "seconds",
-      device_id,
     }),
     capacity_remaining_percent: synapse.sensor({
       context,
       name: "Capacity Remaining Percent",
       unit_of_measurement: "%",
       device_id,
+      icon: "mdi:water-percent",
       attributes: {
         factor: 10.0,
       },
     }),
-    current_valve_position_enum: synapse.sensor({
+    rock_removed_since_rech_lbs: synapse.sensor({
       context,
-      name: "Current Valve Position Enum",
+      name: "Rock Removed Since Last Recharge",
+      unit_of_measurement: "lbs",
       device_id,
+      icon: "mdi:delete-clock-outline",
+      state_class: "total_increasing",
+      attributes: {
+        factor: 1000.0,
+      },
     }),
-    current_water_flow_gpm: synapse.sensor({
+    total_rock_removed_lbs: synapse.sensor({
       context,
-      name: "Current Water Flow Gpm",
-      unit_of_measurement: "gpm",
+      name: "Total Rock Removed Lbs",
+      unit_of_measurement: "lbs",
+      state_class: "total",
+      icon: "mdi:delete-outline",
       device_id,
     }),
     daily_avg_rock_removed_lbs: synapse.sensor({
       context,
       name: "Daily Avg Rock Removed Lbs",
       unit_of_measurement: "lbs",
+      icon: "mdi:delete-clock",
       device_id,
       attributes: {
         factor: 1000.0,
       },
     }),
-    days_in_operation: synapse.sensor({
-      context,
-      name: "Days In Operation",
-      unit_of_measurement: "days",
-      device_id,
-    }),
     days_since_last_regen: synapse.sensor({
       context,
       name: "Days Since Last Regen",
       unit_of_measurement: "days",
-      device_id,
-    }),
-    days_since_last_time_loss: synapse.sensor({
-      context,
-      name: "Days Since Last Time Loss",
-      unit_of_measurement: "days",
+      icon: "mdi:calendar-today",
       device_id,
     }),
     depletion_alert: synapse.sensor({
       context,
       name: "Depletion Alert",
+      icon: "mdi:alert-decagram",
       device_id,
     }),
     error_code: synapse.sensor({
       context,
       name: "Error Code",
+      icon: "mdi:alert-decagram",
       device_id,
     }),
     error_code_alert: synapse.sensor({
       context,
       name: "Error Code Alert",
+      icon: "mdi:alert-decagram",
       device_id,
     }),
     excessive_water_use_alert: synapse.sensor({
       context,
       name: "Excessive Water Use Alert",
+      icon: "mdi:water-alert",
       device_id,
     }),
     floor_leak_detector_alert: synapse.sensor({
       context,
       name: "Floor Leak Detector Alert",
+      icon: "mdi:pipe-leak",
       device_id,
     }),
     flow_monitor_alert: synapse.sensor({
       context,
       name: "Flow Monitor Alert",
+      icon: "mdi:waves-arrow-right",
       device_id,
     }),
     gallons_used_today: synapse.sensor({
@@ -183,33 +176,39 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       unit_of_measurement: "gal",
       device_class: "water",
       state_class: "total_increasing",
+      icon: "mdi:water-pump",
       device_id,
     }),
     low_salt_alert: synapse.sensor({
       context,
+      icon: "mdi:alert-decagram",
       name: "Low Salt Alert",
       device_id,
     }),
     manual_regens: synapse.sensor({
       context,
       name: "Manual Regens",
+      icon: "mdi:water-sync",
+      device_id,
+    }),
+    total_regens: synapse.sensor({
+      context,
+      name: "Total Regens",
+      icon: "mdi:water-sync",
       device_id,
     }),
     max_days_between_regens: synapse.sensor({
       context,
       name: "Max Days Between Regens",
       unit_of_measurement: "days",
+      icon: "mdi:calendar-range",
       device_id,
     }),
     peak_water_flow_gpm: synapse.sensor({
       context,
       name: "Peak Water Flow Gpm",
       unit_of_measurement: "gpm",
-      device_id,
-    }),
-    power_outage_count: synapse.sensor({
-      context,
-      name: "Power Outage Count",
+      icon: "mdi:water-alert",
       device_id,
     }),
     water_counter_gals: synapse.sensor({
@@ -218,12 +217,14 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       unit_of_measurement: "gal",
       device_class: "water",
       state_class: "total_increasing",
+      icon: "mdi:water",
       device_id,
     }),
     total_salt_use_lbs: synapse.sensor({
       context,
       name: "Total Salt Use Lbs",
       unit_of_measurement: "lbs",
+      icon: "mdi:shaker",
       device_id,
       attributes: {
         factor: 10.0,
@@ -235,6 +236,7 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       unit_of_measurement: "gal",
       device_class: "water",
       state_class: "total_increasing",
+      icon: "mdi:water",
       device_id,
     }),
     total_untreated_water_gals: synapse.sensor({
@@ -243,8 +245,34 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       unit_of_measurement: "gal",
       device_class: "water",
       state_class: "total_increasing",
+      icon: "mdi:water-outline",
       device_id,
     }),
+    salt_level_tenths: synapse.sensor({
+      context,
+      name: "Salt Consumption",
+      unit_of_measurement: "%",
+      icon: "mdi:shaker",
+      device_id,
+      attributes: {
+        factor: 10.0,
+      },
+    }),
+    out_of_salt_estimate_days: synapse.sensor({
+      context,
+      name: "Out of Salt Estimate Days",
+      unit_of_measurement: "days",
+      icon: "mdi:shaker-outline",
+      device_id,
+    }),
+    treated_water_avail_gals: synapse.sensor({
+      context,
+      name: "Treated Water Available",
+      unit_of_measurement: "gal",
+      device_class: "water",
+      icon: "mdi:water-check",
+      device_id,
+    })
   };
 
   async function login() {
