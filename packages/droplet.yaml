@@ -1,0 +1,24 @@
+template:
+  - sensor:
+    # Add up all "water used" values from the Droplet
+    - name: Total Water Used (sum)
+      unit_of_measurement: "gal"
+      device_class: water
+      state_class: total_increasing
+      unique_id: droplet_total_water_used
+      state: >-
+        {{ states('sensor.droplet_ef38_water') | float(0) + this.state|float(0)}}
+sensor:
+  # Do an integration on the gpm flow sensor
+  - platform: integration
+    source: sensor.droplet_ef38_flow_rate
+    name: Total Water Used (integration)
+    unique_id: droplet_total_water_used_integration
+    round: 2
+    unit_time: min
+    method: left
+
+utility_meter:
+  daily_water_usage:
+    source: sensor.total_water_used_integration
+    cycle: daily
