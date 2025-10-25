@@ -10,6 +10,8 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
     "sensor.apollo_r_pro_1_w_352144_ld2450_presence_target_count",
   );
 
+  const stairsOccupancy = hass.refBy.id("binary_sensor.lower_stairs_motion_sensor_occupancy");
+
   // Couch Sensor
   const couchPresence = hass.refBy.id("binary_sensor.bed_presence_2d1e78_couch_occupied_either");
 
@@ -332,6 +334,19 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
       case "off":
         actor.send({ type: "binaryUnoccupied" });
         break;
+    }
+  });
+
+  // Note that we don't care about the stairs occupancy for initial sync, only
+  // as a reactive change.
+  // This makes it so someone coming down the stairs will turn the lights in the
+  // theater on before they get there, so you don't have to walk into a dark
+  // room.
+  stairsOccupancy.onUpdate(({ state }) => {
+    if (state === "on") {
+      actor.send({ type: "binaryOccupied" });
+    } else if (state === "off") {
+      actor.send({ type: "binaryUnoccupied" });
     }
   });
 
