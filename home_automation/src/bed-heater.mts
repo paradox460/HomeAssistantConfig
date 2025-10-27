@@ -91,66 +91,54 @@ class BedAutomation {
         },
       },
       guards: {
-        occupied: stateIn({ presence: "occupied" }),
+        occupied: () => this.sensor.state === "on",
       },
     }).createMachine({
       id: "bed_heater_automation",
 
       initial: "idle",
-      type: "parallel",
-
-      states: {
-        presence: {
-          states: {
-            vacant: {
-              on: {
-                occupied: "occupied",
-              },
-            },
-            occupied: {
-              on: {
-                vacant: "vacant",
-              },
-            },
-          },
-
-          initial: "vacant",
-        },
-
-        heat: {
-          initial: "off",
-          states: {
-            off: {
-              on: {
-                heating: "demand",
-              },
-              entry: ["turnOff"],
-            },
-            demand: {
-              on: {
-                noHeating: "off",
-              },
-              after: {
-                bedTimeout: {
-                  target: "off",
-                  guard: "occupied",
-                },
-              },
-              entry: ["turnOn"],
-            },
-            disabled: {
-              on: {
-                enable: "off",
-              },
-            },
-          },
-        },
-
-        idle: {},
+      on: {
+        disable: ".disabled",
       },
 
-      on: {
-        disable: ".heat.disabled",
+      states: {
+        disabled: {
+          on: {
+            enable: "idle",
+          },
+        },
+        idle: {
+          on: {
+            heat: [
+              {
+                target: "occupiedHeating",
+                guard: "occupied",
+              },
+              {
+                target: "heating",
+              },
+            ],
+          },
+          entry: "turnOff",
+        },
+
+        heating: {
+          on: {
+            stopHeat: "idle",
+            occupied: "occupiedHeating",
+          },
+          entry: "turnOn",
+        },
+
+        occupiedHeating: {
+          on: {
+            stopHeat: "idle",
+          },
+          after: {
+            bedTimeout: "idle",
+          },
+          entry: "turnOn",
+        },
       },
     });
   }
@@ -166,16 +154,17 @@ class BedAutomation {
   }
 
   setupCrons() {
+    const actor = this.actor;
     this.service_params.scheduler.cron({
       exec() {
-        this.actor.send({ type: "heating" });
+        actor.send({ type: "heat" });
       },
       schedule: "0 0 * * *",
     });
     this.service_params.automation.solar.onEvent({
       eventName: "sunriseEnd",
       exec: () => {
-        this.actor.send({ type: "noHeating" });
+        actor.send({ type: "stopHeat" });
       },
     });
   }
@@ -193,15 +182,13 @@ class BedAutomation {
       name: name + "_state",
       entity_category: "diagnostic",
       device_id: this.device,
-    });
+    }) as SynapseSensor<any>;
   }
 
   setupListeners() {
     this.sensor.onUpdate(({ state }) => {
       if (state === "on") {
         this.actor.send({ type: "occupied" });
-      } else if (state === "off") {
-        this.actor.send({ type: "vacant" });
       }
     });
 
