@@ -71,3 +71,19 @@
     target:
       device_id: ce336deaa31341b76c7f8575e4a24742
   mode: single
+- id: '1762024608262'
+  alias: Toggle Jeff's bedside heater on/off
+  description: ''
+  triggers:
+  - trigger: event
+    event_type: lutron_event
+    event_data:
+      full_id: master_bedroom_unknown_button_5
+  conditions: []
+  actions:
+  - action: switch.toggle
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.jeff_s_bed_heater
+  mode: single
