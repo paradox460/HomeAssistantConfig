@@ -87,3 +87,25 @@
     target:
       entity_id: switch.jeff_s_bed_heater
   mode: single
+- id: '1763018668462'
+  alias: Aurora Alert
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.aurora_visibility_visibility_alert
+    to: 'on'
+    from: 'off'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  conditions: []
+  actions:
+  - action: notify.all
+    metadata: {}
+    data:
+      title: Aurora Visibility Alert
+      message: There's a {{ states('sensor.aurora_visibility_visibility') }}% chance
+        of aurora visibility in the next 30 minutes.
+  mode: single
