@@ -30,26 +30,52 @@ wifi:
 debug:
   update_interval: 5s
 
-output:
-  - platform: gpio
-    pin: GPIO2
-    id: "motor3"
-  - platform: gpio
-    pin: GPIO3
-    id: "motor4"
+script:
+  - id: stop_motor
+    then:
+      - switch.turn_off: switch_motor3
+      - switch.turn_off: switch_motor4
+  - id: forward_motor
+    then:
+      - switch.turn_off: switch_motor4
+      - switch.turn_on: switch_motor3
+  - id: reverse_motor
+    then:
+      - switch.turn_off: switch_motor3
+      - switch.turn_on: switch_motor4
+  - id: maybe_open_door
+    then:
+      - if:
+          condition:
+            lambda: "return id(auto_open).state && id(chicken_coop_door).position == COVER_CLOSED;"
+          then:
+            - cover.open: chicken_coop_door
 
 switch:
-  - platform: output
-    output: "motor3"
+  - platform: gpio
+    pin: GPIO2
     id: switch_motor3
-  - platform: output
-    output: "motor4"
+    name: "motor 3"
+    interlock: &motor_interlock [switch_motor3, switch_motor4]
+    interlock_wait_time: 100ms
+  - platform: gpio
+    pin: GPIO3
     id: switch_motor4
+    name: "motor 4"
+    interlock: *motor_interlock
+    interlock_wait_time: 100ms
+
   - platform: template
     id: auto_open
     name: "Automatic Open"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
+
+  - platform: template
+    id: reverse_controls
+    name: "Reverse Controls"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
 
 binary_sensor:
   - platform: gpio
@@ -94,16 +120,25 @@ cover:
     device_class: garage
     max_duration: 10s
     stop_action:
-      - switch.turn_off: switch_motor3
-      - switch.turn_off: switch_motor4
+      - script.execute: stop_motor
     open_action:
-      - switch.turn_off: switch_motor4
-      - switch.turn_on: switch_motor3
+      - if:
+          condition:
+            switch.is_on: reverse_controls
+          then:
+            - script.execute: reverse_motor
+          else:
+            - script.execute: forward_motor
     open_endstop: coop_door_top_stop
     open_duration: 8s
     close_action:
-      - switch.turn_off: switch_motor3
-      - switch.turn_on: switch_motor4
+      - if:
+          condition:
+            switch.is_on: reverse_controls
+          then:
+            - script.execute: forward_motor
+          else:
+            - script.execute: reverse_motor
     close_duration: 8s
     close_endstop: coop_door_bottom_stop
 
@@ -206,17 +241,6 @@ text_sensor:
     reset_reason:
       name: "Reset Reason"
       entity_category: "diagnostic"
-
-script:
-  # Still getting the occasional weird brownout, that prevents the door from opening.
-  # This script will run every hour or so, and check if the door should be
-  - id: maybe_open_door
-    then:
-      - if:
-          condition:
-            lambda: "return id(auto_open).state && id(chicken_coop_door).position == COVER_CLOSED;"
-          then:
-            - cover.open: chicken_coop_door
 
 button:
   - platform: restart
