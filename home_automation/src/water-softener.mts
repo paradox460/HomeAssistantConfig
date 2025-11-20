@@ -248,16 +248,6 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
       icon: "mdi:water-outline",
       device_id,
     }),
-    salt_level_tenths: synapse.sensor({
-      context,
-      name: "Salt Consumption",
-      unit_of_measurement: "%",
-      icon: "mdi:shaker",
-      device_id,
-      attributes: {
-        factor: 10.0,
-      },
-    }),
     out_of_salt_estimate_days: synapse.sensor({
       context,
       name: "Out of Salt Estimate Days",
