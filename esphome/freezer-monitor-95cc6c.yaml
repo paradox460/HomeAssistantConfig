@@ -61,6 +61,10 @@ spi:
   clk_pin: 5
   miso_pin: 21
 
+one_wire:
+  - platform: gpio
+    pin: GPIO14
+
 sensor:
   - platform: aht10
     variant: aht20
@@ -98,3 +102,31 @@ sensor:
       - exponential_moving_average:
           alpha: 0.05
           send_every: 6
+  - platform: dallas_temp
+    index: 0
+    name: "Fridge Temperature"
+
+output:
+  - platform: gpio
+    pin: GPIO2
+    id: "neopixel_power"
+
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: neopixel
+    rgb_order: GRB
+    pin: GPIO0
+    num_leds: 1
+    chipset: ws2812
+    name: "Neopixel"
+    on_turn_on: 
+      then:
+        - output.turn_on: neopixel_power
+    on_turn_off: 
+      then:
+        - output.turn_off: neopixel_power
+    effects:
+      - pulse:
+          transition_length: 5000ms
+          update_interval: 5500ms

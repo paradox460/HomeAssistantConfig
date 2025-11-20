@@ -8,3 +8,12 @@
         }}
       delay_on: "0:10:00"
       delay_off: "0:10:00"
+    - name: "Fridge Temp Alert"
+      unique_id: "fridge_temp_alert"
+      icon: mdi:snowflake-alert
+      state: >-
+        {{
+          states('sensor.garage_freezer_monitor_fridge_temperature') | float(0) >= 45
+        }}
+      delay_on: "0:10:00"
+      delay_off: "0:10:00"

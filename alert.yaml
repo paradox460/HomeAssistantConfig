@@ -30,7 +30,7 @@ freezer_malfunction:
   done_message: clear_notification
   entity_id: binary_sensor.freezer_temp_alert
   repeat: 10
-  message: "Freezer Temp High Alert: {{states('sensor.freezer_temperature', with_unit=True)}}"
+  message: "Freezer Temp High Alert: {{states('sensor.garage_freezer_temperature', with_unit=True)}}"
   notifiers:
     - all
   data:
@@ -39,6 +39,34 @@ freezer_malfunction:
     ttl: 0
     priority: high
     channel: alarm_stream
+fridge_malfunction:
+  name: "Fridge malfunction"
+  done_message: clear_notification
+  entity_id: binary_sensor.fridge_temp_alert
+  repeat: 10
+  message: "Fridge Temp High Alert: {{states('sensor.garage_freezer_monitor_fridge_temperature', with_unit=True)}}"
+  notifiers:
+    - all
+  data:
+    tag: fridge-alert
+    clickCtion: "entityId:alert.fridge_malfunction"
+    ttl: 0
+    priority: high
+    channel: alarm_stream
+
+garage_fridge_door_open:
+  name: Garage Fridge Door Open
+  done_message: clear_notification
+  entity_id: binary_sensor.garage_fridge_door_contact
+  repeat: [5, 10, 30]
+  skip_first: true
+  can_acknowledge: true
+  title: Garage Fridge Door Open
+  message: "The garage fridge door has been left open."
+  notifiers:
+    - all
+  data:
+    tag: garage-fridge-door-alert
 
 door_open:
   name: Door Open
