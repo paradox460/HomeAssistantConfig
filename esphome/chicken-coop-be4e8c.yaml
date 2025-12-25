@@ -183,12 +183,8 @@ sun:
   longitude: !secret longitude
   on_sunrise:
       - then:
-        - if:
-            condition:
-              lambda: "return id(auto_open).state;"
-            then:
-              - delay: !lambda 'return id(open_delay).state * 60000;'
-              - cover.open: chicken_coop_door
+        - delay: !lambda 'return id(open_delay).state * 60000;'
+        - script.execute: maybe_open_door
   on_sunset:
     - then:
         - delay: !lambda 'return id(close_delay).state * 60000;'
