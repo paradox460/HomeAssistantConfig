@@ -43,7 +43,7 @@ fridge_malfunction:
   name: "Fridge malfunction"
   done_message: clear_notification
   entity_id: binary_sensor.fridge_temp_alert
-  repeat: 10
+  repeat: 30
   message: "Fridge Temp High Alert: {{states('sensor.garage_freezer_monitor_fridge_temperature', with_unit=True)}}"
   notifiers:
     - all
