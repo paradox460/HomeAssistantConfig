@@ -1,15 +1,3 @@
-bring_in_flag:
-  name: Bring in the Flag
-  done_message: clear_notification
-  entity_id: binary_sensor.weather_is_bad_for_flag
-  repeat: 1440
-  can_acknowledge: true
-  message: "Weather is not suitable to fly the flag. Please take it down"
-  notifiers:
-    - all
-  data:
-    tag: flag–alert
-    clickAction: "entityId:alert.bring_in_flag"
 emqx_down:
   name: "EMQX went down"
   done_message: clear_notification
