@@ -34,3 +34,7 @@ export function toggleIcons(entity, on: string, off: string) {
 export function turnedOn(newState: string, oldState: string): boolean {
   return newState === "on" && oldState === "off"
 }
+
+export function isRealEvent(newState, oldState) {
+  return !(["unavailable", "unknown"].includes(newState) || oldState === "unavailable")
+}

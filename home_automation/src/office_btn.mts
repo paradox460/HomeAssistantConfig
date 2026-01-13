@@ -1,6 +1,36 @@
 import { TServiceParams } from "@digital-alchemy/core";
+import { isRealEvent } from "./utils.mts";
 
-type EventType = "click" | "double_click" | "hold" | string;
+type EventType = "click" | "double_click" | "hold";
+
+type HvacMode = "heat" | "cool" | "off";
+
+type EntityState = "on" | "off" | string;
+
+interface ButtonEntity {
+  onUpdate: (callback: (current: any, previous: any) => void) => void;
+}
+
+interface ToggleableEntity {
+  toggle: () => void;
+  turn_on: () => void;
+  turn_off: () => void;
+  state: EntityState;
+  onUpdate: (callback: (update: any) => void) => void;
+}
+
+type rgb_color = [number, number, number];
+
+interface LedEntity {
+  turn_on: (options?: { brightness_pct?: number; color_name?: string; rgb_color?: rgb_color }) => void;
+  turn_off: () => void;
+}
+
+interface ClimateEntity {
+  state: HvacMode;
+  set_hvac_mode: (options: { hvac_mode: HvacMode }) => void;
+  onUpdate: (callback: () => void) => void;
+}
 
 export function OfficeBtn({ hass, lifecycle, logger }: TServiceParams) {
   // Button entities
@@ -22,21 +52,44 @@ export function OfficeBtn({ hass, lifecycle, logger }: TServiceParams) {
   const officeLifx = hass.refBy.id("light.office_lifx_accent");
   const printer = hass.refBy.id("switch.3d_printer");
 
-  // Helper function to sync LED state with device state
-  const syncLedState = (deviceState: string, led: any) => {
-    deviceState === "on" ? led.turn_on() : led.turn_off();
+  const syncLedState = (deviceState: EntityState, led: LedEntity, color?: rgb_color, brightness?: number): void => {
+    if (deviceState === "on") {
+      led.turn_on(color ? { brightness_pct: brightness ?? 30, rgb_color: color } : undefined);
+    } else {
+      led.turn_off();
+    }
   };
 
-  // Helper function to update Dyson LED based on climate mode
-  const updateDysonLed = (dysonState: string) => {
+  const createSimpleToggleButton = (
+    button: ButtonEntity,
+    device: ToggleableEntity,
+    led: LedEntity,
+    ledColor?: rgb_color,
+    ledBrightness?: number,
+  ): (() => void) => {
+    button.onUpdate(({ state, attributes: { event_type } }, { state: oldState }) => {
+      if (!isRealEvent(state, oldState)) return;
+      if (event_type === "click") {
+        device.toggle();
+      }
+    });
+
+    device.onUpdate(({ state }) => {
+      syncLedState(state, led, ledColor, ledBrightness);
+    });
+
+    return () => syncLedState(device.state, led, ledColor, ledBrightness); // Return init function
+  };
+
+  const updateDysonLed = (dysonState: EntityState): void => {
     if (dysonState === "on") {
-      const climateState = dysonClimate.state;
+      const climateState = dysonClimate.state as HvacMode;
       switch (climateState) {
         case "heat":
-          btn1_led.turn_on({ brightness_pct: 30, color_name: "red" });
+          btn1_led.turn_on({ brightness_pct: 30, rgb_color: [255, 0, 0] });
           break;
         case "cool":
-          btn1_led.turn_on({ brightness_pct: 30, color_name: "blue" });
+          btn1_led.turn_on({ brightness_pct: 30, rgb_color: [0, 0, 255] });
           break;
         default:
           btn1_led.turn_on();
@@ -48,17 +101,18 @@ export function OfficeBtn({ hass, lifecycle, logger }: TServiceParams) {
   };
 
   // Button 1: Dyson Fan Control
-  btn1.onUpdate(({ attributes: { event_type } }) => {
-    logger.info(`btn1 update: ${event_type}`);
+  btn1.onUpdate(({ state, attributes: { event_type } }, { state: oldState }) => {
+    if (!isRealEvent(state, oldState)) return;
 
-    switch (event_type as EventType) {
+    const eventType = event_type as EventType;
+    switch (eventType) {
       case "click":
         dyson.toggle();
         break;
       case "double_click":
         // Ensure fan is on and toggle heating/cooling mode
         dyson.turn_on();
-        const currentMode = dysonClimate.state;
+        const currentMode = dysonClimate.state as HvacMode;
         if (currentMode === "heat") {
           dysonClimate.set_hvac_mode({ hvac_mode: "cool" });
         } else if (currentMode === "cool") {
@@ -76,44 +130,30 @@ export function OfficeBtn({ hass, lifecycle, logger }: TServiceParams) {
     updateDysonLed(dyson.state);
   });
 
-  // Button 2: 3D Printer Control
-  btn2.onUpdate(({ attributes: { event_type } }) => {
-    if (event_type === "click") {
-      printer.toggle();
-    }
-  });
+  // Setup simple toggle buttons (Buttons 2-4)
+  const simpleButtons: Array<{
+    button: ButtonEntity;
+    device: ToggleableEntity;
+    led: LedEntity;
+    ledColor: rgb_color;
+    ledBrightness: number;
+    name: string;
+  }> = [
+      { button: btn2, device: printer, led: btn2_led, ledColor: [0, 255, 0], ledBrightness: 30, name: "3D Printer" },
+      { button: btn3, device: workbench, led: btn3_led, ledColor: [255, 200, 0], ledBrightness: 35, name: "Workbench Light" },
+      { button: btn4, device: officeLifx, led: btn4_led, ledColor: [255, 0, 255], ledBrightness: 30, name: "Accent Light" },
+    ];
 
-  printer.onUpdate(({ state }) => {
-    syncLedState(state, btn2_led);
-  });
+  const ledInitializers: Array<() => void> = [];
 
-  // Button 3: Workbench Light Control
-  btn3.onUpdate(({ attributes: { event_type } }) => {
-    if (event_type === "click") {
-      workbench.toggle();
-    }
-  });
-
-  workbench.onUpdate(({ state }) => {
-    syncLedState(state, btn3_led);
-  });
-
-  // Button 4: Accent Light Control
-  btn4.onUpdate(({ attributes: { event_type } }) => {
-    if (event_type === "click") {
-      officeLifx.toggle();
-    }
-  });
-
-  officeLifx.onUpdate(({ state }) => {
-    syncLedState(state, btn4_led);
+  simpleButtons.forEach(({ button, device, led, ledColor, ledBrightness }) => {
+    const init = createSimpleToggleButton(button, device, led, ledColor, ledBrightness);
+    ledInitializers.push(init);
   });
 
   // Sync LEDs on startup
   lifecycle.onReady(() => {
-    syncLedState(printer.state, btn2_led);
-    syncLedState(workbench.state, btn3_led);
-    syncLedState(officeLifx.state, btn4_led);
+    ledInitializers.forEach(init => init());
     updateDysonLed(dyson.state);
   });
 }
