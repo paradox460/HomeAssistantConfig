@@ -25,7 +25,6 @@ wifi:
   # Set up a wifi access point
   ap:
     ssid: "chicken-coop-be4e8c"
-    password: "7h9sQ2jh8CRd"
 
 debug:
   update_interval: 5s
@@ -85,6 +84,8 @@ binary_sensor:
         input: true
         pullup: true
     id: coop_door_top_stop
+    entity_category: diagnostic
+    name: Top Stop
     filters:
       - invert
   - platform: gpio
@@ -94,6 +95,8 @@ binary_sensor:
         input: true
         pullup: true
     id: coop_door_bottom_stop
+    name: Bottom Stop
+    entity_category: diagnostic
     filters:
       - invert
       - delayed_on: 1s
