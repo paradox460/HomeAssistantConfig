@@ -1,0 +1,4 @@
+geo_location:
+  - platform: usgs_earthquakes_feed
+    feed_type: "past_week_m25_earthquakes"
+    radius: 100.0
