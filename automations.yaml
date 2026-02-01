@@ -1,24 +1,3 @@
-- id: '1708395880307'
-  alias: Auto-off wax melters
-  description: Turn off wax melter after 6 hours
-  triggers:
-  - entity_id:
-    - switch.kitchen_wax_melter
-    - switch.upstairs_guest_wax_melter
-    to: 'on'
-    for:
-      hours: 6
-      minutes: 0
-      seconds: 0
-    trigger: state
-  conditions: []
-  actions:
-  - metadata: {}
-    data: {}
-    target:
-      entity_id: '{{ trigger.entity_id }}'
-    action: switch.turn_off
-  mode: single
 - id: '1713917815664'
   alias: Turn off office fan
   description: Turn off the office fan after 6 hours
