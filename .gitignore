@@ -7,6 +7,7 @@
 !/templates/
 !/automations/
 !/esphome/
+!/esphome/**/*
 !/mqtt/
 !/mqtt/**/*
 !/packages/
@@ -28,3 +29,5 @@ known_devices.yaml
 home_automation/src/secrets.mts
 home_automation/src/hass
 home_automation/src/hass/**/*
+/esphome/archive
+/esphome/archive/**/*

@@ -1,0 +1,6 @@
+# Time synchronization package for ESPHome devices
+# Provides Home Assistant time platform for time-based automations
+
+time:
+  - platform: homeassistant
+    id: ha_time

@@ -1,0 +1,15 @@
+# Extend wifi to add smart shutdown of BLE, to save memory and power
+
+wifi:
+  on_connect:
+    - delay: 5s
+    - ble.disable
+  on_disconnect:
+    - ble.enable:
+
+
+# Improv to allow easier wifi provisioning
+improv_serial:
+
+esp32_improv:
+  authorizer: none

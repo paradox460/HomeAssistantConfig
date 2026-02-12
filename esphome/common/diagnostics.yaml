@@ -1,0 +1,10 @@
+# Diagnostics package for ESPHome devices
+# Includes: restart button and status sensor
+
+button:
+  - platform: restart
+    name: "Restart"
+
+binary_sensor:
+  - platform: status
+    name: "Status"

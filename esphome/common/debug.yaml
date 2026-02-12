@@ -1,0 +1,14 @@
+# Debug package for ESPHome devices
+# Provides detailed device information and diagnostics
+
+debug:
+  update_interval: 5s
+
+text_sensor:
+  - platform: debug
+    device:
+      name: "Device Info"
+      entity_category: "diagnostic"
+    reset_reason:
+      name: "Reset Reason"
+      entity_category: "diagnostic"

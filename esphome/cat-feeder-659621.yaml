@@ -1,31 +1,17 @@
-esphome:
+# Automatic cat feeder
+
+substitutions:
   name: cat-feeder-659621
   friendly_name: Cat Feeder
 
+# Import common packages
+packages:
+  base: !include common/base.yaml
+  wifi: !include common/wifi.yaml
+  time: !include common/time.yaml
+
 esp8266:
   board: d1_mini
-
-# Enable logging
-logger:
-
-# Enable Home Assistant API
-api:
-  encryption:
-    key: !secret cat_feeder_api
-
-ota:
-  platform: esphome
-
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "cat-feeder-659621"
-    password: "7h9sQ2jh8CRd"
-
-captive_portal:
 
 output:
   - platform: gpio
@@ -58,8 +44,7 @@ button:
 
 
 time:
-  - platform: homeassistant
-    id: ha_time
+  - id: !extend ha_time
     on_time:
       - hours: "14,18"
         minutes: 0
