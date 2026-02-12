@@ -27,7 +27,6 @@ esp32:
 deep_sleep:
   id: deep_sleep_1
   run_duration: 1min
-  sleep_duration: 12h
   esp32_ext1_wakeup:
     mode: ANY_HIGH
     pins:
