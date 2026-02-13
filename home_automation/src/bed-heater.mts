@@ -81,6 +81,7 @@ class BedAutomation {
     this.machine = setup({
       delays: {
         bedTimeout: 1000 * 60 * 60 * 2, // 2 hours
+        occupiedTimeout: 1000 * 60 * 30, // 30 minutes
       },
       actions: {
         turnOff: () => {
@@ -99,6 +100,7 @@ class BedAutomation {
       initial: "idle",
       on: {
         disable: ".disabled",
+        stopHeat: ".idle",
       },
 
       states: {
@@ -111,7 +113,7 @@ class BedAutomation {
           on: {
             heat: [
               {
-                target: "occupiedHeating",
+                target: "becomingOccupied",
                 guard: "occupied",
               },
               {
@@ -124,20 +126,26 @@ class BedAutomation {
 
         heating: {
           on: {
-            stopHeat: "idle",
-            occupied: "occupiedHeating",
+            occupied: "becomingOccupied",
+          },
+          entry: "turnOn",
+        },
+
+        becomingOccupied: {
+          after: {
+            occupiedTimeout: "occupiedHeating",
+          },
+          on: {
+            unoccupied: "heating",
           },
           entry: "turnOn",
         },
 
         occupiedHeating: {
-          on: {
-            stopHeat: "idle",
-          },
+          on: {},
           after: {
             bedTimeout: "idle",
           },
-          entry: "turnOn",
         },
       },
     });
@@ -189,6 +197,8 @@ class BedAutomation {
     this.sensor.onUpdate(({ state }) => {
       if (state === "on") {
         this.actor.send({ type: "occupied" });
+      } else if (state === "off") {
+        this.actor.send({ type: "unoccupied" });
       }
     });
 
