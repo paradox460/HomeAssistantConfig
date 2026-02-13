@@ -37,18 +37,6 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
     name: "Theater Vacancy Automation",
     device_id: subDevice,
   });
-  const stateMachineSynced = synapse.binary_sensor({
-    context,
-    name: "Theater state machine synced",
-    entity_category: "diagnostic",
-    device_id: subDevice,
-  });
-  const stateMachineBecomingVacant = synapse.binary_sensor({
-    context,
-    name: "Theater state machine becoming vacant",
-    entity_category: "diagnostic",
-    device_id: subDevice,
-  });
 
   // Misc entities
   const homePresence = hass.refBy.id("binary_sensor.home_presence");
@@ -277,8 +265,6 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
   actor.start();
   actor.subscribe(snapshot => {
     stateMachineState.state = JSON.stringify(snapshot.value);
-    stateMachineSynced.is_on = snapshot.context.synced;
-    stateMachineBecomingVacant.is_on = snapshot.context.becomingVacant;
   });
 
   function sync() {
