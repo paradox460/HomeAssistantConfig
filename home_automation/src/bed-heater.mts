@@ -115,9 +115,11 @@ class BedAutomation {
               {
                 target: "becomingOccupied",
                 guard: "occupied",
+                actions: "turnOn",
               },
               {
                 target: "heating",
+                actions: "turnOn",
               },
             ],
           },
@@ -128,7 +130,6 @@ class BedAutomation {
           on: {
             occupied: "becomingOccupied",
           },
-          entry: "turnOn",
         },
 
         becomingOccupied: {
@@ -138,7 +139,6 @@ class BedAutomation {
           on: {
             unoccupied: "heating",
           },
-          entry: "turnOn",
         },
 
         occupiedHeating: {
