@@ -88,3 +88,29 @@ door_unlocked:
     - all
   data:
     tag: door-lock-alert
+
+utility_room_water_leak:
+  name: Utility Room Water Leak
+  done_message: clear_notification
+  entity_id: binary_sensor.utility_room_leak_water_leak
+  repeat: [5]
+  can_acknowledge: true
+  title: Utility Room Water Leak Detected
+  message: "A water leak has been detected in the utility room. Please investigate."
+  notifiers:
+    - all
+  data:
+    tag: utility-room-water-leak-alert
+
+basement_window_water_leak:
+  name: Basement Window Water Leak
+  done_message: clear_notification
+  entity_id: binary_sensor.basement_window_leak_sensor_water_leak
+  repeat: [5]
+  can_acknowledge: true
+  title: Basement Window Water Leak Detected
+  message: "A water leak has been detected in the basement window. Please investigate."
+  notifiers:
+    - all
+  data:
+    tag: basement-window-water-leak-alert
