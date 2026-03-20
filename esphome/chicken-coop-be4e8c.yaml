@@ -10,33 +10,26 @@ packages:
   improv: !include common/improv.yaml
   time: !include common/time.yaml
 
+esphome:
+  on_boot:
+    priority: -100  # Run after all components are initialized
+    then:
+      - delay: 60s  # Give time source a moment to sync
+      - script.execute: calculate_auto_open_time
+      - script.execute: calculate_auto_close_time
+
 esp32:
   board: seeed_xiao_esp32c3
   framework:
     type: esp-idf
 
-script:
-  - id: stop_motor
-    then:
-      - switch.turn_off: switch_motor3
-      - switch.turn_off: switch_motor4
-  - id: forward_motor
-    then:
-      - switch.turn_off: switch_motor4
-      - switch.turn_on: switch_motor3
-  - id: reverse_motor
-    then:
-      - switch.turn_off: switch_motor3
-      - switch.turn_on: switch_motor4
-  - id: maybe_open_door
-    then:
-      - if:
-          condition:
-            lambda: "return id(auto_open).state && id(chicken_coop_door).position == COVER_CLOSED;"
-          then:
-            - cover.open: chicken_coop_door
+# ==========================================================================
+# Hardware — GPIO switches, binary sensors, cover
+# ==========================================================================
 
 switch:
+  # Motor switches are intentionally exposed to HA (not internal) to allow
+  # manual recovery if the door gets stuck or the cover entity state is stale.
   - platform: gpio
     pin: GPIO2
     id: switch_motor3
@@ -50,9 +43,11 @@ switch:
     interlock: *motor_interlock
     interlock_wait_time: 100ms
 
+  # --- Template switches (user-facing toggles) ---
+
   - platform: template
     id: auto_open
-    name: "Automatic Open"
+    name: "Enable Auto Open"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
 
@@ -131,14 +126,97 @@ cover:
     close_duration: 8s
     close_endstop: coop_door_bottom_stop
 
+# ==========================================================================
+# Scheduling — time, sun, datetime, override tracking
+# ==========================================================================
+
+globals:
+  - id: open_time_manually_set
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: close_time_manually_set
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
 time:
   - id: !extend ha_time
     on_time:
+      # Safety net: if the datetime-based auto open didn't fire (e.g. time
+      # wasn't synced, or datetime wasn't set), still attempt to open the
+      # door hourly between 9-12 as a fallback.
       - minutes: 0
         seconds: 0
         hours: 9-12
         then:
           - script.execute: maybe_open_door
+      # Recalculate auto open/close times at midnight each day
+      - minutes: 0
+        seconds: 0
+        hours: 0
+        then:
+          - lambda: |-
+              if (!id(open_time_manually_set)) {
+                id(calculate_auto_open_time).execute();
+              }
+              if (!id(close_time_manually_set)) {
+                id(calculate_auto_close_time).execute();
+              }
+
+sun:
+  id: my_sun
+  latitude: !secret latitude
+  longitude: !secret longitude
+
+datetime:
+  - platform: template
+    id: next_auto_open
+    name: "Next Auto Open"
+    type: time
+    optimistic: true
+    restore_value: true
+    initial_value: "08:00:00"
+    icon: mdi:weather-sunset-up
+    on_value:
+      then:
+        - lambda: |-
+            // Any value change marks as manually set; scripts correct this after
+            id(open_time_manually_set) = true;
+            ESP_LOGI("coop", "Auto open time set to %02d:%02d:%02d",
+                     x.hour, x.minute, x.second);
+    on_time:
+      then:
+        - logger.log: "Auto open time reached — executing open logic"
+        - script.execute: maybe_open_door
+        - lambda: "id(open_time_manually_set) = false;"
+        - logger.log: "Auto open override cleared — midnight will set tomorrow's time"
+
+  - platform: template
+    id: next_auto_close
+    name: "Next Auto Close"
+    type: time
+    optimistic: true
+    restore_value: true
+    initial_value: "20:00:00"
+    icon: mdi:weather-sunset-down
+    on_value:
+      then:
+        - lambda: |-
+            // Any value change marks as manually set; scripts correct this after
+            id(close_time_manually_set) = true;
+            ESP_LOGI("coop", "Auto close time set to %02d:%02d:%02d",
+                     x.hour, x.minute, x.second);
+    on_time:
+      then:
+        - logger.log: "Auto close time reached — executing close logic"
+        - cover.close: chicken_coop_door
+        - lambda: "id(close_time_manually_set) = false;"
+        - logger.log: "Auto close override cleared — midnight will set tomorrow's time"
+
+# ==========================================================================
+# User controls — delay settings, reset buttons
+# ==========================================================================
 
 number:
   - platform: template
@@ -153,6 +231,13 @@ number:
     restore_value: true
     initial_value: 30
     icon: mdi:weather-sunset-up
+    on_value:
+      then:
+        - lambda: |-
+            // Recalculate auto open time when delay changes, unless manually overridden
+            if (!id(open_time_manually_set)) {
+              id(calculate_auto_open_time).execute();
+            }
   - platform: template
     name: "Close Delay"
     id: close_delay
@@ -165,57 +250,103 @@ number:
     restore_value: true
     initial_value: 15
     icon: mdi:weather-sunset-down
+    on_value:
+      then:
+        - lambda: |-
+            // Recalculate auto close time when delay changes, unless manually overridden
+            if (!id(close_time_manually_set)) {
+              id(calculate_auto_close_time).execute();
+            }
 
+button:
+  - platform: template
+    id: reset_auto_open_time
+    name: "Reset Auto Open Time"
+    icon: mdi:restore
+    on_press:
+      then:
+        - logger.log: "Resetting auto open time to calculated sunrise + delay"
+        - script.execute: calculate_auto_open_time
 
-sun:
-  latitude: !secret latitude
-  longitude: !secret longitude
-  on_sunrise:
-      - then:
-        - delay: !lambda 'return id(open_delay).state * 60000;'
-        - script.execute: maybe_open_door
-  on_sunset:
-    - then:
-        - delay: !lambda 'return id(close_delay).state * 60000;'
-        - cover.close: chicken_coop_door
+  - platform: template
+    id: reset_auto_close_time
+    name: "Reset Auto Close Time"
+    icon: mdi:restore
+    on_press:
+      then:
+        - logger.log: "Resetting auto close time to calculated sunset + delay"
+        - script.execute: calculate_auto_close_time
 
-text_sensor:
-  - platform: sun
-    name: Next Auto Open
-    type: sunrise
-    format: "%Y-%m-%d %H:%M:%S"
-    entity_category: "diagnostic"
-    update_interval: 10min
-    filters:
-      lambda: |-
-        const std::string input_time(x);
+# ==========================================================================
+# Scripts — motor control, door logic, sun time calculations
+# ==========================================================================
 
-        ESPTime parsed_time;
-        ESPTime::strptime(input_time, parsed_time);
+script:
+  - id: stop_motor
+    then:
+      - switch.turn_off: switch_motor3
+      - switch.turn_off: switch_motor4
+  - id: forward_motor
+    then:
+      - switch.turn_off: switch_motor4
+      - switch.turn_on: switch_motor3
+  - id: reverse_motor
+    then:
+      - switch.turn_off: switch_motor3
+      - switch.turn_on: switch_motor4
 
-        parsed_time.recalc_timestamp_local();
-        parsed_time = ESPTime::from_epoch_local(parsed_time.timestamp + id(open_delay).state * 60);
+  - id: maybe_open_door
+    then:
+      - if:
+          condition:
+            lambda: "return id(auto_open).state && id(chicken_coop_door).position == COVER_CLOSED;"
+          then:
+            - cover.open: chicken_coop_door
 
-        char buffer[64];
-        parsed_time.strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S");
-        return std::string(buffer);
+  - id: calculate_auto_open_time
+    then:
+      - lambda: |-
+          auto now = id(ha_time).now();
+          if (!now.is_valid()) {
+            ESP_LOGW("coop", "Time not synced yet — skipping open time calculation");
+            return;
+          }
+          auto sun_time = id(my_sun).sunrise(-0.833);
+          if (!sun_time.has_value()) {
+            ESP_LOGW("coop", "Could not calculate sunrise time");
+            return;
+          }
+          auto sunrise_time = sun_time.value();
+          // Add the open delay (in minutes)
+          auto target = ESPTime::from_epoch_local(sunrise_time.timestamp + (uint32_t)(id(open_delay).state * 60));
+          auto call = id(next_auto_open).make_call();
+          call.set_time(target.hour, target.minute, target.second);
+          call.perform();
+          // Clear manual flag since this was a calculated update
+          id(open_time_manually_set) = false;
+          ESP_LOGI("coop", "Auto open time set to %02d:%02d:%02d (sunrise + %.0f min)",
+                   target.hour, target.minute, target.second, id(open_delay).state);
 
-  - platform: sun
-    name: Next Auto Close
-    type: sunset
-    format: "%Y-%m-%d %H:%M:%S"
-    entity_category: "diagnostic"
-    update_interval: 10min
-    filters:
-      lambda: |-
-        const std::string input_time(x);
-
-        ESPTime parsed_time;
-        ESPTime::strptime(input_time, parsed_time);
-
-        parsed_time.recalc_timestamp_local();
-        parsed_time = ESPTime::from_epoch_local(parsed_time.timestamp + id(close_delay).state * 60);
-
-        char buffer[64];
-        parsed_time.strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S");
-        return std::string(buffer);
+  - id: calculate_auto_close_time
+    then:
+      - lambda: |-
+          auto now = id(ha_time).now();
+          if (!now.is_valid()) {
+            ESP_LOGW("coop", "Time not synced yet — skipping close time calculation");
+            return;
+          }
+          auto sun_time = id(my_sun).sunset(-0.833);
+          if (!sun_time.has_value()) {
+            ESP_LOGW("coop", "Could not calculate sunset time");
+            return;
+          }
+          auto sunset_time = sun_time.value();
+          // Add the close delay (in minutes)
+          auto target = ESPTime::from_epoch_local(sunset_time.timestamp + (uint32_t)(id(close_delay).state * 60));
+          auto call = id(next_auto_close).make_call();
+          call.set_time(target.hour, target.minute, target.second);
+          call.perform();
+          // Clear manual flag since this was a calculated update
+          id(close_time_manually_set) = false;
+          ESP_LOGI("coop", "Auto close time set to %02d:%02d:%02d (sunset + %.0f min)",
+                   target.hour, target.minute, target.second, id(close_delay).state);
