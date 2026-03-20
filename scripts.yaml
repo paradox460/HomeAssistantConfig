@@ -11,12 +11,15 @@ play_xbox_script:
         device_id: ae78864a7dc874b6ad71a0df69c2ecb9
         entity_id: f7534391d26bbf638ba4efbc15e2310c
         domain: light
-    - service: select.select_option
-      metadata: {}
+    - metadata: {}
       data:
         option: Play Xbox
+      action: select.select_option
+    - action: switch.turn_on
+      metadata: {}
       target:
-        entity_id: select.harmony_hub_activities
+        entity_id: switch.xbox
+      data: {}
   - if:
     - condition: template
       value_template: '{{ game is defined }}'
@@ -27,19 +30,21 @@ play_xbox_script:
         state: 'off'
       then:
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.xbox
           to: 'on'
           for:
             hours: 0
             minutes: 0
             seconds: 0
-    - service: media_player.play_media
-      target:
+          trigger: state
+    - target:
         entity_id: media_player.xbox
       data:
-        media_content_type: ''
-        media_content_id: '{{ game }}'
+        media:
+          media_content_id: '{{ game }}'
+          media_content_type: ''
+          metadata: {}
+      action: media_player.play_media
   mode: single
   icon: mdi:microsoft-xbox

@@ -88,3 +88,20 @@
       message: There's a {{ states('sensor.aurora_visibility_visibility') }}% chance
         of aurora visibility in the next 30 minutes.
   mode: single
+- id: '1773983400361'
+  alias: Theater Remote Toggle Lights
+  description: ''
+  triggers:
+  - trigger: mqtt
+    options:
+      topic: FC012C39DD68/up
+      payload: '{"device_id":5,"key_id":1}'
+  conditions: []
+  actions:
+  - action: light.toggle
+    metadata: {}
+    target:
+      entity_id: light.theater_floor_lamps
+    data:
+      transition: 5
+  mode: single
