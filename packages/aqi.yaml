@@ -1,0 +1,613 @@
+# Home Assistant AQI Package
+# Calculates US EPA AQI from AirGradient PM2.5 and PM10 sensors
+# using the 2024 revised EPA breakpoints.
+#
+# Provides three sensors:
+#   - sensor.aqi_instant: Real-time AQI from current readings
+#   - sensor.aqi: EPA AQI from 24-hour rolling averages
+#   - sensor.aqi_nowcast: EPA NowCast AQI from 12-hour weighted average
+#
+# The NowCast algorithm weights the most recent hours more heavily when
+# pollution levels are changing rapidly, providing a more responsive AQI
+# than a simple 24-hour average while still smoothing out short spikes.
+# See: https://en.wikipedia.org/wiki/NowCast_(air_quality_index)
+#
+# Source sensors:
+#   - sensor.airgradient_pm2_5 (PM2.5 µg/m³)
+#   - sensor.airgradient_pm10  (PM10 µg/m³)
+
+# 24-hour rolling average helper sensors via the statistics platform
+sensor:
+  - platform: statistics
+    name: "PM2.5 24h Average"
+    unique_id: pm2_5_24h_average
+    entity_id: sensor.airgradient_pm2_5
+    state_characteristic: mean
+    max_age:
+      hours: 24
+
+  - platform: statistics
+    name: "PM10 24h Average"
+    unique_id: pm10_24h_average
+    entity_id: sensor.airgradient_pm10
+    state_characteristic: mean
+    max_age:
+      hours: 24
+
+template:
+  - sensor:
+      # ── Instantaneous AQI ──────────────────────────────────────────────
+      - name: "AQI Instant"
+        unique_id: aqi_instant
+        icon: mdi:air-filter
+        state_class: measurement
+        state: >-
+          {% set pm25 = states('sensor.airgradient_pm2_5') | float(-1) %}
+          {% set pm10 = states('sensor.airgradient_pm10') | float(-1) %}
+          {% if pm25 < 0 or pm10 < 0 %}
+            unavailable
+          {% else %}
+            {# — PM2.5 breakpoints (2024 revised) — #}
+            {% if pm25 <= 9.0 %}
+              {% set aqi25 = ((50 - 0) / (9.0 - 0)) * (pm25 - 0) + 0 %}
+            {% elif pm25 <= 35.4 %}
+              {% set aqi25 = ((100 - 51) / (35.4 - 9.1)) * (pm25 - 9.1) + 51 %}
+            {% elif pm25 <= 55.4 %}
+              {% set aqi25 = ((150 - 101) / (55.4 - 35.5)) * (pm25 - 35.5) + 101 %}
+            {% elif pm25 <= 125.4 %}
+              {% set aqi25 = ((200 - 151) / (125.4 - 55.5)) * (pm25 - 55.5) + 151 %}
+            {% elif pm25 <= 225.4 %}
+              {% set aqi25 = ((300 - 201) / (225.4 - 125.5)) * (pm25 - 125.5) + 201 %}
+            {% elif pm25 <= 325.4 %}
+              {% set aqi25 = ((500 - 301) / (325.4 - 225.5)) * (pm25 - 225.5) + 301 %}
+            {% else %}
+              {% set aqi25 = 500 %}
+            {% endif %}
+
+            {# — PM10 breakpoints (2024 revised) — #}
+            {% if pm10 <= 54 %}
+              {% set aqi10 = ((50 - 0) / (54 - 0)) * (pm10 - 0) + 0 %}
+            {% elif pm10 <= 154 %}
+              {% set aqi10 = ((100 - 51) / (154 - 55)) * (pm10 - 55) + 51 %}
+            {% elif pm10 <= 254 %}
+              {% set aqi10 = ((150 - 101) / (254 - 155)) * (pm10 - 155) + 101 %}
+            {% elif pm10 <= 354 %}
+              {% set aqi10 = ((200 - 151) / (354 - 255)) * (pm10 - 255) + 151 %}
+            {% elif pm10 <= 424 %}
+              {% set aqi10 = ((300 - 201) / (424 - 355)) * (pm10 - 355) + 201 %}
+            {% elif pm10 <= 604 %}
+              {% set aqi10 = ((500 - 301) / (604 - 425)) * (pm10 - 425) + 301 %}
+            {% else %}
+              {% set aqi10 = 500 %}
+            {% endif %}
+
+            {{ [aqi25, aqi10] | max | round(0) }}
+          {% endif %}
+        attributes:
+          pm25_aqi: >-
+            {% set pm25 = states('sensor.airgradient_pm2_5') | float(-1) %}
+            {% if pm25 < 0 %}
+              unavailable
+            {% elif pm25 <= 9.0 %}
+              {{ (((50 - 0) / (9.0 - 0)) * (pm25 - 0) + 0) | round(0) }}
+            {% elif pm25 <= 35.4 %}
+              {{ (((100 - 51) / (35.4 - 9.1)) * (pm25 - 9.1) + 51) | round(0) }}
+            {% elif pm25 <= 55.4 %}
+              {{ (((150 - 101) / (55.4 - 35.5)) * (pm25 - 35.5) + 101) | round(0) }}
+            {% elif pm25 <= 125.4 %}
+              {{ (((200 - 151) / (125.4 - 55.5)) * (pm25 - 55.5) + 151) | round(0) }}
+            {% elif pm25 <= 225.4 %}
+              {{ (((300 - 201) / (225.4 - 125.5)) * (pm25 - 125.5) + 201) | round(0) }}
+            {% elif pm25 <= 325.4 %}
+              {{ (((500 - 301) / (325.4 - 225.5)) * (pm25 - 225.5) + 301) | round(0) }}
+            {% else %}
+              500
+            {% endif %}
+          pm10_aqi: >-
+            {% set pm10 = states('sensor.airgradient_pm10') | float(-1) %}
+            {% if pm10 < 0 %}
+              unavailable
+            {% elif pm10 <= 54 %}
+              {{ (((50 - 0) / (54 - 0)) * (pm10 - 0) + 0) | round(0) }}
+            {% elif pm10 <= 154 %}
+              {{ (((100 - 51) / (154 - 55)) * (pm10 - 55) + 51) | round(0) }}
+            {% elif pm10 <= 254 %}
+              {{ (((150 - 101) / (254 - 155)) * (pm10 - 155) + 101) | round(0) }}
+            {% elif pm10 <= 354 %}
+              {{ (((200 - 151) / (354 - 255)) * (pm10 - 255) + 151) | round(0) }}
+            {% elif pm10 <= 424 %}
+              {{ (((300 - 201) / (424 - 355)) * (pm10 - 355) + 201) | round(0) }}
+            {% elif pm10 <= 604 %}
+              {{ (((500 - 301) / (604 - 425)) * (pm10 - 425) + 301) | round(0) }}
+            {% else %}
+              500
+            {% endif %}
+          color: >-
+            {% set aqi = states('sensor.aqi_instant') | int(-1) %}
+            {% if aqi < 0 %}
+              unavailable
+            {% elif aqi <= 50 %}
+              green
+            {% elif aqi <= 100 %}
+              yellow
+            {% elif aqi <= 150 %}
+              orange
+            {% elif aqi <= 200 %}
+              red
+            {% elif aqi <= 300 %}
+              purple
+            {% else %}
+              maroon
+            {% endif %}
+          category: >-
+            {% set aqi = states('sensor.aqi_instant') | int(-1) %}
+            {% if aqi < 0 %}
+              unavailable
+            {% elif aqi <= 50 %}
+              Good
+            {% elif aqi <= 100 %}
+              Moderate
+            {% elif aqi <= 150 %}
+              Unhealthy for Sensitive Groups
+            {% elif aqi <= 200 %}
+              Unhealthy
+            {% elif aqi <= 300 %}
+              Very Unhealthy
+            {% else %}
+              Hazardous
+            {% endif %}
+          dominant_pollutant: >-
+            {% set aqi25 = state_attr('sensor.aqi_instant', 'pm25_aqi') | int(-1) %}
+            {% set aqi10 = state_attr('sensor.aqi_instant', 'pm10_aqi') | int(-1) %}
+            {% if aqi25 < 0 or aqi10 < 0 %}
+              unavailable
+            {% elif aqi25 >= aqi10 %}
+              PM2.5
+            {% else %}
+              PM10
+            {% endif %}
+
+      # ── EPA AQI (24-hour rolling average) ──────────────────────────────
+      - name: "AQI"
+        unique_id: aqi
+        icon: mdi:air-filter
+        state_class: measurement
+        state: >-
+          {% set pm25 = states('sensor.pm2_5_24h_average') | float(-1) %}
+          {% set pm10 = states('sensor.pm10_24h_average') | float(-1) %}
+          {% if pm25 < 0 or pm10 < 0 %}
+            unavailable
+          {% else %}
+            {# — PM2.5 breakpoints (2024 revised) — #}
+            {% if pm25 <= 9.0 %}
+              {% set aqi25 = ((50 - 0) / (9.0 - 0)) * (pm25 - 0) + 0 %}
+            {% elif pm25 <= 35.4 %}
+              {% set aqi25 = ((100 - 51) / (35.4 - 9.1)) * (pm25 - 9.1) + 51 %}
+            {% elif pm25 <= 55.4 %}
+              {% set aqi25 = ((150 - 101) / (55.4 - 35.5)) * (pm25 - 35.5) + 101 %}
+            {% elif pm25 <= 125.4 %}
+              {% set aqi25 = ((200 - 151) / (125.4 - 55.5)) * (pm25 - 55.5) + 151 %}
+            {% elif pm25 <= 225.4 %}
+              {% set aqi25 = ((300 - 201) / (225.4 - 125.5)) * (pm25 - 125.5) + 201 %}
+            {% elif pm25 <= 325.4 %}
+              {% set aqi25 = ((500 - 301) / (325.4 - 225.5)) * (pm25 - 225.5) + 301 %}
+            {% else %}
+              {% set aqi25 = 500 %}
+            {% endif %}
+
+            {# — PM10 breakpoints (2024 revised) — #}
+            {% if pm10 <= 54 %}
+              {% set aqi10 = ((50 - 0) / (54 - 0)) * (pm10 - 0) + 0 %}
+            {% elif pm10 <= 154 %}
+              {% set aqi10 = ((100 - 51) / (154 - 55)) * (pm10 - 55) + 51 %}
+            {% elif pm10 <= 254 %}
+              {% set aqi10 = ((150 - 101) / (254 - 155)) * (pm10 - 155) + 101 %}
+            {% elif pm10 <= 354 %}
+              {% set aqi10 = ((200 - 151) / (354 - 255)) * (pm10 - 255) + 151 %}
+            {% elif pm10 <= 424 %}
+              {% set aqi10 = ((300 - 201) / (424 - 355)) * (pm10 - 355) + 201 %}
+            {% elif pm10 <= 604 %}
+              {% set aqi10 = ((500 - 301) / (604 - 425)) * (pm10 - 425) + 301 %}
+            {% else %}
+              {% set aqi10 = 500 %}
+            {% endif %}
+
+            {{ [aqi25, aqi10] | max | round(0) }}
+          {% endif %}
+        attributes:
+          pm25_aqi: >-
+            {% set pm25 = states('sensor.pm2_5_24h_average') | float(-1) %}
+            {% if pm25 < 0 %}
+              unavailable
+            {% elif pm25 <= 9.0 %}
+              {{ (((50 - 0) / (9.0 - 0)) * (pm25 - 0) + 0) | round(0) }}
+            {% elif pm25 <= 35.4 %}
+              {{ (((100 - 51) / (35.4 - 9.1)) * (pm25 - 9.1) + 51) | round(0) }}
+            {% elif pm25 <= 55.4 %}
+              {{ (((150 - 101) / (55.4 - 35.5)) * (pm25 - 35.5) + 101) | round(0) }}
+            {% elif pm25 <= 125.4 %}
+              {{ (((200 - 151) / (125.4 - 55.5)) * (pm25 - 55.5) + 151) | round(0) }}
+            {% elif pm25 <= 225.4 %}
+              {{ (((300 - 201) / (225.4 - 125.5)) * (pm25 - 125.5) + 201) | round(0) }}
+            {% elif pm25 <= 325.4 %}
+              {{ (((500 - 301) / (325.4 - 225.5)) * (pm25 - 225.5) + 301) | round(0) }}
+            {% else %}
+              500
+            {% endif %}
+          pm10_aqi: >-
+            {% set pm10 = states('sensor.pm10_24h_average') | float(-1) %}
+            {% if pm10 < 0 %}
+              unavailable
+            {% elif pm10 <= 54 %}
+              {{ (((50 - 0) / (54 - 0)) * (pm10 - 0) + 0) | round(0) }}
+            {% elif pm10 <= 154 %}
+              {{ (((100 - 51) / (154 - 55)) * (pm10 - 55) + 51) | round(0) }}
+            {% elif pm10 <= 254 %}
+              {{ (((150 - 101) / (254 - 155)) * (pm10 - 155) + 101) | round(0) }}
+            {% elif pm10 <= 354 %}
+              {{ (((200 - 151) / (354 - 255)) * (pm10 - 255) + 151) | round(0) }}
+            {% elif pm10 <= 424 %}
+              {{ (((300 - 201) / (424 - 355)) * (pm10 - 355) + 201) | round(0) }}
+            {% elif pm10 <= 604 %}
+              {{ (((500 - 301) / (604 - 425)) * (pm10 - 425) + 301) | round(0) }}
+            {% else %}
+              500
+            {% endif %}
+          color: >-
+            {% set aqi = states('sensor.aqi') | int(-1) %}
+            {% if aqi < 0 %}
+              unavailable
+            {% elif aqi <= 50 %}
+              green
+            {% elif aqi <= 100 %}
+              yellow
+            {% elif aqi <= 150 %}
+              orange
+            {% elif aqi <= 200 %}
+              red
+            {% elif aqi <= 300 %}
+              purple
+            {% else %}
+              maroon
+            {% endif %}
+          category: >-
+            {% set aqi = states('sensor.aqi') | int(-1) %}
+            {% if aqi < 0 %}
+              unavailable
+            {% elif aqi <= 50 %}
+              Good
+            {% elif aqi <= 100 %}
+              Moderate
+            {% elif aqi <= 150 %}
+              Unhealthy for Sensitive Groups
+            {% elif aqi <= 200 %}
+              Unhealthy
+            {% elif aqi <= 300 %}
+              Very Unhealthy
+            {% else %}
+              Hazardous
+            {% endif %}
+          dominant_pollutant: >-
+            {% set aqi25 = state_attr('sensor.aqi', 'pm25_aqi') | int(-1) %}
+            {% set aqi10 = state_attr('sensor.aqi', 'pm10_aqi') | int(-1) %}
+            {% if aqi25 < 0 or aqi10 < 0 %}
+              unavailable
+            {% elif aqi25 >= aqi10 %}
+              PM2.5
+            {% else %}
+              PM10
+            {% endif %}
+
+  # ── EPA NowCast AQI (trigger-based, hourly sampling) ────────────────
+  # Samples PM2.5 and PM10 every hour, stores the last 12 readings,
+  # and computes the EPA NowCast weighted average for each pollutant.
+  # NowCast is unavailable until at least 3 of the most recent hours
+  # (including the two most recent) have valid data.
+  #
+  # Each attribute rebuilds the history list from scratch so it does not
+  # depend on sibling attributes computed in the same trigger cycle.
+  - trigger:
+      - trigger: time_pattern
+        hours: "/1"
+    sensor:
+      - name: "AQI NowCast"
+        unique_id: aqi_nowcast
+        icon: mdi:air-filter
+        state_class: measurement
+        state: >-
+          {# — Collect current readings and prepend to history — #}
+          {% set cur25 = states('sensor.airgradient_pm2_5') | float(-1) %}
+          {% set cur10 = states('sensor.airgradient_pm10') | float(-1) %}
+          {% set prev25 = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
+          {% set prev10 = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
+          {% set prev25 = prev25 if prev25 is not none else [] %}
+          {% set prev10 = prev10 if prev10 is not none else [] %}
+          {% set h25 = ([cur25] + prev25)[:12] %}
+          {% set h10 = ([cur10] + prev10)[:12] %}
+
+          {# — NowCast helper macro — #}
+          {% macro nowcast(hours) %}
+            {% set ns = namespace(vals=[]) %}
+            {% for v in hours %}
+              {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
+            {% endfor %}
+            {% if hours | length < 2 or hours[0] < 0 or hours[1] < 0 or ns.vals | length < 3 %}
+              -1
+            {% else %}
+              {% set cmin = ns.vals | min %}
+              {% set cmax = ns.vals | max %}
+              {% set wstar = (cmin / cmax) if cmax > 0 else 1 %}
+              {% set w = [wstar, 0.5] | max %}
+              {% set ns2 = namespace(num=0, den=0) %}
+              {% for v in hours %}
+                {% if v >= 0 %}
+                  {% set wt = w ** loop.index0 %}
+                  {% set ns2.num = ns2.num + wt * v %}
+                  {% set ns2.den = ns2.den + wt %}
+                {% endif %}
+              {% endfor %}
+              {{ (ns2.num / ns2.den) if ns2.den > 0 else -1 }}
+            {% endif %}
+          {% endmacro %}
+
+          {% set nc25 = nowcast(h25) | float(-1) %}
+          {% set nc10 = nowcast(h10) | float(-1) %}
+
+          {% if nc25 < 0 and nc10 < 0 %}
+            unavailable
+          {% else %}
+            {# — PM2.5 AQI from NowCast concentration — #}
+            {% if nc25 < 0 %}
+              {% set aqi25 = -1 %}
+            {% elif nc25 <= 9.0 %}
+              {% set aqi25 = ((50 - 0) / (9.0 - 0)) * (nc25 - 0) + 0 %}
+            {% elif nc25 <= 35.4 %}
+              {% set aqi25 = ((100 - 51) / (35.4 - 9.1)) * (nc25 - 9.1) + 51 %}
+            {% elif nc25 <= 55.4 %}
+              {% set aqi25 = ((150 - 101) / (55.4 - 35.5)) * (nc25 - 35.5) + 101 %}
+            {% elif nc25 <= 125.4 %}
+              {% set aqi25 = ((200 - 151) / (125.4 - 55.5)) * (nc25 - 55.5) + 151 %}
+            {% elif nc25 <= 225.4 %}
+              {% set aqi25 = ((300 - 201) / (225.4 - 125.5)) * (nc25 - 125.5) + 201 %}
+            {% elif nc25 <= 325.4 %}
+              {% set aqi25 = ((500 - 301) / (325.4 - 225.5)) * (nc25 - 225.5) + 301 %}
+            {% else %}
+              {% set aqi25 = 500 %}
+            {% endif %}
+
+            {# — PM10 AQI from NowCast concentration — #}
+            {% if nc10 < 0 %}
+              {% set aqi10 = -1 %}
+            {% elif nc10 <= 54 %}
+              {% set aqi10 = ((50 - 0) / (54 - 0)) * (nc10 - 0) + 0 %}
+            {% elif nc10 <= 154 %}
+              {% set aqi10 = ((100 - 51) / (154 - 55)) * (nc10 - 55) + 51 %}
+            {% elif nc10 <= 254 %}
+              {% set aqi10 = ((150 - 101) / (254 - 155)) * (nc10 - 155) + 101 %}
+            {% elif nc10 <= 354 %}
+              {% set aqi10 = ((200 - 151) / (354 - 255)) * (nc10 - 255) + 151 %}
+            {% elif nc10 <= 424 %}
+              {% set aqi10 = ((300 - 201) / (424 - 355)) * (nc10 - 355) + 201 %}
+            {% elif nc10 <= 604 %}
+              {% set aqi10 = ((500 - 301) / (604 - 425)) * (nc10 - 425) + 301 %}
+            {% else %}
+              {% set aqi10 = 500 %}
+            {% endif %}
+
+            {% set valid = [aqi25, aqi10] | select('gt', -1) | list %}
+            {% if valid | length == 0 %}
+              unavailable
+            {% else %}
+              {{ valid | max | round(0) }}
+            {% endif %}
+          {% endif %}
+        attributes:
+          pm25_history: >-
+            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {{ ([cur] + prev)[:12] }}
+          pm10_history: >-
+            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {{ ([cur] + prev)[:12] }}
+          pm25_nowcast: >-
+            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {% set h = ([cur] + prev)[:12] %}
+            {% set ns = namespace(vals=[]) %}
+            {% for v in h %}
+              {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
+            {% endfor %}
+            {% if h | length < 2 or h[0] < 0 or h[1] < 0 or ns.vals | length < 3 %}
+              unavailable
+            {% else %}
+              {% set cmin = ns.vals | min %}
+              {% set cmax = ns.vals | max %}
+              {% set wstar = (cmin / cmax) if cmax > 0 else 1 %}
+              {% set w = [wstar, 0.5] | max %}
+              {% set ns2 = namespace(num=0, den=0) %}
+              {% for v in h %}
+                {% if v >= 0 %}
+                  {% set wt = w ** loop.index0 %}
+                  {% set ns2.num = ns2.num + wt * v %}
+                  {% set ns2.den = ns2.den + wt %}
+                {% endif %}
+              {% endfor %}
+              {{ (ns2.num / ns2.den) | round(1) if ns2.den > 0 else 'unavailable' }}
+            {% endif %}
+          pm10_nowcast: >-
+            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {% set h = ([cur] + prev)[:12] %}
+            {% set ns = namespace(vals=[]) %}
+            {% for v in h %}
+              {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
+            {% endfor %}
+            {% if h | length < 2 or h[0] < 0 or h[1] < 0 or ns.vals | length < 3 %}
+              unavailable
+            {% else %}
+              {% set cmin = ns.vals | min %}
+              {% set cmax = ns.vals | max %}
+              {% set wstar = (cmin / cmax) if cmax > 0 else 1 %}
+              {% set w = [wstar, 0.5] | max %}
+              {% set ns2 = namespace(num=0, den=0) %}
+              {% for v in h %}
+                {% if v >= 0 %}
+                  {% set wt = w ** loop.index0 %}
+                  {% set ns2.num = ns2.num + wt * v %}
+                  {% set ns2.den = ns2.den + wt %}
+                {% endif %}
+              {% endfor %}
+              {{ (ns2.num / ns2.den) | round(1) if ns2.den > 0 else 'unavailable' }}
+            {% endif %}
+          pm25_aqi: >-
+            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {% set h = ([cur] + prev)[:12] %}
+            {% set ns = namespace(vals=[]) %}
+            {% for v in h %}
+              {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
+            {% endfor %}
+            {% if h | length < 2 or h[0] < 0 or h[1] < 0 or ns.vals | length < 3 %}
+              unavailable
+            {% else %}
+              {% set cmin = ns.vals | min %}
+              {% set cmax = ns.vals | max %}
+              {% set wstar = (cmin / cmax) if cmax > 0 else 1 %}
+              {% set w = [wstar, 0.5] | max %}
+              {% set ns2 = namespace(num=0, den=0) %}
+              {% for v in h %}
+                {% if v >= 0 %}
+                  {% set wt = w ** loop.index0 %}
+                  {% set ns2.num = ns2.num + wt * v %}
+                  {% set ns2.den = ns2.den + wt %}
+                {% endif %}
+              {% endfor %}
+              {% set pm25 = ns2.num / ns2.den if ns2.den > 0 else -1 %}
+              {% if pm25 < 0 %}
+                unavailable
+              {% elif pm25 <= 9.0 %}
+                {{ (((50 - 0) / (9.0 - 0)) * (pm25 - 0) + 0) | round(0) }}
+              {% elif pm25 <= 35.4 %}
+                {{ (((100 - 51) / (35.4 - 9.1)) * (pm25 - 9.1) + 51) | round(0) }}
+              {% elif pm25 <= 55.4 %}
+                {{ (((150 - 101) / (55.4 - 35.5)) * (pm25 - 35.5) + 101) | round(0) }}
+              {% elif pm25 <= 125.4 %}
+                {{ (((200 - 151) / (125.4 - 55.5)) * (pm25 - 55.5) + 151) | round(0) }}
+              {% elif pm25 <= 225.4 %}
+                {{ (((300 - 201) / (225.4 - 125.5)) * (pm25 - 125.5) + 201) | round(0) }}
+              {% elif pm25 <= 325.4 %}
+                {{ (((500 - 301) / (325.4 - 225.5)) * (pm25 - 225.5) + 301) | round(0) }}
+              {% else %}
+                500
+              {% endif %}
+            {% endif %}
+          pm10_aqi: >-
+            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {% set h = ([cur] + prev)[:12] %}
+            {% set ns = namespace(vals=[]) %}
+            {% for v in h %}
+              {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
+            {% endfor %}
+            {% if h | length < 2 or h[0] < 0 or h[1] < 0 or ns.vals | length < 3 %}
+              unavailable
+            {% else %}
+              {% set cmin = ns.vals | min %}
+              {% set cmax = ns.vals | max %}
+              {% set wstar = (cmin / cmax) if cmax > 0 else 1 %}
+              {% set w = [wstar, 0.5] | max %}
+              {% set ns2 = namespace(num=0, den=0) %}
+              {% for v in h %}
+                {% if v >= 0 %}
+                  {% set wt = w ** loop.index0 %}
+                  {% set ns2.num = ns2.num + wt * v %}
+                  {% set ns2.den = ns2.den + wt %}
+                {% endif %}
+              {% endfor %}
+              {% set pm10 = ns2.num / ns2.den if ns2.den > 0 else -1 %}
+              {% if pm10 < 0 %}
+                unavailable
+              {% elif pm10 <= 54 %}
+                {{ (((50 - 0) / (54 - 0)) * (pm10 - 0) + 0) | round(0) }}
+              {% elif pm10 <= 154 %}
+                {{ (((100 - 51) / (154 - 55)) * (pm10 - 55) + 51) | round(0) }}
+              {% elif pm10 <= 254 %}
+                {{ (((150 - 101) / (254 - 155)) * (pm10 - 155) + 101) | round(0) }}
+              {% elif pm10 <= 354 %}
+                {{ (((200 - 151) / (354 - 255)) * (pm10 - 255) + 151) | round(0) }}
+              {% elif pm10 <= 424 %}
+                {{ (((300 - 201) / (424 - 355)) * (pm10 - 355) + 201) | round(0) }}
+              {% elif pm10 <= 604 %}
+                {{ (((500 - 301) / (604 - 425)) * (pm10 - 425) + 301) | round(0) }}
+              {% else %}
+                500
+              {% endif %}
+            {% endif %}
+          nowcast_weight: >-
+            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
+            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
+            {% set prev = prev if prev is not none else [] %}
+            {% set h = ([cur] + prev)[:12] %}
+            {% set ns = namespace(vals=[]) %}
+            {% for v in h %}
+              {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
+            {% endfor %}
+            {% if ns.vals | length < 2 %}
+              unavailable
+            {% else %}
+              {% set cmin = ns.vals | min %}
+              {% set cmax = ns.vals | max %}
+              {% set wstar = (cmin / cmax) if cmax > 0 else 1 %}
+              {{ [wstar, 0.5] | max | round(3) }}
+            {% endif %}
+          color: >-
+            {% set aqi = states('sensor.aqi_nowcast') | int(-1) %}
+            {% if aqi < 0 %}
+              unavailable
+            {% elif aqi <= 50 %}
+              green
+            {% elif aqi <= 100 %}
+              yellow
+            {% elif aqi <= 150 %}
+              orange
+            {% elif aqi <= 200 %}
+              red
+            {% elif aqi <= 300 %}
+              purple
+            {% else %}
+              maroon
+            {% endif %}
+          category: >-
+            {% set aqi = states('sensor.aqi_nowcast') | int(-1) %}
+            {% if aqi < 0 %}
+              unavailable
+            {% elif aqi <= 50 %}
+              Good
+            {% elif aqi <= 100 %}
+              Moderate
+            {% elif aqi <= 150 %}
+              Unhealthy for Sensitive Groups
+            {% elif aqi <= 200 %}
+              Unhealthy
+            {% elif aqi <= 300 %}
+              Very Unhealthy
+            {% else %}
+              Hazardous
+            {% endif %}
+          dominant_pollutant: >-
+            {% set aqi25 = state_attr('sensor.aqi_nowcast', 'pm25_aqi') | int(-1) %}
+            {% set aqi10 = state_attr('sensor.aqi_nowcast', 'pm10_aqi') | int(-1) %}
+            {% if aqi25 < 0 or aqi10 < 0 %}
+              unavailable
+            {% elif aqi25 >= aqi10 %}
+              PM2.5
+            {% else %}
+              PM10
+            {% endif %}
