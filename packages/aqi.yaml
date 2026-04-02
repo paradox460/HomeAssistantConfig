@@ -12,9 +12,26 @@
 # than a simple 24-hour average while still smoothing out short spikes.
 # See: https://en.wikipedia.org/wiki/NowCast_(air_quality_index)
 #
+# NowCast hourly samples are persisted in input_text helpers so they
+# survive Home Assistant reboots. An automation updates the helpers
+# every hour, and the NowCast template sensor reads from them.
+#
 # Source sensors:
 #   - sensor.airgradient_pm2_5 (PM2.5 µg/m³)
 #   - sensor.airgradient_pm10  (PM10 µg/m³)
+
+# ── Persistent storage for NowCast hourly samples ─────────────────────
+# Stored as JSON arrays of up to 12 floats (most recent first).
+# input_text state is persisted in .storage and survives reboots.
+input_text:
+  pm25_nowcast_history:
+    name: "PM2.5 NowCast History"
+    max: 255
+    initial: "[]"
+  pm10_nowcast_history:
+    name: "PM10 NowCast History"
+    max: 255
+    initial: "[]"
 
 # 24-hour rolling average helper sensors via the statistics platform
 sensor:
@@ -33,6 +50,37 @@ sensor:
     state_characteristic: mean
     max_age:
       hours: 24
+
+# ── Automation: sample PM values into persistent history every hour ───
+automation:
+  - id: nowcast_hourly_sample
+    alias: "NowCast Hourly Sample"
+    description: >-
+      Every hour, prepend the current PM2.5 and PM10 readings to the
+      NowCast history stored in input_text helpers, keeping the most
+      recent 12 entries.
+    trigger:
+      - trigger: time_pattern
+        hours: "/1"
+    action:
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.pm25_nowcast_history
+        data:
+          value: >-
+            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
+            {% set prev = states('input_text.pm25_nowcast_history') %}
+            {% set prev = prev | from_json if prev not in ['unknown', 'unavailable', ''] else [] %}
+            {{ (([cur] + prev)[:12]) | to_json }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.pm10_nowcast_history
+        data:
+          value: >-
+            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
+            {% set prev = states('input_text.pm10_nowcast_history') %}
+            {% set prev = prev | from_json if prev not in ['unknown', 'unavailable', ''] else [] %}
+            {{ (([cur] + prev)[:12]) | to_json }}
 
 template:
   - sensor:
@@ -298,32 +346,22 @@ template:
               PM10
             {% endif %}
 
-  # ── EPA NowCast AQI (trigger-based, hourly sampling) ────────────────
-  # Samples PM2.5 and PM10 every hour, stores the last 12 readings,
-  # and computes the EPA NowCast weighted average for each pollutant.
-  # NowCast is unavailable until at least 3 of the most recent hours
-  # (including the two most recent) have valid data.
-  #
-  # Each attribute rebuilds the history list from scratch so it does not
-  # depend on sibling attributes computed in the same trigger cycle.
-  - trigger:
-      - trigger: time_pattern
-        hours: "/1"
-    sensor:
+      # ── EPA NowCast AQI (reads from persistent input_text history) ───
+      # The automation above samples PM values every hour into the
+      # input_text helpers. This sensor reacts to changes in those
+      # helpers and computes the NowCast weighted average.
+      # NowCast is unavailable until at least 3 of the most recent hours
+      # (including the two most recent) have valid data.
       - name: "AQI NowCast"
         unique_id: aqi_nowcast
         icon: mdi:air-filter
         state_class: measurement
         state: >-
-          {# — Collect current readings and prepend to history — #}
-          {% set cur25 = states('sensor.airgradient_pm2_5') | float(-1) %}
-          {% set cur10 = states('sensor.airgradient_pm10') | float(-1) %}
-          {% set prev25 = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
-          {% set prev10 = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
-          {% set prev25 = prev25 if prev25 is not none else [] %}
-          {% set prev10 = prev10 if prev10 is not none else [] %}
-          {% set h25 = ([cur25] + prev25)[:12] %}
-          {% set h10 = ([cur10] + prev10)[:12] %}
+          {# — Load history from persistent input_text helpers — #}
+          {% set raw25 = states('input_text.pm25_nowcast_history') %}
+          {% set raw10 = states('input_text.pm10_nowcast_history') %}
+          {% set h25 = raw25 | from_json if raw25 not in ['unknown', 'unavailable', ''] else [] %}
+          {% set h10 = raw10 | from_json if raw10 not in ['unknown', 'unavailable', ''] else [] %}
 
           {# — NowCast helper macro — #}
           {% macro nowcast(hours) %}
@@ -403,20 +441,14 @@ template:
           {% endif %}
         attributes:
           pm25_history: >-
-            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {{ ([cur] + prev)[:12] }}
+            {% set raw = states('input_text.pm25_nowcast_history') %}
+            {{ raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] }}
           pm10_history: >-
-            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {{ ([cur] + prev)[:12] }}
+            {% set raw = states('input_text.pm10_nowcast_history') %}
+            {{ raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] }}
           pm25_nowcast: >-
-            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {% set h = ([cur] + prev)[:12] %}
+            {% set raw = states('input_text.pm25_nowcast_history') %}
+            {% set h = raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] %}
             {% set ns = namespace(vals=[]) %}
             {% for v in h %}
               {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
@@ -439,10 +471,8 @@ template:
               {{ (ns2.num / ns2.den) | round(1) if ns2.den > 0 else 'unavailable' }}
             {% endif %}
           pm10_nowcast: >-
-            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {% set h = ([cur] + prev)[:12] %}
+            {% set raw = states('input_text.pm10_nowcast_history') %}
+            {% set h = raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] %}
             {% set ns = namespace(vals=[]) %}
             {% for v in h %}
               {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
@@ -465,10 +495,8 @@ template:
               {{ (ns2.num / ns2.den) | round(1) if ns2.den > 0 else 'unavailable' }}
             {% endif %}
           pm25_aqi: >-
-            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {% set h = ([cur] + prev)[:12] %}
+            {% set raw = states('input_text.pm25_nowcast_history') %}
+            {% set h = raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] %}
             {% set ns = namespace(vals=[]) %}
             {% for v in h %}
               {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
@@ -508,10 +536,8 @@ template:
               {% endif %}
             {% endif %}
           pm10_aqi: >-
-            {% set cur = states('sensor.airgradient_pm10') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm10_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {% set h = ([cur] + prev)[:12] %}
+            {% set raw = states('input_text.pm10_nowcast_history') %}
+            {% set h = raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] %}
             {% set ns = namespace(vals=[]) %}
             {% for v in h %}
               {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
@@ -551,10 +577,8 @@ template:
               {% endif %}
             {% endif %}
           nowcast_weight: >-
-            {% set cur = states('sensor.airgradient_pm2_5') | float(-1) %}
-            {% set prev = state_attr('sensor.aqi_nowcast', 'pm25_history') %}
-            {% set prev = prev if prev is not none else [] %}
-            {% set h = ([cur] + prev)[:12] %}
+            {% set raw = states('input_text.pm25_nowcast_history') %}
+            {% set h = raw | from_json if raw not in ['unknown', 'unavailable', ''] else [] %}
             {% set ns = namespace(vals=[]) %}
             {% for v in h %}
               {% if v >= 0 %}{% set ns.vals = ns.vals + [v] %}{% endif %}
