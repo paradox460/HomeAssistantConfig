@@ -1,6 +1,42 @@
+# Weather Sensors — Hydreon RG-15 Rain Gauge
+#
+# Hardware: Seeed XIAO ESP32-C3 connected to a Hydreon RG-15 rain sensor
+# over UART. The RG-15 is a solid-state optical rain gauge (no moving
+# parts, no tipping bucket).
+#
+# Native sensors exposed by the Hydreon component:
+#   - Rain Accumulation (acc)        – rain since the last sensor read (delta)
+#   - Rain Event Accumulation        – Hydreon's own rain-event total
+#   - Rain Total Accumulation        – lifetime monotonic rain counter
+#   - Rain Intensity                 – instantaneous rain rate
+#
+# Davis-style "Storm Rain" sensor:
+#   The Hydreon's built-in event accumulation resets more aggressively than
+#   a Davis Vantage 2 Pro. To allow apples-to-apples comparison with the
+#   Davis "Rain Storm" reading, this config implements the same algorithm:
+#
+#     • A storm begins once cumulative rain reaches 0.508 mm (0.02 in),
+#       equivalent to two tips of a Davis rain bucket.
+#     • A storm ends after 24 consecutive hours with no rain detected.
+#     • Storm total is derived by subtracting the total_acc snapshot taken
+#       at storm start from the current total_acc reading, so missed update
+#       cycles or floating-point drift cannot cause data loss.
+#
+#   Two additional entities are created:
+#     - Storm Rain      (sensor)         – running storm total in mm
+#     - Storm Active    (binary_sensor)  – whether a storm is in progress
+#
+#   The start threshold and timeout are configurable via substitutions below.
+
 substitutions:
   name: "weather-sensors-abe59c"
   friendly_name: Weather sensors
+
+  # Davis Vantage 2 Pro storm parameters
+  # Two bucket tips (0.02") to start a storm event
+  storm_start_threshold_mm: "0.508"
+  # 24 hours without rain to end a storm event
+  storm_timeout_ms: "86400000"
 
 # Import common packages
 
@@ -20,6 +56,29 @@ uart:
   rx_pin: GPIO20
   baud_rate: 9600
 
+globals:
+  # total_acc reading at the moment the storm was declared active,
+  # adjusted so that (current total_acc - this value) = storm rain
+  - id: storm_start_total
+    type: float
+    restore_value: yes
+    initial_value: "0.0"
+  # Whether a storm is currently active
+  - id: storm_active
+    type: bool
+    restore_value: yes
+    initial_value: "false"
+  # Millis timestamp of the last rain detected
+  - id: last_rain_time
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+  # Pre-storm accumulation buffer: rain collected before the threshold is met
+  - id: storm_pending_accumulation
+    type: float
+    restore_value: yes
+    initial_value: "0.0"
+
 sensor:
   - platform: hydreon_rgxx
     model: RG_15
@@ -27,6 +86,37 @@ sensor:
     acc:
       name: Rain Accumulation
       id: rain_acc
+      on_value:
+        then:
+          - lambda: |-
+              float rain_mm = x;
+              if (rain_mm <= 0.0f) return;
+
+              uint32_t now = millis();
+              id(last_rain_time) = now;
+
+              if (id(storm_active)) {
+                // Storm already running — publish updated total from total_acc
+                float storm_total = id(rain_total_acc).state - id(storm_start_total);
+                id(storm_rain_sensor).publish_state(storm_total);
+              } else {
+                // No active storm — buffer rain until we hit the start threshold
+                id(storm_pending_accumulation) += rain_mm;
+
+                if (id(storm_pending_accumulation) >= ${storm_start_threshold_mm}) {
+                  // Threshold met — start a new storm event
+                  // The pending rain is already reflected in the current total_acc,
+                  // so set the baseline to (current total_acc - pending) so the
+                  // subtraction includes all rain since the storm began.
+                  id(storm_active) = true;
+                  id(storm_start_total) = id(rain_total_acc).state - id(storm_pending_accumulation);
+                  id(storm_pending_accumulation) = 0.0f;
+
+                  float storm_total = id(rain_total_acc).state - id(storm_start_total);
+                  id(storm_rain_sensor).publish_state(storm_total);
+                  ESP_LOGI("storm", "Storm started — initial accumulation: %.2f mm", storm_total);
+                }
+              }
     event_acc:
       name: Rain Event Accumulation
       id: rain_event_acc
@@ -37,6 +127,21 @@ sensor:
       name: Rain Intensity
       id: rain_intensity
     update_interval: 10s
+
+  - platform: template
+    name: Storm Rain
+    id: storm_rain_sensor
+    unit_of_measurement: mm
+    accuracy_decimals: 2
+    device_class: precipitation
+    state_class: total_increasing
+    icon: mdi:weather-pouring
+    lambda: |-
+      if (id(storm_active)) {
+        return id(rain_total_acc).state - id(storm_start_total);
+      }
+      return 0.0f;
+
 binary_sensor:
   - platform: hydreon_rgxx
     hydreon_rgxx_id: hydreon_1
@@ -47,3 +152,41 @@ binary_sensor:
     em_sat:
       <<: *lens_bad
       name: Emitter Saturated
+
+  - platform: template
+    name: Storm Active
+    id: storm_active_sensor
+    device_class: moisture
+    icon: mdi:weather-lightning-rainy
+    lambda: |-
+      return id(storm_active);
+
+interval:
+  # Check every 60 seconds whether the storm has timed out (24h without rain)
+  - interval: 60s
+    then:
+      - lambda: |-
+          if (!id(storm_active) && id(storm_pending_accumulation) > 0.0f) {
+            // If we have pending rain that never hit the threshold, time it out too
+            uint32_t now = millis();
+            uint32_t elapsed = now - id(last_rain_time);
+            if (id(last_rain_time) > 0 && elapsed >= ${storm_timeout_ms}) {
+              id(storm_pending_accumulation) = 0.0f;
+              ESP_LOGD("storm", "Pending rain cleared after 24h timeout");
+            }
+          }
+
+          if (!id(storm_active)) return;
+
+          uint32_t now = millis();
+          uint32_t elapsed = now - id(last_rain_time);
+
+          if (id(last_rain_time) > 0 && elapsed >= ${storm_timeout_ms}) {
+            float storm_total = id(rain_total_acc).state - id(storm_start_total);
+            ESP_LOGI("storm", "Storm ended — total: %.2f mm (24h without rain)", storm_total);
+            id(storm_active) = false;
+            id(storm_start_total) = 0.0f;
+            id(storm_pending_accumulation) = 0.0f;
+            id(storm_rain_sensor).publish_state(0.0f);
+            id(storm_active_sensor).publish_state(false);
+          }
