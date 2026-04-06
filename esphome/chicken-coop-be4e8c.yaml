@@ -92,6 +92,7 @@ binary_sensor:
       - delayed_on: 10ms
     on_press:
       then:
+        - lambda: "id(door_trigger_source) = \"manual\";"
         - lambda: |-
             auto call = id(chicken_coop_door).make_call();
             call.set_command_toggle();
@@ -114,6 +115,12 @@ cover:
           else:
             - script.execute: forward_motor
     open_endstop: coop_door_top_stop
+    on_opened:
+      then:
+        - lambda: |-
+            std::string src = id(door_trigger_source);
+            id(coop_door_event).trigger(src + "_open");
+            id(door_trigger_source) = "misc";
     open_duration: 8s
     close_action:
       - if:
@@ -125,6 +132,12 @@ cover:
             - script.execute: reverse_motor
     close_duration: 8s
     close_endstop: coop_door_bottom_stop
+    on_closed:
+      then:
+        - lambda: |-
+            std::string src = id(door_trigger_source);
+            id(coop_door_event).trigger(src + "_close");
+            id(door_trigger_source) = "misc";
 
 # ==========================================================================
 # Scheduling — time, sun, datetime, override tracking
@@ -139,6 +152,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: "false"
+  - id: door_trigger_source
+    type: std::string
+    restore_value: no
+    initial_value: '"misc"'
 
 time:
   - id: !extend ha_time
@@ -150,6 +167,7 @@ time:
         seconds: 0
         hours: 9-12
         then:
+          - lambda: "id(door_trigger_source) = \"schedule\";"
           - script.execute: maybe_open_door
       # Recalculate auto open/close times at midnight each day
       - minutes: 0
@@ -188,6 +206,7 @@ datetime:
     on_time:
       then:
         - logger.log: "Auto open time reached — executing open logic"
+        - lambda: "id(door_trigger_source) = \"schedule\";"
         - script.execute: maybe_open_door
         - lambda: "id(open_time_manually_set) = false;"
         - logger.log: "Auto open override cleared — midnight will set tomorrow's time"
@@ -210,6 +229,7 @@ datetime:
     on_time:
       then:
         - logger.log: "Auto close time reached — executing close logic"
+        - lambda: "id(door_trigger_source) = \"schedule\";"
         - cover.close: chicken_coop_door
         - lambda: "id(close_time_manually_set) = false;"
         - logger.log: "Auto close override cleared — midnight will set tomorrow's time"
@@ -276,6 +296,18 @@ button:
       then:
         - logger.log: "Resetting auto close time to calculated sunset + delay"
         - script.execute: calculate_auto_close_time
+
+event:
+ - platform: template
+   name: Coop Door
+   id: coop_door_event
+   event_types:
+    - manual_open
+    - manual_close
+    - schedule_open
+    - schedule_close
+    - misc_open
+    - misc_close
 
 # ==========================================================================
 # Scripts — motor control, door logic, sun time calculations
