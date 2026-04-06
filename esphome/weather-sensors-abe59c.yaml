@@ -114,12 +114,26 @@ sensor:
 
                   float storm_total = id(rain_total_acc).state - id(storm_start_total);
                   id(storm_rain_sensor).publish_state(storm_total);
+                  id(weather_event).trigger("storm_start");
                   ESP_LOGI("storm", "Storm started — initial accumulation: %.2f mm", storm_total);
                 }
               }
     event_acc:
       name: Rain Event Accumulation
       id: rain_event_acc
+      on_value:
+        then:
+          - lambda: |-
+              static float prev = 0.0f;
+              float cur = x;
+              if (prev == 0.0f && cur > 0.0f) {
+                id(weather_event).trigger("rain_start");
+                ESP_LOGI("weather", "Rain started (event_acc rose from 0)");
+              } else if (prev > 0.0f && cur == 0.0f) {
+                id(weather_event).trigger("rain_end");
+                ESP_LOGI("weather", "Rain ended (event_acc reset to 0)");
+              }
+              prev = cur;
     total_acc:
       name: Rain Total Accumuation
       id: rain_total_acc
@@ -189,4 +203,14 @@ interval:
             id(storm_pending_accumulation) = 0.0f;
             id(storm_rain_sensor).publish_state(0.0f);
             id(storm_active_sensor).publish_state(false);
+            id(weather_event).trigger("storm_end");
           }
+event:
+  - platform: template
+    name: Weather Event
+    id: weather_event
+    event_types:
+       - rain_start
+       - storm_start
+       - rain_end
+       - storm_end
