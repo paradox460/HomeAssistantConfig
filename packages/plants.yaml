@@ -1,0 +1,22 @@
+plant:
+  strawberry_tower:
+    sensors:
+       moisture: sensor.strawberry_tower_soil_moisture
+       temperature: sensor.strawberry_tower_temperature
+       battery: sensor.strawberry_tower_battery
+    min_moisture: 50
+    max_moisture: 90
+  wooden_planter:
+    sensors:
+       moisture: sensor.wooden_planter_soil_moisture
+       temperature: sensor.wooden_planter_temperature
+       battery: sensor.wooden_planter_battery
+    min_moisture: 41
+    max_moisture: 80
+  plastic_planter:
+    sensors:
+       moisture: sensor.plastic_planter_soil_moisture
+       temperature: sensor.plastic_planter_temperature
+       battery: sensor.plastic_planter_battery
+    min_moisture: 41
+    max_moisture: 80
