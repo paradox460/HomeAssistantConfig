@@ -3,7 +3,7 @@ import { isRealEvent } from "./utils.mts";
 
 type EventType = "click" | "double_click" | "hold";
 
-type HvacMode = "heat" | "cool" | "off";
+type HvacMode = "heat" | "fan_only" | "off";
 
 type EntityState = "on" | "off" | string;
 
@@ -88,7 +88,7 @@ export function OfficeBtn({ hass, lifecycle, logger }: TServiceParams) {
         case "heat":
           btn1_led.turn_on({ brightness_pct: 30, rgb_color: [255, 0, 0] });
           break;
-        case "cool":
+        case "fan_only":
           btn1_led.turn_on({ brightness_pct: 30, rgb_color: [0, 0, 255] });
           break;
         default:
@@ -114,8 +114,8 @@ export function OfficeBtn({ hass, lifecycle, logger }: TServiceParams) {
         dyson.turn_on();
         const currentMode = dysonClimate.state as HvacMode;
         if (currentMode === "heat") {
-          dysonClimate.set_hvac_mode({ hvac_mode: "cool" });
-        } else if (currentMode === "cool") {
+          dysonClimate.set_hvac_mode({ hvac_mode: "fan_only" });
+        } else if (currentMode === "fan_only") {
           dysonClimate.set_hvac_mode({ hvac_mode: "heat" });
         }
         break;

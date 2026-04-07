@@ -8,12 +8,11 @@
     trigger: state
   conditions: []
   actions:
-  - action: dyson_local.set_timer
+  - action: hass_dyson.set_sleep_timer
     metadata: {}
     data:
-      timer: 360
-    target:
-      device_id: 2db35465e9f3e6b2b44f7869757965fc
+      minutes: 360
+      device_id: 88f05f4f0219517453be32c2d64dbb84
   mode: single
 - id: '1749605313166'
   alias: Bedside Vornado toggle
