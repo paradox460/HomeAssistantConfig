@@ -1,0 +1,200 @@
+# Chicken Waterer — Automated water replacement system
+#
+# Hardware: Two motorized valves (fill and drain) that take ~5 seconds to
+# fully open. Valves close automatically when power is cut.
+#
+# Water Replacement Cycle:
+#   1. Open drain valve, wait (drain_duration) seconds
+#   2. Open fill valve, wait (flush_duration) seconds  — both valves open for flushing
+#   3. Close drain valve, wait (fill_duration) seconds  — only fill valve open
+#   4. Close fill valve
+#
+# The drain opens first so debris flushes out. Both valves stay open briefly
+# for a flushing action, then the drain closes while fill continues to refill
+# the bowl with clean water.
+#
+# All timing parameters are exposed as number entities in Home Assistant.
+# Future: water level sensor for the bowl, supply barrel level sensor.
+
+substitutions:
+  name: "chicken-waterer"
+  friendly_name: "Chicken Waterer"
+  valve_open_time: "6s"  # slightly over the 5s mechanical open time
+
+packages:
+  base: !include common/base.yaml
+  wifi: !include common/wifi.yaml
+  improv: !include common/improv.yaml
+  diagnostics: !include common/diagnostics.yaml
+  time: !include common/time.yaml
+
+esp32:
+  board: seeed_xiao_esp32c6
+  framework:
+    type: esp-idf
+
+# ==========================================================================
+# Hardware — GPIO valve switches
+# ==========================================================================
+
+switch:
+  - platform: gpio
+    pin: GPIO2
+    id: fill_valve_switch
+    name: "Fill Valve"
+    icon: mdi:pipe-valve
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - logger.log: "Fill valve OPENING"
+    on_turn_off:
+      - logger.log: "Fill valve CLOSING"
+
+  - platform: gpio
+    pin: GPIO3
+    id: drain_valve_switch
+    name: "Drain Valve"
+    icon: mdi:pipe-valve
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - logger.log: "Drain valve OPENING"
+    on_turn_off:
+      - logger.log: "Drain valve CLOSING"
+
+# ==========================================================================
+# Configurable timing — exposed to Home Assistant as number entities
+# ==========================================================================
+
+number:
+  - platform: template
+    id: drain_duration
+    name: "Drain Duration"
+    icon: mdi:timer-outline
+    unit_of_measurement: "s"
+    mode: box
+    min_value: 5
+    max_value: 600
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 30
+    entity_category: config
+
+  - platform: template
+    id: flush_duration
+    name: "Flush Duration"
+    icon: mdi:timer-outline
+    unit_of_measurement: "s"
+    mode: box
+    min_value: 5
+    max_value: 300
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 15
+    entity_category: config
+
+  - platform: template
+    id: fill_duration
+    name: "Fill Duration"
+    icon: mdi:timer-outline
+    unit_of_measurement: "s"
+    mode: box
+    min_value: 5
+    max_value: 600
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    entity_category: config
+
+# ==========================================================================
+# Controls — buttons & events
+# ==========================================================================
+
+button:
+  - platform: template
+    id: start_water_replacement
+    name: "Start Water Replacement"
+    icon: mdi:water-sync
+    on_press:
+      - script.execute: water_replacement_cycle
+
+  - platform: template
+    id: emergency_stop
+    name: "Emergency Stop"
+    icon: mdi:stop-circle
+    entity_category: config
+    on_press:
+      - logger.log:
+          level: WARN
+          message: "Emergency stop — closing all valves"
+      - script.stop: water_replacement_cycle
+      - switch.turn_off: fill_valve_switch
+      - switch.turn_off: drain_valve_switch
+      - event.trigger:
+          id: waterer_event
+          event_type: emergency_stop
+
+event:
+  - platform: template
+    id: waterer_event
+    name: "Waterer Event"
+    event_types:
+      - cycle_start
+      - cycle_complete
+      - emergency_stop
+
+# ==========================================================================
+# Binary sensor — cycle running indicator
+# ==========================================================================
+
+binary_sensor:
+  - platform: template
+    id: cycle_running
+    name: "Water Cycle Running"
+    icon: mdi:refresh
+    lambda: |-
+      return id(water_replacement_cycle).is_running();
+
+# ==========================================================================
+# Script — water replacement cycle
+# ==========================================================================
+
+script:
+  - id: water_replacement_cycle
+    mode: single
+    then:
+      - logger.log: "=== Water replacement cycle starting ==="
+      - event.trigger:
+          id: waterer_event
+          event_type: cycle_start
+
+      # Step 1: Open drain valve and wait for drain
+      - logger.log:
+          format: "Step 1: Opening drain valve, waiting %.0f seconds"
+          args: ['id(drain_duration).state']
+      - switch.turn_on: drain_valve_switch
+      - delay: !lambda "return id(drain_duration).state * 1000;"
+
+      # Step 2: Open fill valve (both valves now open for flushing)
+      - logger.log:
+          format: "Step 2: Opening fill valve, flushing for %.0f seconds"
+          args: ['id(flush_duration).state']
+      - switch.turn_on: fill_valve_switch
+      - delay: !lambda "return id(flush_duration).state * 1000;"
+
+      # Step 3: Close drain valve, keep filling
+      - logger.log:
+          format: "Step 3: Closing drain valve, filling for %.0f seconds"
+          args: ['id(fill_duration).state']
+      - switch.turn_off: drain_valve_switch
+      - delay: !lambda "return id(fill_duration).state * 1000;"
+
+      # Step 4: Close fill valve — cycle complete
+      - logger.log: "Step 4: Closing fill valve — cycle complete"
+      - switch.turn_off: fill_valve_switch
+
+      - logger.log: "=== Water replacement cycle complete ==="
+      - event.trigger:
+          id: waterer_event
+          event_type: cycle_complete
