@@ -17,6 +17,7 @@ import { LaundryNotify } from "./laundry-notify.mts";
 import { Mailbox } from "./mailbox.mts";
 import { Office } from "./office.mts";
 import { OfficeBtn } from "./office_btn.mts";
+import { Plants } from "./plants.mts";
 import { Theater } from "./theater.mts";
 import { Traccar } from "./traccar.mts";
 import { WaterSoftener } from "./water-softener.mts";
@@ -67,6 +68,7 @@ const HOME_AUTOMATION = CreateApplication({
     Mailbox,
     Office,
     OfficeBtn,
+    Plants,
     Theater,
     Traccar,
     WaterSoftener,

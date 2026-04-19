@@ -364,7 +364,7 @@ export function WaterSoftener({ context, lifecycle, logger, scheduler, synapse }
     await throttledFetchDevices();
   });
   scheduler.cron({
-    schedule: "*/5 * * * *",
+    schedule: "*/30 * * * *",
     exec: async () => await throttledFetchDevices(),
   });
 }
