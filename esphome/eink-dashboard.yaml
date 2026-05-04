@@ -1,0 +1,910 @@
+substitutions:
+  name: eink-dashboard
+  friendly_name: eInk dashboard
+
+# ---------------------------------------------------------------------------
+# Common packages
+# ---------------------------------------------------------------------------
+packages:
+  base: !include common/base.yaml
+  wifi: !include common/wifi.yaml
+  time: !include common/time.yaml
+
+# ---------------------------------------------------------------------------
+# Board & framework
+# ---------------------------------------------------------------------------
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ---------------------------------------------------------------------------
+# YAML templates
+# ---------------------------------------------------------------------------
+# Reusable time-format snippet (YAML anchor)
+.time_format: &time_format
+  time_format: "%l:%M %p  %B %e, %Y"
+  time: ha_time
+
+.card_layout: &card_layout
+  type: flex
+  flex_flow: COLUMN
+  flex_align_main: CENTER
+  flex_align_cross: STRETCH
+
+.ha_unknown_filter: &ha_unknown_filter
+  - substitute:
+      - "unknown -> --"
+      - "unavailable -> --"
+
+
+# ---------------------------------------------------------------------------
+# Boot sequence
+# ---------------------------------------------------------------------------
+esphome:
+  on_boot:
+    then:
+      - output.turn_on: bsp_battery_enable
+      - pcf8563.read_time:
+      - lvgl.label.update:
+          id: lv_time
+          text: *time_format
+
+# ---------------------------------------------------------------------------
+# Globals
+# ---------------------------------------------------------------------------
+globals:
+  - id: weather_img_retries
+    type: int
+    initial_value: '0'
+  - id: pending_refresh
+    type: bool
+    initial_value: 'false'
+  - id: manual_img_refresh
+    type: bool
+    initial_value: 'false'
+  - id: pressure_img_retries
+    type: int
+    initial_value: '0'
+
+# ---------------------------------------------------------------------------
+# Buses & peripherals
+# ---------------------------------------------------------------------------
+spi:
+  clk_pin: GPIO7
+  mosi_pin: GPIO9
+
+i2c:
+  scl: GPIO20
+  sda: GPIO19
+
+http_request:
+
+output:
+  - platform: gpio
+    pin: GPIO21
+    id: bsp_battery_enable
+
+# ---------------------------------------------------------------------------
+# Display
+# ---------------------------------------------------------------------------
+display:
+  - platform: waveshare_epaper
+    id: epaper_display
+    model: 7.50inv2p
+    cs_pin: GPIO10
+    dc_pin: GPIO11
+    reset_pin:
+      number: GPIO12
+      inverted: false
+    busy_pin:
+      number: GPIO13
+      inverted: true
+    update_interval: never
+    # reset_duration: 2ms
+    auto_clear_enabled: false
+
+# ---------------------------------------------------------------------------
+# Online images
+# ---------------------------------------------------------------------------
+online_image:
+  - url: "http://10.0.0.8:10000/dashboard-eink/0?viewport=800x480&colors=000000%2CFFFFFF&dithering=jarvis-judice-ninke&theme=Graphite+E-ink+Light&lang=en&invert=&next=600"
+    id: weather_img
+    format: PNG
+    update_interval: 600s
+    type: BINARY
+    on_download_finished:
+      - globals.set:
+          id: weather_img_retries
+          value: '0'
+      - lvgl.image.update:
+          id: lv_weather_img
+          src: weather_img
+      - if:
+          condition:
+            lambda: 'return id(manual_img_refresh);'
+          then:
+            - globals.set:
+                id: manual_img_refresh
+                value: 'false'
+            - globals.set:
+                id: pending_refresh
+                value: 'true'
+    on_error:
+      - if:
+          condition:
+            lambda: 'return id(weather_img_retries) < 3;'
+          then:
+            - globals.set:
+                id: weather_img_retries
+                value: !lambda 'return id(weather_img_retries) + 1;'
+            - delay: 5s
+            - component.update: weather_img
+
+  - url: "http://10.0.0.8:10000/dashboard-eink/pressure?viewport=200x230&colors=000000%2CFFFFFF&theme=Graphite+E-ink+Light&lang=en&invert=&next=600"
+    id: pressure_img
+    format: PNG
+    update_interval: 600s
+    type: BINARY
+    on_download_finished:
+      - globals.set:
+          id: pressure_img_retries
+          value: '0'
+      - lvgl.image.update:
+          id: lv_pressure_img
+          src: pressure_img
+    on_error:
+      - if:
+          condition:
+            lambda: 'return id(pressure_img_retries) < 3;'
+          then:
+            - globals.set:
+                id: pressure_img_retries
+                value: !lambda 'return id(pressure_img_retries) + 1;'
+            - delay: 5s
+            - component.update: pressure_img
+
+# ---------------------------------------------------------------------------
+# E-paper colour aliases (inverted: white ↔ black)
+# ---------------------------------------------------------------------------
+mapping:
+  - id: moon_phase_icons
+    from: string
+    to: string
+    entries:
+      new_moon: "\U000F0F61"
+      waxing_crescent: "\U000F0F62"
+      first_quarter: "\U000F0F63"
+      waxing_gibbous: "\U000F0F64"
+      full_moon: "\U000F0F65"
+      waning_gibbous: "\U000F0F66"
+      last_quarter: "\U000F0F67"
+      waning_crescent: "\U000F0F68"
+  - id: forecast_icons
+    from: string
+    to: string
+    entries:
+      sunny: "\U000F0599"
+      clear-night: "\U000F0599"
+      partlycloudy: "\U000F0595"
+      cloudy: "\U000F0590"
+      rainy: "\U000F0597"
+      pouring: "\U000F067F"
+      snowy-rainy: "\U000F0F33"
+      snowy: "\U000F059B"
+      windy: "\U000F059D"
+      windy-variant: "\U000F059D"
+      fog: "\U000F0591"
+      lightning: "\U000F059A"
+      lightning-rainy: "\U000F067E"
+
+color:
+  - id: paper_white
+    hex: "000000"
+  - id: paper_black
+    hex: "FFFFFF"
+
+# ---------------------------------------------------------------------------
+# Fonts
+# ---------------------------------------------------------------------------
+font:
+  - file: "gfonts://Inter@400"
+    id: inter_16
+    size: 16
+    bpp: 4
+  - file: "gfonts://Inter@600"
+    id: inter_bold_16
+    size: 16
+    bpp: 4
+  - file: "gfonts://Inter@400"
+    id: inter_32
+    size: 32
+    bpp: 4
+  - file: "gfonts://Inter@400"
+    id: inter_48
+    size: 48
+    bpp: 4
+  - file: "gfonts://Inter@600"
+    id: inter_bold_24
+    size: 24
+    bpp: 4
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: mdi_20
+    size: 20
+    bpp: 4
+    glyphs:
+      # Moon phases
+      - "\U000F0F61"  # mdi:moon-new
+      - "\U000F0F62"  # mdi:moon-waxing-crescent
+      - "\U000F0F63"  # mdi:moon-first-quarter
+      - "\U000F0F64"  # mdi:moon-waxing-gibbous
+      - "\U000F0F65"  # mdi:moon-full
+      - "\U000F0F66"  # mdi:moon-waning-gibbous
+      - "\U000F0F67"  # mdi:moon-last-quarter
+      - "\U000F0F68"  # mdi:moon-waning-crescent
+      # Weather conditions
+      - "\U000F0599"  # mdi:weather-sunny
+      - "\U000F0595"  # mdi:weather-partly-cloudy
+      - "\U000F0590"  # mdi:weather-cloudy
+      - "\U000F0597"  # mdi:weather-rainy
+      - "\U000F067F"  # mdi:weather-pouring
+      - "\U000F0F33"  # mdi:weather-snowy-rainy
+      - "\U000F059B"  # mdi:weather-snowy
+      - "\U000F059D"  # mdi:weather-windy
+      - "\U000F0591"  # mdi:weather-fog
+      - "\U000F059E"  # mdi:weather-windy-variant
+      - "\U000F0596"  # mdi:weather-night
+      - "\U000F067E"  # mdi:weather-lightning-rainy
+      - "\U000F059A"  # mdi:weather-lightning
+
+
+# ---------------------------------------------------------------------------
+# LVGL
+# ---------------------------------------------------------------------------
+
+lvgl:
+  theme:
+    label:
+      text_color: paper_black
+
+  bg_color: paper_white
+
+  default_font: inter_16
+
+  style_definitions:
+    - id: style_transparent
+      bg_opa: TRANSP
+      scrollbar_mode: "OFF"
+    - id: style_card
+      bg_opa: TRANSP
+      border_width: 0
+      border_color: paper_black
+      radius: 0
+      pad_all: 8
+      width: 33%
+    - id: style_card_value
+      text_font: inter_32
+      text_color: paper_black
+      text_align: LEFT
+      width: 100%
+    - id: style_card_value_hero
+      text_font: inter_48
+      text_color: paper_black
+      text_align: LEFT
+      width: 100%
+    - id: style_card_label
+      text_font: inter_bold_16
+      text_color: paper_black
+      text_align: LEFT
+      width: 100%
+    - id: style_top_bar
+      styles: style_transparent
+      width: 100%
+      height: 24
+      radius: 0
+      pad_all: 0
+      pad_left: 5
+      pad_right: 5
+      border_width: 1
+      border_side: BOTTOM
+      border_color: paper_black
+
+  on_draw_end:
+    - if:
+        condition:
+          lambda: 'return id(pending_refresh);'
+        then:
+          - globals.set:
+              id: pending_refresh
+              value: 'false'
+          - component.update: epaper_display
+
+  pages:
+    - id: page_weather
+      widgets:
+        - obj:
+            width: 100%
+            height: 100%
+            pad_all: 0
+            pad_top: 32
+            bg_opa: TRANSP
+            scrollbar_mode: "OFF"
+            border_width: 0
+            layout:
+              type: flex
+              flex_flow: ROW
+              flex_align_main: START
+              flex_align_cross: STRETCH
+            widgets:
+              # --- Left column: Wind Compass ---
+              - obj:
+                  width: 25%
+                  height: 100%
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 8
+                  scrollbar_mode: "OFF"
+                  layout:
+                    type: flex
+                    flex_flow: COLUMN
+                    flex_align_main: START
+                    flex_align_cross: CENTER
+                  widgets:
+                    - label:
+                        styles: style_card_label
+                        text: "Wind"
+                        text_align: CENTER
+                        width: 100%
+                    - obj:
+                        id: wind_compass_container
+                        width: 180
+                        height: 180
+                        bg_opa: TRANSP
+                        border_width: 0
+                        scrollbar_mode: "OFF"
+                        widgets:
+                          - meter:
+                              id: wind_compass
+                              width: 180
+                              height: 180
+                              align: CENTER
+                              bg_opa: TRANSP
+                              border_width: 1
+                              border_color: paper_black
+                              border_opa: COVER
+                              indicator:
+                                bg_opa: TRANSP
+                              scales:
+                                - range_from: 0
+                                  range_to: 360
+                                  angle_range: 360
+                                  rotation: 270
+                                  ticks:
+                                    count: 9
+                                    width: 2
+                                    length: 10
+                                    color: paper_black
+                                  indicators:
+                                    - line:
+                                        id: wind_needle
+                                        width: 4
+                                        length: 80%
+                                        value: 0
+                                        color: paper_black
+                                        rounded: true
+                          # Cardinal labels overlaid
+                          - label:
+                              text: "N"
+                              text_font: inter_bold_16
+                              text_color: paper_black
+                              align: TOP_MID
+                              y: 6
+                          - label:
+                              text: "S"
+                              text_font: inter_bold_16
+                              text_color: paper_black
+                              align: BOTTOM_MID
+                              y: -6
+                          - label:
+                              text: "E"
+                              text_font: inter_bold_16
+                              text_color: paper_black
+                              align: RIGHT_MID
+                              x: -6
+                          - label:
+                              text: "W"
+                              text_font: inter_bold_16
+                              text_color: paper_black
+                              align: LEFT_MID
+                              x: 6
+                    - obj:
+                        width: 100%
+                        height: SIZE_CONTENT
+                        bg_opa: TRANSP
+                        border_width: 0
+                        scrollbar_mode: "OFF"
+                        pad_all: 0
+                        layout:
+                          type: flex
+                          flex_flow: ROW
+                          flex_align_main: SPACE_EVENLY
+                          flex_align_cross: CENTER
+                        widgets:
+                          - label:
+                              id: lbl_wind_speed
+                              text_font: inter_bold_16
+                              text_color: paper_black
+                              text_align: CENTER
+                              text: "-- mph"
+                          - label:
+                              id: lbl_wind_gust
+                              text_font: inter_bold_16
+                              text_color: paper_black
+                              text_align: CENTER
+                              text: "-- mph"
+                    - image:
+                        id: lv_pressure_img
+                        src: pressure_img
+                        width: 200
+                        height: 230
+                        image_recolor: paper_black
+                        image_recolor_opa: COVER
+              # --- Right column: Data Grid ---
+              - obj:
+                  width: 75%
+                  height: 100%
+                  bg_opa: TRANSP
+                  border_width: 0
+                  pad_all: 0
+                  scrollbar_mode: "OFF"
+                  layout:
+                    type: grid
+                    grid_columns: [FR(1), FR(1), FR(1)]
+                    grid_rows: [FR(1), FR(1), FR(1)]
+                  widgets:
+                    # --- Row 0: Temp Out | Hum Out | Baro ---
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "Temp Out"
+                          - label:
+                              id: lbl_temperature
+                              styles: style_card_value_hero
+                              text: "--°F"
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "Hum Out"
+                          - label:
+                              id: lbl_humidity
+                              styles: style_card_value
+                              text: "--%"
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "Barometer"
+                          - label:
+                              id: lbl_barometer
+                              styles: style_card_value
+                              text: "--"
+                    # --- Row 1: Temp In | Hum In | THSW ---
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "Temp In"
+                          - label:
+                              id: lbl_indoor_temp
+                              styles: style_card_value
+                              text: "--°F"
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "Hum In"
+                          - label:
+                              id: lbl_indoor_humidity
+                              styles: style_card_value
+                              text: "--%"
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "THSW"
+                          - label:
+                              id: lbl_thsw
+                              styles: style_card_value
+                              text: "--°F"
+                    # --- Row 2: AQI | UV Index | Last Storm ---
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "AQI"
+                          - label:
+                              id: lbl_aqi
+                              styles: style_card_value
+                              text: "--"
+                          - label:
+                              id: lbl_aqi_category
+                              styles: style_card_label
+                              text: ""
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "UV Index"
+                          - label:
+                              id: lbl_uv_index
+                              styles: style_card_value
+                              text: "--"
+                    - obj:
+                        styles: style_card
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        layout: *card_layout
+                        widgets:
+                          - label:
+                              styles: style_card_label
+                              text: "Last Storm"
+                          - label:
+                              id: lbl_last_storm
+                              styles: style_card_value
+                              text: "--"
+
+    - id: page_weather_img
+      scrollbar_mode: "OFF"
+      widgets:
+        - image:
+            id: lv_weather_img
+            src: weather_img
+            width: 800
+            height: 480
+            y: 4
+            align: TOP_LEFT
+            image_recolor: paper_black
+            image_recolor_opa: COVER
+
+  top_layer:
+    styles: style_transparent
+    pad_all: 0
+    widgets:
+      - obj:
+          styles: style_top_bar
+          bg_opa: TRANSP
+          scrollbar_mode: "OFF"
+          layout:
+            type: flex
+            flex_flow: ROW
+            flex_align_main: SPACE_BETWEEN
+            flex_align_cross: CENTER
+          widgets:
+            - label:
+                id: lv_time
+                border_color: paper_black
+                text: "--:-- --"
+            - obj:
+                bg_opa: TRANSP
+                border_width: 0
+                pad_all: 0
+                height: 24
+                scrollbar_mode: "OFF"
+                layout:
+                  type: flex
+                  flex_flow: ROW
+                  flex_align_main: END
+                  flex_align_cross: CENTER
+                widgets:
+                  - label:
+                      id: lbl_forecast_icon
+                      text_font: mdi_20
+                      text_color: paper_black
+                      text: "\U000F0599"
+                  - label:
+                      id: lbl_moon_icon
+                      text_font: mdi_20
+                      text_color: paper_black
+                      text: "\U000F0F65"
+
+# ---------------------------------------------------------------------------
+# Buttons
+# ---------------------------------------------------------------------------
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO3
+      inverted: true
+      mode: INPUT_PULLUP
+    name: "Green Button"
+    id: btn_green
+    on_press:
+      - if:
+          condition:
+            lvgl.page.is_showing: page_weather_img
+          then:
+            - globals.set:
+                id: manual_img_refresh
+                value: 'true'
+            - component.update: weather_img
+          else:
+            - component.update: epaper_display
+            - globals.set:
+                id: pending_refresh
+                value: 'true'
+
+  - platform: gpio
+    pin:
+      number: GPIO4
+      inverted: true
+      mode: INPUT_PULLUP
+    name: "Next Page"
+    id: btn_next_page
+    on_press:
+      - lvgl.page.next:
+      - globals.set:
+          id: pending_refresh
+          value: 'true'
+
+  - platform: gpio
+    pin:
+      number: GPIO5
+      inverted: true
+      mode: INPUT_PULLUP
+    name: "Previous Page"
+    id: btn_prev_page
+    on_press:
+      - lvgl.page.previous:
+      - globals.set:
+          id: pending_refresh
+          value: 'true'
+
+# ---------------------------------------------------------------------------
+# Sensors
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Home Assistant text sensors (outdoor weather data)
+# ---------------------------------------------------------------------------
+text_sensor:
+  - platform: homeassistant
+    entity_id: sensor.weather_station_temperature
+    id: ha_outdoor_temp
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_temperature
+          text: !lambda 'return x + "°F";'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_humidity
+    id: ha_outdoor_humidity
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_humidity
+          text: !lambda 'return x + "%";'
+
+  - platform: homeassistant
+    entity_id: sensor.aqi
+    id: ha_aqi
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_aqi
+          text: !lambda 'return x;'
+
+  - platform: homeassistant
+    entity_id: sensor.aqi
+    attribute: category
+    id: ha_aqi_category
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_aqi_category
+          text: !lambda 'return x;'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_uv_index
+    id: ha_uv_index
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_uv_index
+          text: !lambda 'return x;'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_barometer
+    id: ha_barometer
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_barometer
+          text: !lambda 'return x + "\"";'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_thsw_index
+    id: ha_thsw
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_thsw
+          text: !lambda 'return x + "°F";'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_sensors_storm_rain
+    id: ha_last_storm
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_last_storm
+          text: !lambda 'return x + "\"";'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_wind_direction
+    id: ha_wind_dir
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.indicator.update:
+          id: wind_needle
+          value: !lambda 'return atoi(x.c_str());'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_wind_speed_median_5m
+    id: ha_wind_speed
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_wind_speed
+          text: !lambda 'return x + " mph";'
+
+  - platform: homeassistant
+    entity_id: sensor.weather_station_wind_gust_max_5m
+    id: ha_wind_gust
+    filters: *ha_unknown_filter
+    on_value:
+      - lvgl.label.update:
+          id: lbl_wind_gust
+          text: !lambda 'return x + " mph";'
+
+  - platform: homeassistant
+    entity_id: sensor.moon_phase
+    id: ha_moon_phase
+    on_value:
+      - lvgl.label.update:
+          id: lbl_moon_icon
+          text: !lambda |-
+            auto icon = id(moon_phase_icons)[x];
+            return icon.empty() ? "\U000F0F65" : icon;
+
+  - platform: homeassistant
+    entity_id: weather.forecast_home
+    id: ha_weather_forecast
+    on_value:
+      - lvgl.label.update:
+          id: lbl_forecast_icon
+          text: !lambda |-
+            auto icon = id(forecast_icons)[x];
+            return icon.empty() ? "\U000F0590" : icon;
+
+sensor:
+  - platform: sht4x
+    temperature:
+      name: "Temperature"
+      id: master_bedroom_t_h_temperature
+      on_value:
+        - lvgl.label.update:
+            id: lbl_indoor_temp
+            text: !lambda |-
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.1f°F", x * 9.0 / 5.0 + 32.0);
+              return std::string(buf);
+    humidity:
+      name: "Relative Humidity"
+      id: master_bedroom_t_h_humidity
+      on_value:
+        - lvgl.label.update:
+            id: lbl_indoor_humidity
+            text: !lambda |-
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.0f%%", x);
+              return std::string(buf);
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    id: wifi_rssi
+    update_interval: 30s
+
+  - platform: adc
+    pin: GPIO1
+    name: "Battery Voltage"
+    id: battery_voltage
+    update_interval: 60s
+    attenuation: 12db
+    filters:
+      - multiply: 2.0
+
+  - platform: template
+    name: "Battery Level"
+    id: battery_level
+    unit_of_measurement: "%"
+    icon: "mdi:battery"
+    device_class: battery
+    state_class: measurement
+    lambda: "return id(battery_voltage).state;"
+    update_interval: 10s
+    filters:
+      - calibrate_linear:
+          - 4.15 -> 100.0
+          - 3.96 -> 90.0
+          - 3.91 -> 80.0
+          - 3.85 -> 70.0
+          - 3.80 -> 60.0
+          - 3.75 -> 50.0
+          - 3.68 -> 40.0
+          - 3.58 -> 30.0
+          - 3.49 -> 20.0
+          - 3.41 -> 10.0
+          - 3.30 -> 5.0
+          - 3.27 -> 0.0
+      - clamp:
+          min_value: 0
+          max_value: 100
+
+# ---------------------------------------------------------------------------
+# Time
+# ---------------------------------------------------------------------------
+time:
+  - platform: pcf8563
+    id: pcf8563_time
+    update_interval: never
+    on_time:
+      - seconds: 0
+        then:
+          - lvgl.label.update:
+              id: lv_time
+              text: *time_format
+          - globals.set:
+              id: pending_refresh
+              value: 'true'
+
+  - id: !extend ha_time
+    on_time_sync:
+      - pcf8563.write_time:

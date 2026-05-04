@@ -90,6 +90,7 @@ mqtt:
       state_topic: weather/windGust_mph
       device_class: wind_speed
       device: *device
+      force_update: true
     - name: Weather Station Wind Speed
       unique_id: "weather_station_wind_speed"
       icon: mdi:weather-dust
@@ -99,6 +100,7 @@ mqtt:
       state_topic: weather/windSpeed_mph
       device_class: wind_speed
       device: *device
+      force_update: true
     - name: Weather Station Wind Direction
       unique_id: "weather_station_wind_direction"
       state_topic: weather/windDir
@@ -107,6 +109,7 @@ mqtt:
       icon: mdi:weather-windy
       value_template: "{{ value | round(1) }}"
       device: *device
+      force_update: true
     - name: Weather Station Wind Gust Direction
       unique_id: "weather_station_wind_gust_direction"
       state_topic: weather/windGustDir
@@ -115,6 +118,7 @@ mqtt:
       icon: mdi:weather-windy
       value_template: "{{ value | round(1) }}"
       device: *device
+      force_update: true
 
     - name: Weather Station Rain Rate
       unique_id: "weather_station_rain_rate"
@@ -217,3 +221,20 @@ mqtt:
       payload_off: 0.0
       payload_on: 1.0
       device: *device
+
+sensor:
+  - platform: statistics
+    name: "Weather Station Wind Speed Median 5m"
+    unique_id: weather_station_wind_speed_median_5m
+    entity_id: sensor.weather_station_wind_speed
+    state_characteristic: median
+    max_age:
+      minutes: 5
+
+  - platform: statistics
+    name: "Weather Station Wind Gust Max 5m"
+    unique_id: weather_station_wind_gust_max_5m
+    entity_id: sensor.weather_station_wind_gust
+    state_characteristic: value_max
+    max_age:
+      minutes: 5
