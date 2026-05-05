@@ -769,15 +769,6 @@ text_sensor:
           text: !lambda 'return x + "°F";'
 
   - platform: homeassistant
-    entity_id: sensor.weather_sensors_storm_rain
-    id: ha_last_storm
-    filters: *ha_unknown_filter
-    on_value:
-      - lvgl.label.update:
-          id: lbl_last_storm
-          text: !lambda 'return x + "\"";'
-
-  - platform: homeassistant
     entity_id: sensor.weather_station_wind_direction
     id: ha_wind_dir
     filters: *ha_unknown_filter
@@ -887,6 +878,18 @@ sensor:
       - clamp:
           min_value: 0
           max_value: 100
+
+  - platform: homeassistant
+    entity_id: sensor.weather_sensors_storm_rain
+    id: ha_last_storm
+    accuracy_decimals: 2
+    on_value:
+      - lvgl.label.update:
+          id: lbl_last_storm
+          text:
+            format: "%.2f \""
+            args: [id(ha_last_storm).state]
+            if_nan: "--"
 
 # ---------------------------------------------------------------------------
 # Time
