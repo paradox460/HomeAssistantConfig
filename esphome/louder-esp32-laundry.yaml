@@ -1,0 +1,7 @@
+substitutions:
+  name: louder-esp32-laundry
+  friendly_name: Louder-ESP32 Laundry
+  task_stack_in_psram: "true"
+
+packages:
+  - !include common/louder-esp32-base.yaml

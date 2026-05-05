@@ -1,0 +1,7 @@
+substitutions:
+  name: louder-esp32-ferrins-bedroom
+  friendly_name: Louder-ESP32 Ferrin's Bedroom
+  task_stack_in_psram: "true"
+
+packages:
+  - !include common/louder-esp32-base.yaml

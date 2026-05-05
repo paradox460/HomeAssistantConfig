@@ -1,0 +1,7 @@
+substitutions:
+  name: louder-esp32-ground-guest
+  friendly_name: Louder-ESP32 Ground Guest
+  task_stack_in_psram: "true"
+
+packages:
+  - !include common/louder-esp32-base.yaml
