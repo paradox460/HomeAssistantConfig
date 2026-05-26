@@ -44,8 +44,8 @@ export function KidsLighting({ automation, hass, scheduler }: TServiceParams) {
       if (isAway()) {
         return;
       }
-      hass.call.scene.turn_on({
-        entity_id: ["scene.virtual_ede_s_bedtime", "scene.virtual_ferrins_bedtime"],
+      hass.call.button.press({
+        entity_id: ["button.virtual_position_1_keypad_ede_s_bedtime", "button.ferrin_s_room_pico_ferrin_s_bedtim"],
       });
     },
     schedule: "0 21 * * *",

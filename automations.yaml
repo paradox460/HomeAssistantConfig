@@ -18,10 +18,11 @@
   alias: Bedside Vornado toggle
   description: ''
   triggers:
-  - trigger: event
-    event_type: lutron_event
-    event_data:
-      full_id: master_bedroom_unknown_button_4
+  - device_id: 4aa6763edba40dcf9461e86d6f82a53a
+    domain: lutron_caseta
+    type: press
+    subtype: Button 4
+    trigger: device
   conditions: []
   actions:
   - action: switch.toggle
@@ -53,10 +54,11 @@
   alias: Toggle Jeff's bedside heater on/off
   description: ''
   triggers:
-  - trigger: event
-    event_type: lutron_event
-    event_data:
-      full_id: master_bedroom_unknown_button_5
+  - device_id: 4aa6763edba40dcf9461e86d6f82a53a
+    domain: lutron_caseta
+    type: press
+    subtype: Button 5
+    trigger: device
   conditions: []
   actions:
   - action: switch.toggle
