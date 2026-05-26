@@ -9,8 +9,6 @@ import { Away } from "./away.mts";
 import { Bambu } from "./bambu.mts";
 import { BatteryMinder } from "./battery-minder.mts";
 import { BedHeater } from "./bed-heater.mts";
-// import { CoolChickens } from "./cool-chickens.mts";
-// import { WarmChickens } from "./warm-chickens.mts";
 import { HolidayLights } from "./holiday-lights.mts";
 import { KidsLighting } from "./kids-lighting.mts";
 import { LaundryNotify } from "./laundry-notify.mts";
@@ -61,7 +59,6 @@ const HOME_AUTOMATION = CreateApplication({
     Bambu,
     BatteryMinder,
     BedHeater,
-    // CoolChickens,
     HolidayLights,
     KidsLighting,
     LaundryNotify,
@@ -73,7 +70,6 @@ const HOME_AUTOMATION = CreateApplication({
     Traccar,
     WaterSoftener,
     UtilityTariffs
-    // WarmChickens,
   },
 });
 
