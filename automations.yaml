@@ -104,3 +104,34 @@
     data:
       transition: 5
   mode: single
+- id: '1780788237445'
+  alias: Strawberry tower water
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.front_flowerbeds_station_running
+    from:
+    - 'off'
+    to:
+    - 'on'
+  conditions: []
+  actions:
+  - action: valve.open_valve
+    metadata: {}
+    target:
+      entity_id: valve.strawberry_tower_valve
+    data: {}
+    continue_on_error: true
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+    continue_on_error: true
+  - action: valve.close_valve
+    metadata: {}
+    target:
+      entity_id: valve.strawberry_tower_valve
+    data: {}
+  mode: single
