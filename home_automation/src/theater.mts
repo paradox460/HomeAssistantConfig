@@ -19,7 +19,9 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
   const tv = hass.refBy.id("media_player.theater_screen");
 
   // Controlled entities
-  const theaterMode = hass.refBy.id("select.harmony_hub_activities");
+  const turnTVOff = () => {
+    hass.refBy.id("remote.sofabaton_hub").turn_off();
+  }
   const theaterLights = hass.refBy.id("light.theater_floor_lamps");
 
   // Synapse entities
@@ -52,7 +54,7 @@ export function Theater({ context, hass, lifecycle, synapse }: TServiceParams) {
       turnAllOff: () => {
         motionSensorLight.turn_off();
         theaterLights.turn_off();
-        theaterMode.select_option({ option: "power_off" });
+        turnTVOff();
       },
       turnOn: ({ context }) => {
         if (context.becomingVacant) {
