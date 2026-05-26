@@ -3,8 +3,9 @@
   description: Turn off the office fan after 6 hours
   triggers:
   - entity_id:
-    - fan.office
-    to: 'on'
+    - fan.office_office_fan
+    to:
+    - 'on'
     trigger: state
   conditions: []
   actions:
