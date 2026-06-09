@@ -1,6 +1,6 @@
 [tools]
-bun = "latest"
-node = "latest"
+bun = "1.3.5"
+node = "24"
 "npm:tsx" = "latest"
 
 [hooks]
