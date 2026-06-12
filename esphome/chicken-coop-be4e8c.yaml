@@ -160,15 +160,6 @@ globals:
 time:
   - id: !extend ha_time
     on_time:
-      # Safety net: if the datetime-based auto open didn't fire (e.g. time
-      # wasn't synced, or datetime wasn't set), still attempt to open the
-      # door hourly between 9-12 as a fallback.
-      - minutes: 0
-        seconds: 0
-        hours: 9-12
-        then:
-          - lambda: "id(door_trigger_source) = \"schedule\";"
-          - script.execute: maybe_open_door
       # Recalculate auto open/close times at midnight each day
       - minutes: 0
         seconds: 0
