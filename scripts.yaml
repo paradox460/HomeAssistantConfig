@@ -48,3 +48,14 @@ play_xbox_script:
       action: media_player.play_media
   mode: single
   icon: mdi:microsoft-xbox
+flatten_bed:
+  sequence:
+  - action: button.press
+    metadata: {}
+    target:
+      entity_id:
+      - button.jeffs_master_bed_flat
+      - button.stephanie_s_master_bed_flat
+    data: {}
+  alias: Flatten bed
+  description: ''
